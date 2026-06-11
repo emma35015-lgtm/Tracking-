@@ -6,44 +6,56 @@ import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [step, setStep] = useState<"email" | "code">("email");
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
-  const [code, setCode] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
 
-  async function sendCode(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setInfo(null);
     const supabase = createClient();
-    const { error } = await supabase.auth.signInWithOtp({
+    const credentials = {
       email: email.trim().toLowerCase(),
-      options: { shouldCreateUser: true },
-    });
-    setLoading(false);
-    if (error) {
-      setError("No se pudo enviar el código. Revisa el correo e intenta de nuevo.");
-      return;
-    }
-    setStep("code");
-  }
+      password,
+    };
 
-  async function verifyCode(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    const supabase = createClient();
-    const { error } = await supabase.auth.verifyOtp({
-      email: email.trim().toLowerCase(),
-      token: code.trim(),
-      type: "email",
-    });
-    setLoading(false);
-    if (error) {
-      setError("Código incorrecto o vencido. Intenta de nuevo.");
-      return;
+    if (mode === "signin") {
+      const { error } = await supabase.auth.signInWithPassword(credentials);
+      setLoading(false);
+      if (error) {
+        setError(
+          error.message.includes("Invalid login credentials")
+            ? "Correo o contraseña incorrectos. Si eres nueva, crea tu cuenta abajo."
+            : "No se pudo iniciar sesión. Intenta de nuevo."
+        );
+        return;
+      }
+    } else {
+      const { data, error } = await supabase.auth.signUp(credentials);
+      setLoading(false);
+      if (error) {
+        if (error.message.includes("already registered")) {
+          setError("Ese correo ya tiene cuenta. Usa \"Entrar\" con tu contraseña.");
+        } else if (error.message.toLowerCase().includes("password")) {
+          setError("La contraseña debe tener al menos 6 caracteres.");
+        } else {
+          setError("No se pudo crear la cuenta. Intenta de nuevo.");
+        }
+        return;
+      }
+      // Si la confirmación por correo está activada en Supabase, no hay sesión aún.
+      if (!data.session) {
+        setInfo("Te mandamos un correo de confirmación: ábrelo y luego entra aquí con tu contraseña.");
+        setMode("signin");
+        return;
+      }
     }
+
     router.push("/");
     router.refresh();
   }
@@ -58,74 +70,76 @@ export default function LoginPage() {
         </p>
       </div>
 
-      {step === "email" ? (
-        <form onSubmit={sendCode} className="flex flex-col gap-3">
-          <label className="text-sm font-medium" htmlFor="email">
-            Tu correo
-          </label>
-          <input
-            id="email"
-            type="email"
-            required
-            autoFocus
-            autoComplete="email"
-            placeholder="tu@correo.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none focus:border-brand"
-          />
-          <button
-            type="submit"
-            disabled={loading}
-            className="rounded-xl bg-brand px-4 py-3 font-semibold text-white disabled:opacity-50"
-          >
-            {loading ? "Enviando…" : "Enviarme un código"}
-          </button>
+      <div className="mb-4 flex rounded-xl bg-zinc-200 p-1 text-sm font-medium">
+        <button
+          type="button"
+          onClick={() => {
+            setMode("signin");
+            setError(null);
+          }}
+          className={`flex-1 rounded-lg py-2 ${mode === "signin" ? "bg-white shadow-sm" : "text-zinc-500"}`}
+        >
+          Entrar
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setMode("signup");
+            setError(null);
+          }}
+          className={`flex-1 rounded-lg py-2 ${mode === "signup" ? "bg-white shadow-sm" : "text-zinc-500"}`}
+        >
+          Crear cuenta
+        </button>
+      </div>
+
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+        <label className="text-sm font-medium" htmlFor="email">
+          Tu correo
+        </label>
+        <input
+          id="email"
+          type="email"
+          required
+          autoComplete="email"
+          placeholder="tu@correo.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none focus:border-brand"
+        />
+        <label className="text-sm font-medium" htmlFor="password">
+          Contraseña
+        </label>
+        <input
+          id="password"
+          type="password"
+          required
+          minLength={6}
+          autoComplete={mode === "signin" ? "current-password" : "new-password"}
+          placeholder={mode === "signup" ? "Mínimo 6 caracteres" : "Tu contraseña"}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none focus:border-brand"
+        />
+        <button
+          type="submit"
+          disabled={loading}
+          className="mt-1 rounded-xl bg-brand px-4 py-3 font-semibold text-white disabled:opacity-50"
+        >
+          {loading ? "Un momento…" : mode === "signin" ? "Entrar" : "Crear mi cuenta"}
+        </button>
+        {mode === "signup" && (
           <p className="text-center text-xs text-zinc-400">
-            Sin contraseñas: te mandamos un código de 6 dígitos.
+            Tu sesión queda guardada en tu iPhone: solo entras una vez.
           </p>
-        </form>
-      ) : (
-        <form onSubmit={verifyCode} className="flex flex-col gap-3">
-          <label className="text-sm font-medium" htmlFor="code">
-            Código enviado a {email}
-          </label>
-          <input
-            id="code"
-            inputMode="numeric"
-            pattern="[0-9]*"
-            maxLength={6}
-            required
-            autoFocus
-            autoComplete="one-time-code"
-            placeholder="123456"
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            className="rounded-xl border border-zinc-300 bg-white px-4 py-3 text-center text-2xl tracking-[0.5em] outline-none focus:border-brand"
-          />
-          <button
-            type="submit"
-            disabled={loading}
-            className="rounded-xl bg-brand px-4 py-3 font-semibold text-white disabled:opacity-50"
-          >
-            {loading ? "Verificando…" : "Entrar"}
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setStep("email");
-              setCode("");
-              setError(null);
-            }}
-            className="text-sm text-zinc-500 underline"
-          >
-            Usar otro correo
-          </button>
-        </form>
-      )}
+        )}
+      </form>
 
       {error && (
         <p className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>
+      )}
+      {info && (
+        <p className="mt-4 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{info}</p>
       )}
     </main>
   );

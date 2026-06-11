@@ -8,7 +8,7 @@ App (PWA) para llevar el tracking de tus gastos **de forma automática** desde t
 - **Multi-usuario**: compártela con tus amigos con solo pasarles el link; cada quien ve únicamente sus datos.
 - Se instala en el iPhone desde Safari: Compartir → **Añadir a pantalla de inicio**.
 
-Stack: Next.js + Tailwind + Supabase (Auth con código por email, Postgres con RLS). Pensada para desplegarse gratis en Vercel.
+Stack: Next.js + Tailwind + Supabase (Auth con correo y contraseña, Postgres con RLS). Pensada para desplegarse gratis en Vercel.
 
 ## Puesta en marcha
 
@@ -16,14 +16,7 @@ Stack: Next.js + Tailwind + Supabase (Auth con código por email, Postgres con R
 
 1. Crea un proyecto en [supabase.com](https://supabase.com).
 2. En **SQL Editor**, pega y ejecuta el contenido de [`supabase/migrations/0001_init.sql`](supabase/migrations/0001_init.sql).
-3. En **Authentication → Email Templates → Magic Link**, cambia el cuerpo para mostrar el código en español, por ejemplo:
-
-   ```html
-   <h2>Tu código para entrar a Gastos</h2>
-   <p style="font-size:32px;letter-spacing:8px"><strong>{{ .Token }}</strong></p>
-   <p>Escríbelo en la app. Vence en una hora.</p>
-   ```
-
+3. En **Authentication → Sign In / Providers → Email**, desactiva **Confirm email** (así las cuentas entran al instante, sin depender de correos; el envío de correos de Supabase requiere SMTP propio para personalizarse).
 4. Copia de **Settings → API**: la URL del proyecto, la `anon` key y la `service_role` key.
 
 ### 2. Local
