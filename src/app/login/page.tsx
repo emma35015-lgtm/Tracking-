@@ -4,6 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
+const inputClass =
+  "w-full rounded-2xl border-[1.6px] border-input-border bg-input px-4 py-3.5 text-base font-medium text-ink outline-none focus:border-coral";
+
 export default function LoginPage() {
   const router = useRouter();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
@@ -63,21 +66,23 @@ export default function LoginPage() {
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-sm flex-col justify-center px-6 pb-24">
       <div className="mb-8 text-center">
-        <div className="mb-3 text-5xl">💸</div>
-        <h1 className="text-2xl font-bold">Gastos</h1>
-        <p className="mt-1 text-sm text-zinc-500">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-[22px] bg-coral text-3xl font-extrabold text-white">
+          $
+        </div>
+        <h1 className="text-[32px] font-extrabold tracking-tight">Gastos</h1>
+        <p className="mt-1 text-sm font-medium text-muted">
           Tus gastos, registrados solos con Apple Pay y Siri.
         </p>
       </div>
 
-      <div className="mb-4 flex rounded-xl bg-zinc-200 p-1 text-sm font-medium">
+      <div className="mb-4 flex rounded-2xl bg-sand p-1 text-sm font-bold">
         <button
           type="button"
           onClick={() => {
             setMode("signin");
             setError(null);
           }}
-          className={`flex-1 rounded-lg py-2 ${mode === "signin" ? "bg-white shadow-sm" : "text-zinc-500"}`}
+          className={`flex-1 rounded-xl py-2.5 ${mode === "signin" ? "bg-white" : "text-muted"}`}
         >
           Entrar
         </button>
@@ -87,14 +92,14 @@ export default function LoginPage() {
             setMode("signup");
             setError(null);
           }}
-          className={`flex-1 rounded-lg py-2 ${mode === "signup" ? "bg-white shadow-sm" : "text-zinc-500"}`}
+          className={`flex-1 rounded-xl py-2.5 ${mode === "signup" ? "bg-white" : "text-muted"}`}
         >
           Crear cuenta
         </button>
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <label className="text-sm font-medium" htmlFor="email">
+        <label className="text-[13px] font-bold text-muted-2" htmlFor="email">
           Tu correo
         </label>
         <input
@@ -105,9 +110,9 @@ export default function LoginPage() {
           placeholder="tu@correo.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none focus:border-brand"
+          className={inputClass}
         />
-        <label className="text-sm font-medium" htmlFor="password">
+        <label className="text-[13px] font-bold text-muted-2" htmlFor="password">
           Contraseña
         </label>
         <input
@@ -119,27 +124,29 @@ export default function LoginPage() {
           placeholder={mode === "signup" ? "Mínimo 6 caracteres" : "Tu contraseña"}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none focus:border-brand"
+          className={inputClass}
         />
         <button
           type="submit"
           disabled={loading}
-          className="mt-1 rounded-xl bg-brand px-4 py-3 font-semibold text-white disabled:opacity-50"
+          className="mt-1 h-[58px] rounded-[18px] bg-coral text-lg font-extrabold tracking-tight text-white disabled:opacity-50"
         >
           {loading ? "Un momento…" : mode === "signin" ? "Entrar" : "Crear mi cuenta"}
         </button>
         {mode === "signup" && (
-          <p className="text-center text-xs text-zinc-400">
+          <p className="text-center text-xs font-medium text-muted">
             Tu sesión queda guardada en tu iPhone: solo entras una vez.
           </p>
         )}
       </form>
 
       {error && (
-        <p className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>
+        <p className="mt-4 rounded-2xl bg-[#F8E3DC] px-4 py-3 text-sm font-medium text-coral-dark">
+          {error}
+        </p>
       )}
       {info && (
-        <p className="mt-4 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{info}</p>
+        <p className="mt-4 rounded-2xl bg-mint px-4 py-3 text-sm font-medium text-mint-ink">{info}</p>
       )}
     </main>
   );

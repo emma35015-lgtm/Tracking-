@@ -13,7 +13,7 @@ function CopyButton({ value, label }: { value: string; label?: string }) {
         setCopied(true);
         setTimeout(() => setCopied(false), 1500);
       }}
-      className="shrink-0 rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-semibold text-white"
+      className="shrink-0 rounded-lg bg-ink px-3 py-1.5 text-xs font-semibold text-white"
     >
       {copied ? "¡Copiado!" : (label ?? "Copiar")}
     </button>
@@ -22,8 +22,8 @@ function CopyButton({ value, label }: { value: string; label?: string }) {
 
 function CopyRow({ title, value }: { title: string; value: string }) {
   return (
-    <div className="rounded-xl bg-zinc-100 p-3">
-      <p className="mb-1 text-xs font-semibold text-zinc-500">{title}</p>
+    <div className="rounded-xl bg-input p-3">
+      <p className="mb-1 text-xs font-semibold text-muted">{title}</p>
       <div className="flex items-center gap-2">
         <code className="min-w-0 flex-1 break-all text-xs">{value}</code>
         <CopyButton value={value} />
@@ -38,7 +38,7 @@ function Step({ n, children }: { n: number; children: React.ReactNode }) {
       <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand text-xs font-bold text-white">
         {n}
       </span>
-      <div className="min-w-0 flex-1 text-sm text-zinc-700">{children}</div>
+      <div className="min-w-0 flex-1 text-sm text-ink">{children}</div>
     </li>
   );
 }
@@ -102,9 +102,9 @@ export function ShortcutSetup({ hasToken }: { hasToken: boolean }) {
 
   if (!token) {
     return (
-      <div className="rounded-2xl bg-white p-4 shadow-sm">
+      <div className="rounded-[24px] bg-white p-5">
         <h2 className="mb-2 font-semibold">Paso 1 · Genera tu token personal</h2>
-        <p className="mb-3 text-sm text-zinc-600">
+        <p className="mb-3 text-sm text-muted-2">
           Es la llave con la que tu iPhone se identifica con la app. Se muestra una
           sola vez{hasToken ? ". Ya tienes uno activo; generar otro lo reemplaza." : "."}
         </p>
@@ -124,16 +124,16 @@ export function ShortcutSetup({ hasToken }: { hasToken: boolean }) {
     <div className="flex flex-col gap-5">
       <div className="rounded-2xl border-2 border-brand bg-white p-4 shadow-sm">
         <h2 className="mb-2 font-semibold">Tu token personal</h2>
-        <p className="mb-3 text-sm text-zinc-600">
+        <p className="mb-3 text-sm text-muted-2">
           Cópialo ahora: al salir de esta página ya no podrás verlo (solo generar otro).
           Lo usarás en el paso del encabezado, más abajo.
         </p>
         <CopyRow title="Token" value={token} />
       </div>
 
-      <div className="rounded-2xl bg-white p-4 shadow-sm">
+      <div className="rounded-[24px] bg-white p-5">
         <h2 className="mb-1 font-semibold"> Pay · Registro automático</h2>
-        <p className="mb-4 text-sm text-zinc-600">
+        <p className="mb-4 text-sm text-muted-2">
           Al terminar, cada pago con Apple Pay se registrará solo, con monto y
           comercio. Son ~3 minutos, una sola vez.
         </p>
@@ -186,7 +186,7 @@ export function ShortcutSetup({ hasToken }: { hasToken: boolean }) {
             vas a añadir <strong>3 campos</strong>. Cada vez que toques &quot;Añadir
             nuevo campo&quot; te pregunta el tipo: elige <strong>Texto</strong> las 3
             veces.
-            <div className="mt-2 flex flex-col gap-2 rounded-xl bg-zinc-100 p-3 text-xs leading-relaxed">
+            <div className="mt-2 flex flex-col gap-2 rounded-xl bg-input p-3 text-xs leading-relaxed">
               <p>
                 <strong>Campo 1</strong> · Clave: <code>amount</code> · Texto: toca el
                 espacio del valor y, arriba del teclado, toca la variable azul{" "}
@@ -211,7 +211,7 @@ export function ShortcutSetup({ hasToken }: { hasToken: boolean }) {
           </Step>
         </ol>
 
-        <div className="mt-4 rounded-xl bg-amber-50 p-3 text-xs leading-relaxed text-amber-800">
+        <div className="mt-4 rounded-xl bg-sand p-3 text-xs leading-relaxed text-muted-2">
           <p className="mb-1 font-semibold">Si no funciona, revisa esto (en orden):</p>
           <p>· El Método debe decir POST, no GET.</p>
           <p>
@@ -226,9 +226,9 @@ export function ShortcutSetup({ hasToken }: { hasToken: boolean }) {
         </div>
       </div>
 
-      <div className="rounded-2xl bg-white p-4 shadow-sm">
+      <div className="rounded-[24px] bg-white p-5">
         <h2 className="mb-1 font-semibold">🎙️ Siri · Gastos en efectivo</h2>
-        <p className="mb-4 text-sm text-zinc-600">
+        <p className="mb-4 text-sm text-muted-2">
           Para registrar efectivo sin abrir la app: &quot;Oye Siri, registrar gasto&quot;.
         </p>
         <ol className="flex flex-col gap-4">
@@ -252,7 +252,7 @@ export function ShortcutSetup({ hasToken }: { hasToken: boolean }) {
           </Step>
           <Step n={5}>
             En el cuerpo JSON añade 2 campos tipo <strong>Texto</strong>:
-            <div className="mt-2 rounded-xl bg-zinc-100 p-3 text-xs leading-relaxed">
+            <div className="mt-2 rounded-xl bg-input p-3 text-xs leading-relaxed">
               <p>
                 <strong>Campo 1</strong> · Clave: <code>amount</code> · Texto: la
                 variable <strong>&quot;Entrada proporcionada&quot;</strong> (sale arriba
@@ -273,15 +273,15 @@ export function ShortcutSetup({ hasToken }: { hasToken: boolean }) {
         </ol>
       </div>
 
-      <div className="rounded-2xl bg-white p-4 shadow-sm">
+      <div className="rounded-[24px] bg-white p-5">
         <h2 className="mb-2 font-semibold">Probar conexión</h2>
-        <p className="mb-3 text-sm text-zinc-600">
+        <p className="mb-3 text-sm text-muted-2">
           Verifica que tu token y el servidor funcionan (es lo mismo que harán tus
           atajos):
         </p>
         <button
           onClick={handleTest}
-          className="w-full rounded-xl bg-zinc-900 px-4 py-3 font-semibold text-white"
+          className="w-full rounded-xl bg-ink px-4 py-3 font-semibold text-white"
         >
           Registrar un gasto de prueba
         </button>

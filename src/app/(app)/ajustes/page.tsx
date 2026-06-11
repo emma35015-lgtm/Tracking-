@@ -7,8 +7,28 @@ import {
   signOut,
   updateProfile,
 } from "@/app/(app)/actions";
+import { CategoryIcon, categoryColor } from "@/lib/category-style";
 
-const CURRENCIES = ["MXN", "USD", "EUR", "COP", "ARS", "CLP", "PEN"];
+const CURRENCIES: [string, string][] = [
+  ["MXN", "Peso mexicano"],
+  ["USD", "Dólar"],
+  ["EUR", "Euro"],
+  ["COP", "Peso colombiano"],
+  ["ARS", "Peso argentino"],
+  ["CLP", "Peso chileno"],
+  ["PEN", "Sol peruano"],
+];
+
+const inputClass =
+  "w-full rounded-[14px] border-[1.6px] border-input-border bg-input px-[15px] py-[13px] text-[15px] font-medium text-ink outline-none focus:border-coral";
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="mx-1 mb-3 mt-6 text-[13px] font-bold uppercase tracking-[0.06em] text-muted">
+      {children}
+    </div>
+  );
+}
 
 export default async function AjustesPage() {
   const supabase = await createClient();
@@ -23,125 +43,141 @@ export default async function AjustesPage() {
   ]);
 
   return (
-    <div className="flex flex-col gap-8">
-      <section>
-        <h1 className="mb-3 text-lg font-bold">Ajustes</h1>
-        <form action={updateProfile} className="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm">
-          <p className="text-xs text-zinc-400">{user?.email}</p>
-          <label className="flex flex-col gap-1 text-sm font-medium">
-            Tu nombre
-            <input
-              name="display_name"
-              defaultValue={profile?.display_name ?? ""}
-              placeholder="Opcional"
-              className="rounded-xl border border-zinc-300 px-4 py-2.5 outline-none focus:border-brand"
-            />
-          </label>
-          <label className="flex flex-col gap-1 text-sm font-medium">
-            Moneda
-            <select
-              name="default_currency"
-              defaultValue={profile?.default_currency ?? "MXN"}
-              className="rounded-xl border border-zinc-300 bg-white px-4 py-2.5 outline-none focus:border-brand"
-            >
-              {CURRENCIES.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-          </label>
-          <button type="submit" className="rounded-xl bg-brand px-4 py-2.5 font-semibold text-white">
-            Guardar
-          </button>
-        </form>
-      </section>
+    <div className="screen-in">
+      <h1 className="mt-1.5 text-[26px] font-extrabold tracking-tight">Ajustes</h1>
 
-      <section>
-        <h2 className="mb-3 text-sm font-semibold text-zinc-500">Automatización del iPhone</h2>
-        <div className="rounded-2xl bg-white p-4 shadow-sm">
-          {token ? (
-            <div className="flex flex-col gap-2 text-sm">
-              <p>
-                ✅ Token <span className="font-medium">{token.label}</span> activo
-                {token.last_used_at
-                  ? ` · usado por última vez el ${new Date(token.last_used_at).toLocaleDateString("es-MX")}`
-                  : " · aún sin usarse"}
-              </p>
-              <div className="flex gap-2">
-                <Link
-                  href="/ajustes/atajos"
-                  className="flex-1 rounded-xl bg-brand px-4 py-2.5 text-center font-semibold text-white"
-                >
-                  Ver instrucciones
-                </Link>
-                <form action={revokeToken} className="flex-1">
-                  <button
-                    type="submit"
-                    className="w-full rounded-xl border border-red-200 px-4 py-2.5 font-semibold text-red-600"
-                  >
-                    Revocar token
-                  </button>
-                </form>
-              </div>
+      {/* Perfil */}
+      <form action={updateProfile} className="mt-[18px] rounded-[24px] bg-white p-5">
+        <div className="text-[13px] font-medium text-muted">{user?.email}</div>
+        <div className="mb-2 mt-4 text-[13px] font-bold text-muted-2">Tu nombre</div>
+        <input
+          name="display_name"
+          defaultValue={profile?.display_name ?? ""}
+          placeholder="Opcional"
+          className={inputClass}
+        />
+        <div className="mb-2 mt-4 text-[13px] font-bold text-muted-2">Moneda</div>
+        <select
+          name="default_currency"
+          defaultValue={profile?.default_currency ?? "MXN"}
+          className={inputClass}
+        >
+          {CURRENCIES.map(([code, label]) => (
+            <option key={code} value={code}>
+              {code} · {label}
+            </option>
+          ))}
+        </select>
+        <button
+          type="submit"
+          className="mt-4 h-[50px] w-full rounded-[15px] bg-coral text-base font-extrabold text-white"
+        >
+          Guardar
+        </button>
+      </form>
+
+      {/* Automatización */}
+      <SectionLabel>Automatización del iPhone</SectionLabel>
+      <div className="rounded-[24px] bg-white px-5 py-[18px]">
+        {token ? (
+          <>
+            <div className="flex items-center gap-[9px] text-sm font-semibold">
+              <span className="flex h-[22px] w-[22px] items-center justify-center rounded-[7px] bg-mint">
+                <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="#1E4435" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M2 7.5 5.5 11 12 3" />
+                </svg>
+              </span>
+              Token iPhone activo
             </div>
-          ) : (
-            <div className="flex flex-col gap-2 text-sm">
-              <p className="text-zinc-600">
-                Conecta tu iPhone para que tus pagos con Apple Pay se registren solos.
-              </p>
+            <div className="ml-[31px] mt-1.5 text-xs font-medium text-muted">
+              {token.last_used_at
+                ? `Usado por última vez el ${new Date(token.last_used_at).toLocaleDateString("es-MX")}`
+                : "Aún sin usarse"}
+            </div>
+            <div className="mt-4 flex gap-2.5">
               <Link
                 href="/ajustes/atajos"
-                className="rounded-xl bg-brand px-4 py-2.5 text-center font-semibold text-white"
+                className="flex h-[46px] flex-1 items-center justify-center rounded-[14px] bg-ink text-sm font-bold text-white"
               >
-                Configurar mi iPhone
+                Ver instrucciones
               </Link>
-            </div>
-          )}
-        </div>
-      </section>
-
-      <section>
-        <h2 className="mb-3 text-sm font-semibold text-zinc-500">Categorías</h2>
-        <ul className="mb-3 divide-y divide-zinc-100 overflow-hidden rounded-2xl bg-white shadow-sm">
-          {(categories ?? []).map((c) => (
-            <li key={c.id} className="flex items-center justify-between px-4 py-2.5 text-sm">
-              <span>
-                {c.icon} {c.name}
-              </span>
-              <form action={deleteCategory}>
-                <input type="hidden" name="id" value={c.id} />
-                <button type="submit" className="text-xs text-red-500" aria-label={`Eliminar ${c.name}`}>
-                  Eliminar
+              <form action={revokeToken} className="flex-1">
+                <button
+                  type="submit"
+                  className="h-[46px] w-full rounded-[14px] border-[1.6px] border-[#E0A99C] text-sm font-bold text-coral-dark"
+                >
+                  Revocar
                 </button>
               </form>
-            </li>
-          ))}
-        </ul>
-        <form action={addCategory} className="flex gap-2">
-          <input
-            name="icon"
-            placeholder="🛍️"
-            maxLength={4}
-            className="w-16 rounded-xl border border-zinc-300 bg-white px-2 py-2.5 text-center outline-none focus:border-brand"
-          />
-          <input
-            name="name"
-            required
-            placeholder="Nueva categoría"
-            className="flex-1 rounded-xl border border-zinc-300 bg-white px-4 py-2.5 outline-none focus:border-brand"
-          />
-          <button type="submit" className="rounded-xl bg-zinc-900 px-4 py-2.5 font-semibold text-white">
-            Añadir
-          </button>
-        </form>
-        <p className="mt-2 text-xs text-zinc-400">
-          Al eliminar una categoría, sus gastos quedan como &quot;Sin categoría&quot;.
-        </p>
-      </section>
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="text-sm font-medium text-muted-2">
+              Conecta tu iPhone para que tus pagos con Apple Pay se registren solos.
+            </p>
+            <Link
+              href="/ajustes/atajos"
+              className="mt-4 flex h-[46px] items-center justify-center rounded-[14px] bg-coral text-sm font-bold text-white"
+            >
+              Configurar mi iPhone
+            </Link>
+          </>
+        )}
+      </div>
 
-      <form action={signOut}>
-        <button type="submit" className="w-full rounded-xl border border-zinc-300 px-4 py-3 font-semibold text-zinc-600">
+      {/* Categorías */}
+      <SectionLabel>Categorías</SectionLabel>
+      <div className="overflow-hidden rounded-[24px] bg-white">
+        {(categories ?? []).map((c, i, arr) => (
+          <div
+            key={c.id}
+            className={`flex items-center gap-[13px] px-[18px] py-3.5 ${
+              i < arr.length - 1 ? "border-b border-crema" : ""
+            }`}
+          >
+            <div
+              className="flex h-[34px] w-[34px] items-center justify-center rounded-[11px]"
+              style={{ background: categoryColor(c.name) }}
+            >
+              <CategoryIcon name={c.name} emoji={c.icon} color="#15140F" size={18} />
+            </div>
+            <div className="flex-1 text-[15px] font-bold">{c.name}</div>
+            <form action={deleteCategory}>
+              <input type="hidden" name="id" value={c.id} />
+              <button type="submit" className="text-[13px] font-bold text-coral-dark">
+                Eliminar
+              </button>
+            </form>
+          </div>
+        ))}
+      </div>
+      <form action={addCategory} className="mt-3 flex gap-2">
+        <input
+          name="icon"
+          placeholder="🛍️"
+          maxLength={4}
+          className="w-16 rounded-[14px] border-[1.6px] border-input-border bg-input px-2 py-[13px] text-center outline-none focus:border-coral"
+        />
+        <input
+          name="name"
+          required
+          placeholder="Nueva categoría"
+          className="flex-1 rounded-[14px] border-[1.6px] border-input-border bg-input px-[15px] py-[13px] text-[15px] font-medium outline-none focus:border-coral"
+        />
+        <button type="submit" className="rounded-[14px] bg-ink px-4 text-sm font-bold text-white">
+          Añadir
+        </button>
+      </form>
+      <p className="mx-1 mt-2 text-xs font-medium text-muted">
+        Al eliminar una categoría, sus gastos quedan como &quot;Sin categoría&quot;.
+      </p>
+
+      <form action={signOut} className="mt-6">
+        <button
+          type="submit"
+          className="h-[50px] w-full rounded-[15px] border-[1.6px] border-input-border font-bold text-muted-2"
+        >
           Cerrar sesión
         </button>
       </form>

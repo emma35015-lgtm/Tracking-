@@ -1,7 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
-import { formatMoney } from "@/lib/format";
+import { formatMoney, formatMoneyShort } from "@/lib/format";
 import { resolveMonth } from "@/lib/months";
-import { MonthNav } from "@/components/month-nav";
+import { MonthHeader } from "@/components/month-header";
+import { categoryColor } from "@/lib/category-style";
 
 type ExpenseRow = {
   amount: number;
@@ -48,7 +49,7 @@ function buildTips(
   if (daysElapsed >= 5 && daysElapsed < daysInMonth) {
     const projected = (total / daysElapsed) * daysInMonth;
     tips.push(
-      `📅 Llevas ${formatMoney(total, currency)} en ${daysElapsed} días. A este ritmo, cerrarás el mes en ~${formatMoney(projected, currency)}.`
+      `📅 Llevas ${formatMoneyShort(total, currency)} en ${daysElapsed} días. A este ritmo, cerrarás el mes en ~${formatMoneyShort(projected, currency)}.`
     );
   }
 
@@ -63,7 +64,7 @@ function buildTips(
   }
   if (worstCat) {
     tips.push(
-      `📈 Ojo: ${worstCat.name} creció ${Math.round(worstCat.growth)}% vs el mes pasado (${formatMoney(worstCat.now, currency)}). Es el primer lugar donde buscar recortes.`
+      `📈 Ojo: ${worstCat.name} creció ${Math.round(worstCat.growth)}% vs el mes pasado (${formatMoneyShort(worstCat.now, currency)}). Es el primer lugar donde buscar recortes.`
     );
   }
 
@@ -72,7 +73,7 @@ function buildTips(
   const smallTotal = sum(small);
   if (small.length >= 8 && smallTotal > total * 0.15) {
     tips.push(
-      `🐜 Gasto hormiga: ${small.length} compras de ${formatMoney(100, currency)} o menos suman ${formatMoney(smallTotal, currency)} (${Math.round((smallTotal / total) * 100)}% de tu mes). Son las que menos se sienten y más pesan.`
+      `🐜 Gasto hormiga: ${small.length} compras de ${formatMoney(100, currency)} o menos suman ${formatMoneyShort(smallTotal, currency)} (${Math.round((smallTotal / total) * 100)}% de tu mes). Son las que menos se sienten y más pesan.`
     );
   }
 
@@ -80,7 +81,7 @@ function buildTips(
   const subs = byCat.get("Suscripciones");
   if (subs && subs.total > 0) {
     tips.push(
-      `📺 Tus suscripciones cuestan ${formatMoney(subs.total, currency)} al mes — ${formatMoney(subs.total * 12, currency)} al año. ¿Las usas todas?`
+      `📺 Tus suscripciones cuestan ${formatMoneyShort(subs.total, currency)} al mes — ${formatMoneyShort(subs.total * 12, currency)} al año. ¿Las usas todas?`
     );
   }
 
@@ -96,7 +97,7 @@ function buildTips(
   const topMerchant = [...byMerchant.entries()].sort((a, b) => b[1].count - a[1].count)[0];
   if (topMerchant && topMerchant[1].count >= 4) {
     tips.push(
-      `🏪 Tu lugar más frecuente: ${topMerchant[0]} (${topMerchant[1].count} veces, ${formatMoney(topMerchant[1].total, currency)}). Pequeños cambios ahí tienen el mayor impacto.`
+      `🏪 Tu lugar más frecuente: ${topMerchant[0]} (${topMerchant[1].count} veces, ${formatMoneyShort(topMerchant[1].total, currency)}). Pequeños cambios ahí tienen el mayor impacto.`
     );
   }
 
@@ -105,7 +106,7 @@ function buildTips(
   if (prevTotal > 0 && daysElapsed >= daysInMonth) {
     const diff = total - prevTotal;
     if (diff < 0) {
-      tips.push(`🎉 Gastaste ${formatMoney(Math.abs(diff), currency)} menos que el mes pasado. ¡Sigue así!`);
+      tips.push(`🎉 Gastaste ${formatMoneyShort(Math.abs(diff), currency)} menos que el mes pasado. ¡Sigue así!`);
     }
   }
 
@@ -159,6 +160,7 @@ export default async function AnalisisPage({
     byDay[day - 1] += Number(e.amount);
   }
   const maxDay = Math.max(...byDay, 1);
+  const peakIndex = byDay.indexOf(Math.max(...byDay));
 
   const byCat = groupByCategory(current);
   const byCatPrev = groupByCategory(previous);
@@ -167,90 +169,102 @@ export default async function AnalisisPage({
   const tips = buildTips(current, previous, currency, daysElapsed, daysInMonth);
 
   return (
-    <div>
-      <MonthNav base="/analisis" year={year} month={month} prev={prev} next={next} />
+    <div className="screen-in">
+      <MonthHeader base="/analisis" subtitle="Análisis" year={year} month={month} prev={prev} next={next} />
 
       {current.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-zinc-300 p-6 text-center text-sm text-zinc-500">
+        <div className="mt-6 rounded-[22px] bg-white p-6 text-center text-sm font-medium text-muted">
           Sin gastos este mes. Cuando haya datos, aquí verás tus gráficas y tips.
         </div>
       ) : (
-        <div className="flex flex-col gap-6">
-          {/* Resumen comparativo */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-2xl bg-white p-4 shadow-sm">
-              <p className="text-xs text-zinc-500">Este mes</p>
-              <p className="text-xl font-bold tabular-nums">{formatMoney(total, currency)}</p>
+        <div className="mt-5 flex flex-col gap-3">
+          {/* Stat cards */}
+          <div className="flex gap-[11px]">
+            <div className="flex-1 rounded-[22px] bg-white p-[18px]">
+              <div className="text-xs font-semibold text-muted">Este mes</div>
+              <div className="mt-2 text-3xl font-extrabold leading-none tracking-[-0.03em] tabular-nums">
+                {formatMoneyShort(total, currency)}
+              </div>
               {prevTotal > 0 && (
-                <p className={`mt-1 text-xs font-medium ${total <= prevTotal ? "text-emerald-600" : "text-red-500"}`}>
+                <div
+                  className="mt-1 text-[11px] font-bold"
+                  style={{ color: total <= prevTotal ? "#1E4435" : "#C9533A" }}
+                >
                   {total <= prevTotal ? "▼" : "▲"}{" "}
                   {Math.abs(Math.round(((total - prevTotal) / prevTotal) * 100))}% vs mes pasado
-                </p>
+                </div>
               )}
             </div>
-            <div className="rounded-2xl bg-white p-4 shadow-sm">
-              <p className="text-xs text-zinc-500">Promedio diario</p>
-              <p className="text-xl font-bold tabular-nums">{formatMoney(dailyAvg, currency)}</p>
-              <p className="mt-1 text-xs text-zinc-400">
+            <div className="flex-1 rounded-[22px] bg-ink p-[18px] text-white">
+              <div className="text-xs font-semibold opacity-70">Promedio diario</div>
+              <div className="mt-2 text-3xl font-extrabold leading-none tracking-[-0.03em] tabular-nums">
+                {formatMoneyShort(dailyAvg, currency)}
+              </div>
+              <div className="mt-1 text-[11px] opacity-60">
                 en {daysElapsed} {daysElapsed === 1 ? "día" : "días"}
-              </p>
+              </div>
             </div>
           </div>
 
-          {/* Gráfica: gasto por día */}
-          <section className="rounded-2xl bg-white p-4 shadow-sm">
-            <h2 className="mb-3 text-sm font-semibold text-zinc-500">Gasto por día</h2>
+          {/* Gasto por día */}
+          <section className="rounded-[24px] bg-sand px-4 pb-4 pt-5">
+            <h2 className="mb-3 px-1 text-base font-extrabold tracking-tight">Gasto por día</h2>
             <div className="flex h-32 items-end gap-[2px]">
-              {byDay.map((amount, i) => (
-                <div
-                  key={i}
-                  className="group relative flex-1 rounded-t bg-brand/80"
-                  style={{
-                    height: amount > 0 ? `${Math.max(4, (amount / maxDay) * 100)}%` : "2px",
-                    opacity: amount > 0 ? 1 : 0.25,
-                  }}
-                  title={`Día ${i + 1}: ${formatMoney(amount, currency)}`}
-                />
-              ))}
+              {byDay.map((amount, i) => {
+                const peak = i === peakIndex && amount > 0;
+                return (
+                  <div
+                    key={i}
+                    className="flex-1 rounded-t"
+                    style={{
+                      height: amount > 0 ? `${Math.max(5, (amount / maxDay) * 100)}%` : "3px",
+                      background: peak ? "#E07C55" : "#15140F",
+                      opacity: amount > 0 ? 1 : 0.18,
+                    }}
+                    title={`Día ${i + 1}: ${formatMoney(amount, currency)}`}
+                  />
+                );
+              })}
             </div>
-            <div className="mt-1 flex justify-between text-[10px] text-zinc-400">
+            <div className="mt-1.5 flex justify-between text-[10px] font-semibold text-muted-3">
               <span>1</span>
               <span>{Math.round(daysInMonth / 2)}</span>
               <span>{daysInMonth}</span>
             </div>
           </section>
 
-          {/* Categorías vs mes pasado */}
-          <section className="rounded-2xl bg-white p-4 shadow-sm">
-            <h2 className="mb-3 text-sm font-semibold text-zinc-500">
-              Categorías vs mes pasado
-            </h2>
-            <div className="flex flex-col gap-3">
-              {catRows.map(([name, { icon, total: catTotal }]) => {
+          {/* Por categoría */}
+          <section className="rounded-[24px] bg-white p-5">
+            <h2 className="mb-4 text-base font-extrabold tracking-tight">Por categoría</h2>
+            <div className="flex flex-col gap-[15px]">
+              {catRows.map(([name, { total: catTotal }]) => {
                 const before = byCatPrev.get(name)?.total ?? 0;
                 const pct = total > 0 ? Math.round((catTotal / total) * 100) : 0;
                 return (
                   <div key={name}>
-                    <div className="mb-1 flex items-baseline justify-between text-sm">
-                      <span>
-                        {icon} {name}{" "}
-                        <span className="text-xs text-zinc-400">{pct}%</span>
-                      </span>
-                      <span className="tabular-nums">
-                        <span className="font-medium">{formatMoney(catTotal, currency)}</span>
+                    <div className="mb-[7px] flex items-baseline justify-between">
+                      <span className="text-sm font-bold">
+                        {name} <span className="font-semibold text-muted-3">{pct}%</span>
                         {before > 0 && (
                           <span
-                            className={`ml-2 text-xs ${catTotal <= before ? "text-emerald-600" : "text-red-500"}`}
+                            className="ml-1.5 text-xs"
+                            style={{ color: catTotal <= before ? "#1E4435" : "#C9533A" }}
                           >
                             {catTotal <= before ? "▼" : "▲"}
                           </span>
                         )}
                       </span>
+                      <span className="text-sm font-extrabold tabular-nums">
+                        {formatMoneyShort(catTotal, currency)}
+                      </span>
                     </div>
-                    <div className="h-2 overflow-hidden rounded-full bg-zinc-200">
+                    <div className="h-2.5 overflow-hidden rounded-full bg-track">
                       <div
-                        className="h-full rounded-full bg-brand"
-                        style={{ width: `${Math.max(3, pct)}%` }}
+                        className="h-full rounded-full"
+                        style={{
+                          width: `${Math.max(4, pct)}%`,
+                          background: categoryColor(name) === "#ECE1BC" ? "#E07C55" : categoryColor(name),
+                        }}
                       />
                     </div>
                   </div>
@@ -259,21 +273,17 @@ export default async function AnalisisPage({
             </div>
           </section>
 
-          {/* Tips de ahorro */}
-          {tips.length > 0 && (
-            <section className="rounded-2xl bg-white p-4 shadow-sm">
-              <h2 className="mb-3 text-sm font-semibold text-zinc-500">
-                💡 Tips según tus datos
-              </h2>
-              <ul className="flex flex-col gap-3">
-                {tips.map((tip, i) => (
-                  <li key={i} className="rounded-xl bg-emerald-50 p-3 text-sm text-zinc-700">
-                    {tip}
-                  </li>
-                ))}
-              </ul>
+          {/* Tips */}
+          {tips.map((tip, i) => (
+            <section key={i} className="rounded-[24px] bg-mint px-5 py-[18px]">
+              {i === 0 && (
+                <div className="mb-1.5 text-sm font-extrabold tracking-tight text-mint-ink">
+                  💡 Según tus datos
+                </div>
+              )}
+              <div className="text-sm font-medium leading-relaxed text-mint-ink">{tip}</div>
             </section>
-          )}
+          ))}
         </div>
       )}
     </div>
