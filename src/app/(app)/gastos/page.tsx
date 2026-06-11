@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { formatDay, formatMoney, formatTime } from "@/lib/format";
+import { dayKey, formatDayLabel, formatMoneyShort, formatTime } from "@/lib/format";
 import { resolveMonth } from "@/lib/months";
-import { MonthNav } from "@/components/month-nav";
+import { MonthHeader } from "@/components/month-header";
+import { CategoryIcon, categoryColor } from "@/lib/category-style";
 
 type ExpenseRow = {
   id: string;
@@ -35,59 +36,75 @@ export default async function GastosPage({
 
   const byDay = new Map<string, ExpenseRow[]>();
   for (const e of expenses) {
-    const day = e.occurred_at.slice(0, 10);
-    const list = byDay.get(day) ?? [];
+    const key = dayKey(new Date(e.occurred_at));
+    const list = byDay.get(key) ?? [];
     list.push(e);
-    byDay.set(day, list);
+    byDay.set(key, list);
   }
 
   return (
-    <div>
-      <MonthNav base="/gastos" year={year} month={month} prev={prev} next={next} />
+    <div className="screen-in">
+      <MonthHeader base="/gastos" subtitle="Movimientos" year={year} month={month} prev={prev} next={next} />
 
       {expenses.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-zinc-300 p-6 text-center text-sm text-zinc-500">
+        <div className="mt-6 rounded-[22px] bg-white p-6 text-center text-sm font-medium text-muted">
           Sin gastos este mes.
         </div>
       ) : (
-        [...byDay.entries()].map(([day, list]) => {
-          const dayTotal = list.reduce((sum, e) => sum + Number(e.amount), 0);
-          return (
-            <section key={day} className="mb-5">
-              <div className="mb-2 flex items-baseline justify-between px-1">
-                <h2 className="text-sm font-semibold capitalize text-zinc-500">
-                  {formatDay(new Date(day + "T12:00:00Z"))}
-                </h2>
-                <span className="text-xs tabular-nums text-zinc-400">
-                  {formatMoney(dayTotal, list[0].currency)}
-                </span>
-              </div>
-              <ul className="divide-y divide-zinc-100 overflow-hidden rounded-2xl bg-white shadow-sm">
-                {list.map((e) => (
-                  <li key={e.id}>
-                    <Link href={`/gastos/${e.id}`} className="flex items-center gap-3 px-4 py-3">
-                      <span className="text-xl">{e.categories?.icon ?? "❓"}</span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate font-medium">
+        <div className="mt-[22px] flex flex-col gap-5">
+          {[...byDay.entries()].map(([key, list]) => {
+            const dayTotal = list.reduce((sum, e) => sum + Number(e.amount), 0);
+            return (
+              <section key={key}>
+                <div className="flex items-baseline justify-between px-1 pb-2.5">
+                  <span className="text-[13px] font-bold uppercase tracking-wider text-muted">
+                    {formatDayLabel(key)}
+                  </span>
+                  <span className="text-[13px] font-extrabold tabular-nums">
+                    {formatMoneyShort(dayTotal, list[0].currency)}
+                  </span>
+                </div>
+                <div className="overflow-hidden rounded-[22px] bg-white">
+                  {list.map((e, i) => (
+                    <Link
+                      key={e.id}
+                      href={`/gastos/${e.id}`}
+                      className={`flex items-center gap-[13px] px-4 py-3.5 ${
+                        i < list.length - 1 ? "border-b border-crema" : ""
+                      }`}
+                    >
+                      <div
+                        className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-[13px]"
+                        style={{ background: categoryColor(e.categories?.name) }}
+                      >
+                        <CategoryIcon
+                          name={e.categories?.name}
+                          emoji={e.categories?.icon}
+                          color="#15140F"
+                          size={20}
+                        />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-[15px] font-bold tracking-tight">
                           {e.merchant ?? "Gasto"}
-                        </span>
-                        <span className="block text-xs text-zinc-500">
+                        </div>
+                        <div className="text-xs font-medium text-muted">
                           {formatTime(new Date(e.occurred_at))} ·{" "}
                           {e.categories?.name ?? "Sin categoría"}
                           {e.source === "applepay" && " ·  Pay"}
-                          {e.source === "siri" && " · 🎙️ Siri"}
-                        </span>
-                      </span>
-                      <span className="font-semibold tabular-nums">
-                        {formatMoney(Number(e.amount), e.currency)}
-                      </span>
+                          {e.source === "siri" && " · Siri"}
+                        </div>
+                      </div>
+                      <div className="text-base font-extrabold tracking-tight tabular-nums">
+                        {formatMoneyShort(Number(e.amount), e.currency)}
+                      </div>
                     </Link>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          );
-        })
+                  ))}
+                </div>
+              </section>
+            );
+          })}
+        </div>
       )}
     </div>
   );

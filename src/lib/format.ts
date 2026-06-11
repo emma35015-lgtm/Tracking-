@@ -1,3 +1,6 @@
+// Zona horaria de referencia para mostrar fechas (los datos se guardan en UTC).
+const TZ = "America/Mexico_City";
+
 export function formatMoney(amount: number, currency: string): string {
   return new Intl.NumberFormat("es-MX", {
     style: "currency",
@@ -6,16 +9,53 @@ export function formatMoney(amount: number, currency: string): string {
   }).format(amount);
 }
 
-export function formatDay(date: Date): string {
-  return new Intl.DateTimeFormat("es-MX", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
+// Estilo del rediseño: montos redondeados, sin centavos ($1,234)
+export function formatMoneyShort(amount: number, currency: string): string {
+  return new Intl.NumberFormat("es-MX", {
+    style: "currency",
+    currency,
+    currencyDisplay: "narrowSymbol",
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
+// "2026-06-11" en la zona horaria de referencia
+export function dayKey(date: Date): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: TZ,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
   }).format(date);
+}
+
+// "Hoy · 11 jun", "Ayer · 10 jun", "Mié · 9 jun"
+export function formatDayLabel(key: string): string {
+  const todayKey = dayKey(new Date());
+  const yesterdayKey = dayKey(new Date(Date.now() - 86_400_000));
+  const noon = new Date(key + "T12:00:00Z");
+  const datePart = new Intl.DateTimeFormat("es-MX", {
+    timeZone: "UTC",
+    day: "numeric",
+    month: "short",
+  })
+    .format(noon)
+    .replace(".", "");
+  let prefix: string;
+  if (key === todayKey) prefix = "Hoy";
+  else if (key === yesterdayKey) prefix = "Ayer";
+  else {
+    const wd = new Intl.DateTimeFormat("es-MX", { timeZone: "UTC", weekday: "short" })
+      .format(noon)
+      .replace(".", "");
+    prefix = wd.charAt(0).toUpperCase() + wd.slice(1);
+  }
+  return `${prefix} · ${datePart}`;
 }
 
 export function formatTime(date: Date): string {
   return new Intl.DateTimeFormat("es-MX", {
+    timeZone: TZ,
     hour: "numeric",
     minute: "2-digit",
   }).format(date);

@@ -1,5 +1,5 @@
 // Service worker mínimo: cachea estáticos, network-first para páginas.
-const CACHE = "gastos-v1";
+const CACHE = "gastos-v2";
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();

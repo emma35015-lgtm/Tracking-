@@ -25,21 +25,30 @@ export async function proxy(request: NextRequest) {
     }
   );
 
-  // Refresca la sesión y protege todo excepto /login y /api/ingest.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // getClaims valida el JWT localmente (firma asimétrica + JWKS cacheado),
+  // sin viaje de red a Supabase en cada navegación — getUser sí lo hacía y
+  // era la causa principal de la lentitud al cambiar de pestaña.
+  let authenticated = false;
+  try {
+    const { data } = await supabase.auth.getClaims();
+    authenticated = Boolean(data?.claims);
+  } catch {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    authenticated = Boolean(user);
+  }
 
   const { pathname } = request.nextUrl;
   const isPublic = pathname.startsWith("/login") || pathname.startsWith("/api/ingest");
 
-  if (!user && !isPublic) {
+  if (!authenticated && !isPublic) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
 
-  if (user && pathname.startsWith("/login")) {
+  if (authenticated && pathname.startsWith("/login")) {
     const url = request.nextUrl.clone();
     url.pathname = "/";
     return NextResponse.redirect(url);
