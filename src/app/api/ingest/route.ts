@@ -120,7 +120,23 @@ export async function POST(request: Request) {
           .update(`${userId}|${amount}|${merchant ? normalizeMerchant(merchant) : ""}|${bucket}`)
           .digest("hex");
 
-  const categoryId = await categorize(supabase, userId, merchant);
+  // Si el Atajo manda una categoría por nombre, la respetamos (búsqueda
+  // sin distinguir mayúsculas/acentos). Si no, autocategorizamos por comercio.
+  let categoryId: string | null = null;
+  const requestedCategory =
+    typeof body.category === "string" && body.category.trim() ? body.category.trim() : null;
+  if (requestedCategory) {
+    const { data: match } = await supabase
+      .from("categories")
+      .select("id")
+      .eq("user_id", userId)
+      .ilike("name", requestedCategory)
+      .maybeSingle();
+    categoryId = match?.id ?? null;
+  }
+  if (!categoryId) {
+    categoryId = await categorize(supabase, userId, merchant);
+  }
 
   const { data: expense, error } = await supabase
     .from("expenses")
