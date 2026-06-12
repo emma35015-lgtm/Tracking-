@@ -18,6 +18,10 @@ export default async function AgregarPage() {
         <Link href="/ajustes/atajos" className="font-bold text-coral-link">
           configura los Atajos de tu iPhone
         </Link>
+        . ¿Cuenta compartida?{" "}
+        <Link href="/dividir" className="font-bold text-coral-link">
+          Divide el ticket
+        </Link>
         .
       </p>
     </div>

@@ -128,6 +128,27 @@ export default async function InicioPage() {
         </div>
       </div>
 
+      {/* Dividir cuenta */}
+      <Link
+        href="/dividir"
+        className="mt-3 flex items-center gap-3.5 rounded-[22px] bg-white px-[17px] py-[15px]"
+      >
+        <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-mint">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E4435" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M6 3h12v18l-2-1.5L14 21l-2-1.5L10 21l-2-1.5L6 21V3Z M9 8h6 M9 12h6" />
+          </svg>
+        </div>
+        <div className="flex-1">
+          <div className="text-base font-bold tracking-tight">Dividir cuenta</div>
+          <div className="text-xs font-medium text-muted">
+            Foto del ticket y calculamos tu parte
+          </div>
+        </div>
+        <svg width="9" height="15" viewBox="0 0 9 15" fill="none" stroke="#8A8167" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M1.5 1.5 7.5 7.5l-6 6" />
+        </svg>
+      </Link>
+
       {/* Esta semana */}
       <div className="mt-[26px] flex items-center justify-between">
         <h2 className="text-[19px] font-extrabold tracking-tight">Esta semana</h2>
