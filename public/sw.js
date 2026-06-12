@@ -1,5 +1,5 @@
 // Service worker mínimo: cachea estáticos, network-first para páginas.
-const CACHE = "gastos-v2";
+const CACHE = "gastos-v3";
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
@@ -23,7 +23,11 @@ self.addEventListener("fetch", (event) => {
   if (url.pathname.startsWith("/api/")) return;
 
   // Estáticos: cache-first
-  if (url.pathname.startsWith("/_next/static/") || url.pathname.startsWith("/icons/")) {
+  if (
+    url.pathname.startsWith("/_next/static/") ||
+    url.pathname.startsWith("/icons/") ||
+    url.pathname.startsWith("/ocr/")
+  ) {
     event.respondWith(
       caches.match(request).then(
         (cached) =>
