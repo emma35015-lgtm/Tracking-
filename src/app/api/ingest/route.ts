@@ -30,11 +30,44 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Token inválido" }, { status: 401 });
   }
 
-  let body: Record<string, unknown>;
+  // Aceptamos los datos por donde vengan, para que el Atajo del iPhone sea
+  // simple: query params en la URL (?amount=...), cuerpo JSON, o formulario.
+  const body: Record<string, unknown> = {};
+
+  // 1) Query params de la URL
+  const url = new URL(request.url);
+  url.searchParams.forEach((value, key) => {
+    body[key] = value;
+  });
+
+  // 2) Cuerpo de la petición (JSON o form-urlencoded), si trae algo
+  const contentType = request.headers.get("content-type") ?? "";
   try {
-    body = await request.json();
+    if (contentType.includes("application/json")) {
+      const json = await request.json();
+      if (json && typeof json === "object") Object.assign(body, json);
+    } else if (
+      contentType.includes("application/x-www-form-urlencoded") ||
+      contentType.includes("multipart/form-data")
+    ) {
+      const form = await request.formData();
+      form.forEach((value, key) => {
+        body[key] = value;
+      });
+    } else {
+      // Sin content-type claro: intenta JSON, pero no falles si no lo es.
+      const text = await request.text();
+      if (text.trim()) {
+        try {
+          const json = JSON.parse(text);
+          if (json && typeof json === "object") Object.assign(body, json);
+        } catch {
+          // ignora: probablemente los datos venían en la URL
+        }
+      }
+    }
   } catch {
-    return NextResponse.json({ ok: false, error: "JSON inválido" }, { status: 400 });
+    // Cuerpo ilegible: seguimos con lo que haya en la URL
   }
 
   const amount = parseAmount(body.amount);
