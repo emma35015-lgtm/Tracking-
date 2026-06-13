@@ -203,6 +203,25 @@ export default async function InicioPage() {
         </svg>
       </Link>
 
+      {/* Viajes / bote */}
+      <Link
+        href="/viajes"
+        className="mt-3 flex items-center gap-3.5 rounded-[22px] bg-white px-[17px] py-[15px]"
+      >
+        <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-mint text-xl">
+          🐮
+        </div>
+        <div className="flex-1">
+          <div className="text-base font-bold tracking-tight">Viajes</div>
+          <div className="text-xs font-medium text-muted">
+            El bote compartido: cuánto queda y quién debe
+          </div>
+        </div>
+        <svg width="9" height="15" viewBox="0 0 9 15" fill="none" stroke="#8A8167" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M1.5 1.5 7.5 7.5l-6 6" />
+        </svg>
+      </Link>
+
       {/* Esta semana */}
       <div className="mt-[26px] flex items-center justify-between">
         <h2 className="text-[19px] font-extrabold tracking-tight">Esta semana</h2>
