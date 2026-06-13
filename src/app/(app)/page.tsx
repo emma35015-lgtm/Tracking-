@@ -23,13 +23,14 @@ export default async function InicioPage() {
   const prevStart = new Date(Date.UTC(year, month - 2, 1));
 
   const supabase = await createClient();
-  const [{ data }, { data: profile }] = await Promise.all([
+  const [{ data }, { data: profile }, { data: token }] = await Promise.all([
     supabase
       .from("expenses")
       .select("id, amount, currency, merchant, occurred_at, source, categories(name, icon)")
       .gte("occurred_at", prevStart.toISOString())
       .order("occurred_at", { ascending: false }),
     supabase.from("profiles").select("display_name, default_currency").maybeSingle(),
+    supabase.from("api_tokens").select("id").maybeSingle(),
   ]);
 
   const all = (data ?? []) as unknown as ExpenseRow[];
@@ -127,6 +128,30 @@ export default async function InicioPage() {
           )}
         </div>
       </div>
+
+      {/* Conectar iPhone (solo si aún no hay token) */}
+      {!token && (
+        <Link
+          href="/ajustes/atajos"
+          className="mt-3 flex items-center gap-3.5 rounded-[22px] bg-ink px-[17px] py-[15px] text-white"
+        >
+          <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-coral">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="6" y="2.5" width="12" height="19" rx="3" />
+              <path d="M11 18.5h2" />
+            </svg>
+          </div>
+          <div className="flex-1">
+            <div className="text-base font-bold tracking-tight">Conecta tu iPhone</div>
+            <div className="text-xs font-medium text-white/70">
+              Que tus gastos se registren solos
+            </div>
+          </div>
+          <svg width="9" height="15" viewBox="0 0 9 15" fill="none" stroke="#ffffffaa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M1.5 1.5 7.5 7.5l-6 6" />
+          </svg>
+        </Link>
+      )}
 
       {/* Dividir cuenta */}
       <Link

@@ -3,6 +3,27 @@
 import { useEffect, useState } from "react";
 import { createToken } from "@/app/(app)/actions";
 
+// Atajos compartidos por iCloud (ya traen URL, método y JSON listos).
+// Cada quien pega SU token al instalarlos.
+const SHORTCUT_APPLEPAY = "https://www.icloud.com/shortcuts/becb6b8b6ee2482997ac01bc7603b3b9";
+const SHORTCUT_SIRI = "https://www.icloud.com/shortcuts/21c6f812dd934320a8f2bde51ef04a20";
+
+function AddShortcutButton({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex h-[52px] w-full items-center justify-center gap-2 rounded-[16px] bg-coral text-base font-extrabold text-white"
+    >
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 5v14 M5 12h14" />
+      </svg>
+      {children}
+    </a>
+  );
+}
+
 function CopyButton({ value, label }: { value: string; label?: string }) {
   const [copied, setCopied] = useState(false);
   return (
@@ -98,8 +119,6 @@ export function ShortcutSetup({ hasToken }: { hasToken: boolean }) {
     }
   }
 
-  const ingestUrl = `${origin || "https://TU-APP.vercel.app"}/api/ingest`;
-
   if (!token) {
     return (
       <div className="rounded-[24px] bg-white p-5">
@@ -126,151 +145,83 @@ export function ShortcutSetup({ hasToken }: { hasToken: boolean }) {
         <h2 className="mb-2 font-semibold">Tu token personal</h2>
         <p className="mb-3 text-sm text-muted-2">
           Cópialo ahora: al salir de esta página ya no podrás verlo (solo generar otro).
-          Lo usarás en el paso del encabezado, más abajo.
+          Es lo que pegarás en el encabezado de cada atajo.
         </p>
-        <CopyRow title="Token" value={token} />
+        <CopyRow title="Valor del encabezado (pégalo en Authorization)" value={`Bearer ${token}`} />
       </div>
 
+      {/* Cómo poner el token en un atajo instalado */}
+      <div className="rounded-[24px] bg-mint px-5 py-4 text-[13px] leading-relaxed text-mint-ink">
+        <p className="mb-1 font-extrabold">📌 Importante al añadir un atajo</p>
+        Cada atajo necesita TU token. Después de añadirlo: ábrelo, busca la acción{" "}
+        <strong>&quot;Obtener contenido de URL&quot;</strong> → en{" "}
+        <strong>Encabezados</strong>, en el valor de <code>Authorization</code>, deja{" "}
+        <code>Bearer </code> y pega tu token (cópialo arriba 👆). Así tus gastos llegan a
+        TU cuenta, no a la de quien compartió el atajo.
+      </div>
+
+      {/* Atajo de Siri */}
+      <div className="rounded-[24px] bg-white p-5">
+        <h2 className="mb-1 font-semibold">🎙️ Siri · Gastos en efectivo</h2>
+        <p className="mb-4 text-sm text-muted-2">
+          Para registrar efectivo por voz: &quot;Oye Siri, Registrar Gasto&quot;.
+        </p>
+        <AddShortcutButton href={SHORTCUT_SIRI}>Añadir atajo de Siri</AddShortcutButton>
+        <ol className="mt-4 flex flex-col gap-3">
+          <Step n={1}>
+            Toca el botón de arriba → en Atajos, baja y toca{" "}
+            <strong>&quot;Añadir atajo&quot;</strong>.
+          </Step>
+          <Step n={2}>
+            Ábrelo y <strong>pega tu token</strong> en el encabezado{" "}
+            <code>Authorization</code> (ver el aviso verde de arriba).
+          </Step>
+          <Step n={3}>
+            Pruébalo: di <strong>&quot;Oye Siri, Registrar Gasto&quot;</strong>, contesta
+            el monto y revisa tu lista de gastos. También puedes ponerlo como widget, en
+            la pantalla de bloqueo o en el botón de acción.
+          </Step>
+        </ol>
+      </div>
+
+      {/* Atajo de Apple Pay */}
       <div className="rounded-[24px] bg-white p-5">
         <h2 className="mb-1 font-semibold"> Pay · Registro automático</h2>
         <p className="mb-4 text-sm text-muted-2">
-          Al terminar, cada pago con Apple Pay se registrará solo, con monto y
-          comercio. Son ~3 minutos, una sola vez.
+          Cada pago con Apple Pay se registra solo, con monto y comercio.
         </p>
-
-        <ol className="flex flex-col gap-4">
+        <AddShortcutButton href={SHORTCUT_APPLEPAY}>Añadir atajo de Apple Pay</AddShortcutButton>
+        <ol className="mt-4 flex flex-col gap-3">
           <Step n={1}>
-            Abre la app <strong>Atajos</strong> de tu iPhone (ícono de dos cuadros de
-            colores; si no la tienes, está gratis en el App Store).
+            Toca el botón de arriba → <strong>&quot;Añadir atajo&quot;</strong>. Ábrelo y{" "}
+            <strong>pega tu token</strong> en el encabezado <code>Authorization</code>.
           </Step>
           <Step n={2}>
-            Abajo toca la pestaña <strong>Automatización</strong> y luego el{" "}
-            <strong>+</strong> de arriba a la derecha (Nueva automatización).
+            Ahora créale el disparador automático: abre <strong>Atajos</strong> → pestaña{" "}
+            <strong>Automatización</strong> → <strong>+</strong> → busca{" "}
+            <strong>Transacción</strong> (o <strong>Wallet</strong>).
           </Step>
           <Step n={3}>
-            En la lista busca <strong>Transacción</strong> 💳 — en algunos iPhone
-            aparece como <strong>Wallet</strong>. Es el mismo: elige el que te salga.
+            Elige tu(s) <strong>tarjeta(s)</strong>, marca{" "}
+            <strong>Ejecutar inmediatamente</strong> y toca <strong>Siguiente</strong>.
           </Step>
           <Step n={4}>
-            Configura el disparador: selecciona tu(s) <strong>tarjeta(s)</strong> de
-            Apple Pay, marca <strong>Ejecutar inmediatamente</strong> (¡importante!) y,
-            si aparece, apaga &quot;Notificar al ejecutar&quot;. Toca{" "}
-            <strong>Siguiente</strong>.
+            Añade la acción <strong>&quot;Ejecutar atajo&quot;</strong> y elige el atajo de
+            Apple Pay que acabas de añadir. <strong>Listo</strong>.
           </Step>
           <Step n={5}>
-            Toca <strong>Nueva automatización en blanco</strong> y añade la acción{" "}
-            <strong>&quot;Obtener contenido de URL&quot;</strong> (búscala por nombre).
-          </Step>
-          <Step n={6}>
-            En el campo de la URL, pega esto:
-            <div className="mt-2">
-              <CopyRow title="URL" value={ingestUrl} />
-            </div>
-          </Step>
-          <Step n={7}>
-            Toca la flechita <strong>&gt;</strong> junto a la URL para ver más opciones.
-            Toca <strong>Método</strong> (dice GET) y cámbialo a <strong>POST</strong>.
-            Al hacerlo aparecen las secciones &quot;Encabezados&quot; y &quot;Cuerpo de
-            la solicitud&quot;.
-          </Step>
-          <Step n={8}>
-            En <strong>Encabezados</strong> toca &quot;Añadir nuevo campo&quot; y llena
-            los dos espacios (la clave va sin dos puntos):
-            <div className="mt-2 flex flex-col gap-2">
-              <CopyRow title="Clave" value="Authorization" />
-              <CopyRow title="Texto (Bearer + espacio + tu token)" value={`Bearer ${token}`} />
-            </div>
-          </Step>
-          <Step n={9}>
-            En <strong>Cuerpo de la solicitud</strong> (déjalo en <strong>JSON</strong>)
-            vas a añadir <strong>3 campos</strong>. Cada vez que toques &quot;Añadir
-            nuevo campo&quot; te pregunta el tipo: elige <strong>Texto</strong> las 3
-            veces.
-            <div className="mt-2 flex flex-col gap-2 rounded-xl bg-input p-3 text-xs leading-relaxed">
-              <p>
-                <strong>Campo 1</strong> · Clave: <code>amount</code> · Texto: toca el
-                espacio del valor y, arriba del teclado, toca la variable azul{" "}
-                <strong>&quot;Entrada de atajo&quot;</strong>. Luego toca la burbujita
-                azul que se insertó y en el menú elige <strong>Cantidad</strong>.
-              </p>
-              <p>
-                <strong>Campo 2</strong> · Clave: <code>merchant</code> · Texto: igual
-                que el anterior, pero al tocar la burbuja elige{" "}
-                <strong>Comercio</strong> (o &quot;Nombre&quot; si no aparece).
-              </p>
-              <p>
-                <strong>Campo 3</strong> · Clave: <code>source</code> · Texto: escribe
-                con el teclado: <code>applepay</code>
-              </p>
-            </div>
-          </Step>
-          <Step n={10}>
-            Toca <strong>Listo</strong>. Para probar: compra cualquier cosa con Apple
-            Pay y abre esta app — el gasto debe aparecer solo en unos segundos, ya
-            categorizado. 🪄
+            Compra algo con Apple Pay: el gasto debe aparecer solo en unos segundos. 🪄
           </Step>
         </ol>
-
         <div className="mt-4 rounded-xl bg-sand p-3 text-xs leading-relaxed text-muted-2">
-          <p className="mb-1 font-semibold">Si no funciona, revisa esto (en orden):</p>
-          <p>· El Método debe decir POST, no GET.</p>
-          <p>
-            · El encabezado: clave <code>Authorization</code> (sin &quot;:&quot;) y el
-            valor con un espacio entre <code>Bearer</code> y el token.
-          </p>
-          <p>· En el disparador: tu tarjeta seleccionada y &quot;Ejecutar inmediatamente&quot;.</p>
+          <p className="mb-1 font-semibold">Si algo falla:</p>
+          <p>· Revisa que el token del encabezado sea el tuyo (sin espacios de más).</p>
+          <p>· En el disparador: tu tarjeta y &quot;Ejecutar inmediatamente&quot;.</p>
           <p>
             · A veces el banco tarda en avisar y un pago no dispara la automatización —
             eso es del banco, no tuyo. Agrégalo con Siri o con el botón ➕.
           </p>
         </div>
-      </div>
-
-      <div className="rounded-[24px] bg-white p-5">
-        <h2 className="mb-1 font-semibold">🎙️ Siri · Gastos en efectivo</h2>
-        <p className="mb-4 text-sm text-muted-2">
-          Para registrar efectivo sin abrir la app: &quot;Oye Siri, registrar gasto&quot;.
-        </p>
-        <ol className="flex flex-col gap-4">
-          <Step n={1}>
-            En Atajos, ve a la pestaña <strong>Atajos</strong> (la primera) y toca{" "}
-            <strong>+</strong> para crear uno nuevo.
-          </Step>
-          <Step n={2}>
-            Toca el nombre de arriba y ponle <strong>Registrar gasto</strong> — con ese
-            nombre lo llamarás con Siri.
-          </Step>
-          <Step n={3}>
-            Añade la acción <strong>&quot;Solicitar entrada&quot;</strong>: cambia el
-            tipo a <strong>Número</strong> y en la pregunta escribe{" "}
-            <em>¿Cuánto gastaste?</em>
-          </Step>
-          <Step n={4}>
-            Añade la acción <strong>&quot;Obtener contenido de URL&quot;</strong> y
-            configúrala igual que en la sección de Apple Pay: misma URL, Método{" "}
-            <strong>POST</strong> y el mismo encabezado <code>Authorization</code>.
-          </Step>
-          <Step n={5}>
-            En el cuerpo JSON añade 2 campos tipo <strong>Texto</strong>:
-            <div className="mt-2 rounded-xl bg-input p-3 text-xs leading-relaxed">
-              <p>
-                <strong>Campo 1</strong> · Clave: <code>amount</code> · Texto: la
-                variable <strong>&quot;Entrada proporcionada&quot;</strong> (sale arriba
-                del teclado).
-              </p>
-              <p>
-                <strong>Campo 2</strong> · Clave: <code>source</code> · Texto:{" "}
-                <code>siri</code>
-              </p>
-            </div>
-          </Step>
-          <Step n={6}>
-            Dale <strong>Listo</strong> y pruébalo: di{" "}
-            <strong>&quot;Oye Siri, registrar gasto&quot;</strong>, contesta el monto y
-            revisa tu lista de gastos. También puedes poner el atajo como widget, en la
-            pantalla de bloqueo o en el botón de acción.
-          </Step>
-        </ol>
       </div>
 
       <div className="rounded-[24px] bg-white p-5">
