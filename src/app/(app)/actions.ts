@@ -116,11 +116,25 @@ export async function updateProfile(formData: FormData) {
   const { supabase, user } = await requireUser();
   const displayName = String(formData.get("display_name") ?? "").trim() || null;
   const currency = String(formData.get("default_currency") ?? "MXN").trim().toUpperCase();
-  await supabase
+
+  // El presupuesto es opcional; vacío = sin presupuesto.
+  const budgetRaw = parseAmount(formData.get("monthly_budget"));
+  const monthlyBudget =
+    String(formData.get("monthly_budget") ?? "").trim() === "" ? null : budgetRaw;
+
+  // Intentamos guardar con presupuesto. Si la columna aún no existe en la BD
+  // (migración 0002 sin correr), reintentamos sin ella para no romper el guardado.
+  const { error } = await supabase
     .from("profiles")
-    .update({ display_name: displayName, default_currency: currency })
+    .update({ display_name: displayName, default_currency: currency, monthly_budget: monthlyBudget })
     .eq("id", user.id);
-  revalidatePath("/ajustes");
+  if (error) {
+    await supabase
+      .from("profiles")
+      .update({ display_name: displayName, default_currency: currency })
+      .eq("id", user.id);
+  }
+  revalidatePath("/", "layout");
 }
 
 export async function addCategory(formData: FormData) {

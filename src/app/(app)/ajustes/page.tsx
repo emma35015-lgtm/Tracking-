@@ -36,11 +36,16 @@ export default async function AjustesPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [{ data: profile }, { data: categories }, { data: token }] = await Promise.all([
-    supabase.from("profiles").select("display_name, default_currency").maybeSingle(),
-    supabase.from("categories").select("id, name, icon").order("name"),
-    supabase.from("api_tokens").select("label, created_at, last_used_at").maybeSingle(),
-  ]);
+  const [{ data: profile }, { data: categories }, { data: token }, { data: budgetRow }] =
+    await Promise.all([
+      supabase.from("profiles").select("display_name, default_currency").maybeSingle(),
+      supabase.from("categories").select("id, name, icon").order("name"),
+      supabase.from("api_tokens").select("label, created_at, last_used_at").maybeSingle(),
+      // Aparte: si la columna no existe (migración pendiente), no rompe el resto.
+      supabase.from("profiles").select("monthly_budget").maybeSingle(),
+    ]);
+
+  const monthlyBudget = budgetRow?.monthly_budget ? Number(budgetRow.monthly_budget) : null;
 
   return (
     <div className="screen-in">
@@ -68,6 +73,16 @@ export default async function AjustesPage() {
             </option>
           ))}
         </select>
+        <div className="mb-2 mt-4 text-[13px] font-bold text-muted-2">
+          Presupuesto mensual <span className="font-medium text-muted">(opcional)</span>
+        </div>
+        <input
+          name="monthly_budget"
+          inputMode="decimal"
+          defaultValue={monthlyBudget ? String(monthlyBudget) : ""}
+          placeholder="Ej. 8000 — déjalo vacío para quitarlo"
+          className={inputClass}
+        />
         <button
           type="submit"
           className="mt-4 h-[50px] w-full rounded-[15px] bg-coral text-base font-extrabold text-white"
