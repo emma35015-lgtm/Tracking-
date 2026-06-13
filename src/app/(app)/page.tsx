@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { formatMonth, formatMoneyShort, dayKey } from "@/lib/format";
 import { CategoryIcon, categoryColor } from "@/lib/category-style";
 import { BudgetRing } from "@/components/budget-ring";
+import { AvatarEgg } from "@/components/avatar-egg";
 
 type ExpenseRow = {
   id: string;
@@ -86,9 +87,7 @@ export default async function InicioPage() {
       {/* Header */}
       <div className="mt-1.5 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-[46px] w-[46px] items-center justify-center rounded-full bg-gradient-to-br from-[#E89B6C] to-[#D9694A] text-lg font-extrabold text-white">
-            {initial}
-          </div>
+          <AvatarEgg initial={initial} />
           <div>
             <div className="text-[13px] font-medium text-muted">
               {name ? `Buenas, ${name}` : "Buenas"}
