@@ -213,13 +213,32 @@ export function ShortcutSetup({ hasToken }: { hasToken: boolean }) {
             Compra algo con Apple Pay: el gasto debe aparecer solo en unos segundos. 🪄
           </Step>
         </ol>
-        <div className="mt-4 rounded-xl bg-sand p-3 text-xs leading-relaxed text-muted-2">
+
+        <div className="mt-4 rounded-[18px] bg-mint px-4 py-3 text-xs leading-relaxed text-mint-ink">
+          <p className="mb-1 font-extrabold">🛡️ Para que nunca pierdas un gasto (recomendado)</p>
+          Abre el atajo y, <strong>después</strong> de &quot;Obtener contenido de URL&quot;, añade
+          estas dos acciones:
+          <p className="mt-2">
+            <strong>1. Mostrar notificación</strong> con el texto de la respuesta (la variable{" "}
+            <strong>&quot;Contenido de la URL&quot;</strong>). Así, tras cada compra te llega un
+            aviso: &quot;Gasto registrado: $250…&quot;. Si NO te llega aviso, sabrás que no se
+            guardó (por señal) y lo agregas a mano.
+          </p>
+          <p className="mt-1.5">
+            <strong>2. Reintento (opcional):</strong> envuelve la acción de la URL en un{" "}
+            <strong>&quot;Repetir 3 veces&quot;</strong>. Como el servidor evita duplicados, reintentar
+            es seguro: si un intento falla por señal, el siguiente lo logra sin registrar dos veces.
+          </p>
+        </div>
+
+        <div className="mt-3 rounded-xl bg-sand p-3 text-xs leading-relaxed text-muted-2">
           <p className="mb-1 font-semibold">Si algo falla:</p>
           <p>· Revisa que el token del encabezado sea el tuyo (sin espacios de más).</p>
+          <p>· Borra cualquier encabezado vacío (renglón &quot;Clave/Texto&quot; sin llenar).</p>
           <p>· En el disparador: tu tarjeta y &quot;Ejecutar inmediatamente&quot;.</p>
           <p>
-            · A veces el banco tarda en avisar y un pago no dispara la automatización —
-            eso es del banco, no tuyo. Agrégalo con Siri o con el botón ➕.
+            · Si no hay internet al pagar, ese gasto no se manda (es de la red, no del atajo).
+            Con el aviso de arriba te enteras y lo agregas con Siri o el botón ➕.
           </p>
         </div>
       </div>

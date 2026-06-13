@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { formatMonth, formatMoneyShort, dayKey } from "@/lib/format";
 import { CategoryIcon, categoryColor } from "@/lib/category-style";
+import { BudgetRing } from "@/components/budget-ring";
 
 type ExpenseRow = {
   id: string;
@@ -23,7 +24,7 @@ export default async function InicioPage() {
   const prevStart = new Date(Date.UTC(year, month - 2, 1));
 
   const supabase = await createClient();
-  const [{ data }, { data: profile }, { data: token }] = await Promise.all([
+  const [{ data }, { data: profile }, { data: token }, { data: budgetRow }] = await Promise.all([
     supabase
       .from("expenses")
       .select("id, amount, currency, merchant, occurred_at, source, categories(name, icon)")
@@ -31,7 +32,11 @@ export default async function InicioPage() {
       .order("occurred_at", { ascending: false }),
     supabase.from("profiles").select("display_name, default_currency").maybeSingle(),
     supabase.from("api_tokens").select("id").maybeSingle(),
+    // En consulta aparte: si la columna no existe (migración pendiente), no rompe lo demás.
+    supabase.from("profiles").select("monthly_budget").maybeSingle(),
   ]);
+
+  const monthlyBudget = budgetRow?.monthly_budget ? Number(budgetRow.monthly_budget) : null;
 
   const all = (data ?? []) as unknown as ExpenseRow[];
   const expenses = all.filter((e) => e.occurred_at >= start.toISOString());
@@ -128,6 +133,31 @@ export default async function InicioPage() {
           )}
         </div>
       </div>
+
+      {/* Presupuesto */}
+      {monthlyBudget && monthlyBudget > 0 ? (
+        <div className="mt-3">
+          <BudgetRing spent={total} budget={monthlyBudget} currency={currency} />
+        </div>
+      ) : (
+        <Link
+          href="/ajustes"
+          className="mt-3 flex items-center gap-3.5 rounded-[22px] bg-white px-[17px] py-[15px]"
+        >
+          <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-sand text-xl">
+            🎯
+          </div>
+          <div className="flex-1">
+            <div className="text-base font-bold tracking-tight">Ponte un presupuesto</div>
+            <div className="text-xs font-medium text-muted">
+              Y mira cuánto te queda con un anillo de progreso
+            </div>
+          </div>
+          <svg width="9" height="15" viewBox="0 0 9 15" fill="none" stroke="#8A8167" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M1.5 1.5 7.5 7.5l-6 6" />
+          </svg>
+        </Link>
+      )}
 
       {/* Conectar iPhone (solo si aún no hay token) */}
       {!token && (
