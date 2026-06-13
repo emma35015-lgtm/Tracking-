@@ -92,6 +92,26 @@ PUNTOS GANADOS 15.00
 `);
 assert(t5.items.length === 1, `nada después del TOTAL (salieron ${t5.items.length})`);
 
+// ── Ticket 6: columnas separadas (lector de Apple / Live Text) ──
+console.log("\nTicket en columnas (Live Text):");
+const t6 = parseReceipt(`
+TAQUERIA LA ESQUINA
+2 Cerveza Victoria
+Tacos pastor
+Guacamole
+$180.00
+$135.00
+$95.00
+TOTAL
+$410.00
+`);
+assert(t6.items.length === 3, `3 items emparejados (salieron ${t6.items.length})`);
+assert(t6.items[0].qty === 2 && t6.items[0].totalCents === 18000, "2 cervezas ↔ $180.00");
+assert(t6.items[1].name === "Tacos pastor" && t6.items[1].totalCents === 13500, "tacos ↔ $135.00");
+assert(t6.items[2].totalCents === 9500, "guacamole ↔ $95.00");
+assert(t6.totalCents === 41000, `total $410 detectado (salió ${t6.totalCents})`);
+assert(t6.merchant === "Taqueria la Esquina", `comercio: ${t6.merchant}`);
+
 // ── Matemática de reparto ────────────────────────────────────────
 console.log("\nSplit math:");
 const beer = { id: "a", name: "Cerveza", qty: 4, totalCents: 24000, myUnits: 1, shared: false, sharedBy: 2 };
