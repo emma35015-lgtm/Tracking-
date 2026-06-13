@@ -133,6 +133,25 @@ export function SplitFlow({
     setRows((rs) => rs.map((r) => (r.id === id ? { ...r, ...patch } : r)));
   }
 
+  // Convierte texto de ticket (del OCR o pegado) en filas editables
+  function seedFromText(text: string): number {
+    const parsed = parseReceipt(text);
+    if (parsed.merchant && !merchant) setMerchant(parsed.merchant);
+    setTicketTotalCents(parsed.totalCents ?? parsed.subtotalCents);
+    const parsedRows = parsed.items.map((it) =>
+      newRow(
+        {
+          name: it.name,
+          qtyText: String(it.qty),
+          priceText: (it.totalCents / 100).toFixed(2),
+        },
+        defaultPeople
+      )
+    );
+    setRows((prev) => [...prev, ...parsedRows]);
+    return parsedRows.length;
+  }
+
   async function handleFile(file: File | undefined) {
     if (!file) return;
     cancelledRef.current = false;
@@ -143,29 +162,40 @@ export function SplitFlow({
       const { ocrReceipt } = await import("@/lib/ocr");
       const text = await ocrReceipt(file, (p) => setOcrProgress(p));
       if (cancelledRef.current) return;
-      const parsed = parseReceipt(text);
-      if (parsed.merchant && !merchant) setMerchant(parsed.merchant);
-      setTicketTotalCents(parsed.totalCents ?? parsed.subtotalCents);
-      const parsedRows = parsed.items.map((it) =>
-        newRow(
-          {
-            name: it.name,
-            qtyText: String(it.qty),
-            priceText: (it.totalCents / 100).toFixed(2),
-          },
-          defaultPeople
-        )
-      );
-      if (parsedRows.length === 0) {
-        setOcrError("No pude leer artículos en la foto. Intenta otra foto con más luz, o captúralos a mano aquí abajo.");
+      const count = seedFromText(text);
+      if (count === 0) {
+        setOcrError("No pude leer artículos en la foto. Prueba la opción de pegar el texto (lee mucho mejor), o captúralos a mano.");
       }
-      setRows((prev) => [...prev, ...parsedRows]);
       setStep("revisar");
     } catch {
       if (cancelledRef.current) return;
-      setOcrError("Algo falló leyendo la foto. Puedes intentar de nuevo o capturar a mano.");
+      setOcrError("Algo falló leyendo la foto. Prueba la opción de pegar el texto, o captura a mano.");
       setStep("revisar");
     }
+  }
+
+  // Texto copiado con el lector de Apple (Fotos → seleccionar texto → Copiar):
+  // mucho más preciso que el OCR del navegador en tickets térmicos.
+  async function handlePaste() {
+    setOcrError(null);
+    let text = "";
+    try {
+      text = await navigator.clipboard.readText();
+    } catch {
+      setOcrError("No pude leer lo copiado. Toca \"Permitir pegar\" cuando tu iPhone lo pregunte, e intenta de nuevo.");
+      setStep("revisar");
+      return;
+    }
+    if (!text.trim()) {
+      setOcrError("No hay nada copiado. Ve a Fotos, mantén presionado el texto del ticket, Seleccionar todo → Copiar, y regresa aquí.");
+      setStep("revisar");
+      return;
+    }
+    const count = seedFromText(text);
+    if (count === 0) {
+      setOcrError("No encontré productos con precio en el texto copiado. Revisa que copiaras los renglones del ticket, o captúralos a mano.");
+    }
+    setStep("revisar");
   }
 
   // ─────────────────────── CAPTURAR ───────────────────────
@@ -214,6 +244,37 @@ export function SplitFlow({
         >
           O elegir una foto de la galería
         </button>
+
+        <button
+          type="button"
+          onClick={handlePaste}
+          className="flex items-center gap-4 rounded-[26px] bg-white p-5 text-left"
+        >
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[18px] bg-ink">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="6" y="4" width="12" height="17" rx="2.5" />
+              <path d="M9 4V3a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 3v1 M9.5 10h5 M9.5 14h5" />
+            </svg>
+          </div>
+          <div>
+            <div className="text-lg font-extrabold tracking-tight">
+              Pegar texto del ticket{" "}
+              <span className="rounded-full bg-mint px-2 py-0.5 text-[10px] font-bold text-mint-ink align-middle">
+                MÁS PRECISO
+              </span>
+            </div>
+            <div className="text-[13px] font-medium text-muted">
+              Usa el lector de Apple: lee mejor los tickets
+            </div>
+          </div>
+        </button>
+
+        <div className="rounded-[18px] bg-sand px-4 py-3 text-xs font-medium leading-relaxed text-muted-2">
+          💡 <strong>Cómo copiar el texto:</strong> tómale foto al ticket con la Cámara
+          normal → ábrela en <strong>Fotos</strong> → mantén presionado sobre el texto →{" "}
+          <strong>Seleccionar todo</strong> → <strong>Copiar</strong> → regresa aquí y toca
+          &quot;Pegar texto del ticket&quot;.
+        </div>
 
         <button
           type="button"

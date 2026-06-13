@@ -59,6 +59,68 @@ const NOT_MERCHANT_RE =
 
 const MAX_ITEM_CENTS = 10_000_000; // $100,000 — arriba de eso es basura de OCR
 
+// Línea que es SOLO un precio ("$180.00") — típico del lector de Apple,
+// que a veces separa la columna de nombres de la de precios.
+const PRICE_ONLY_RE = /^[$]?\s*\d{1,3}(?:[.,]\d{3})*[.,]\d{2}\s*$/;
+
+// Empareja nombres y precios cuando el OCR los devolvió en bloques separados:
+// los nombres justo antes del bloque de precios, en el mismo orden.
+function pairColumns(lines: string[]): { items: ParsedItem[]; totalCents: number | null } {
+  const prices: { index: number; cents: number }[] = [];
+  const nameCandidates: { index: number; name: string }[] = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const upper = stripAccents(line).toUpperCase();
+    if (SUBTOTAL_RE.test(upper) || TIP_RE.test(upper) || SKIP_RE.test(upper)) continue;
+    if (TOTAL_RE.test(upper)) continue;
+    if (PRICE_ONLY_RE.test(line)) {
+      const cents = toCents(line);
+      if (cents !== null && cents > 0 && cents <= MAX_ITEM_CENTS) prices.push({ index: i, cents });
+      continue;
+    }
+    if (PRICE_RE.test(line)) continue; // líneas mixtas: ya las atendió el paso normal
+    const letters = (line.match(/[a-zA-ZáéíóúñÁÉÍÓÚÑ]/g) ?? []).length;
+    if (letters >= 3 && !NOT_MERCHANT_RE.test(upper)) {
+      nameCandidates.push({ index: i, name: line });
+    }
+  }
+
+  if (prices.length < 2) return { items: [], totalCents: null };
+
+  let priceList = prices;
+  let totalCents: number | null = null;
+  let names = nameCandidates.filter((n) => n.index < priceList[0].index);
+
+  // El último precio es el TOTAL si los demás suman exactamente eso,
+  // o si sobra exactamente un precio respecto a los nombres.
+  const sumButLast = priceList.slice(0, -1).reduce((s, p) => s + p.cents, 0);
+  if (priceList.length >= 3 && sumButLast === priceList[priceList.length - 1].cents) {
+    totalCents = priceList[priceList.length - 1].cents;
+    priceList = priceList.slice(0, -1);
+  } else if (names.length + 1 === priceList.length) {
+    totalCents = priceList[priceList.length - 1].cents;
+    priceList = priceList.slice(0, -1);
+  }
+
+  // Los nombres relevantes son los ÚLTIMOS N antes del bloque de precios
+  // (lo anterior suele ser encabezado: nombre del lugar, dirección, mesa…)
+  if (names.length > priceList.length) names = names.slice(names.length - priceList.length);
+  if (names.length === 0 || names.length !== priceList.length) return { items: [], totalCents };
+
+  const items = names.map((n, idx) => {
+    let qty = 1;
+    let body = n.name;
+    const leadQty = body.match(/^(\d{1,2})\s+(.+)$/);
+    if (leadQty) {
+      qty = Math.max(1, parseInt(leadQty[1], 10));
+      body = leadQty[2];
+    }
+    return { qty, name: body.trim(), totalCents: priceList[idx].cents };
+  });
+  return { items, totalCents };
+}
+
 export function parseReceipt(rawText: string): ParsedReceipt {
   const lines = rawText
     .split("\n")
@@ -128,6 +190,16 @@ export function parseReceipt(rawText: string): ParsedReceipt {
 
     if (firstItemIndex === -1) firstItemIndex = i;
     result.items.push({ qty, name, totalCents });
+  }
+
+  // Si el paso por líneas casi no encontró items, intenta el modo columnas
+  // (nombres y precios en bloques separados, típico del lector de Apple)
+  if (result.items.length <= 1) {
+    const paired = pairColumns(lines);
+    if (paired.items.length > result.items.length) {
+      result.items = paired.items;
+      if (result.totalCents === null) result.totalCents = paired.totalCents;
+    }
   }
 
   // Comercio: primera línea "limpia" antes del primer item
