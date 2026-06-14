@@ -42,9 +42,26 @@ export default async function GastosPage({
     byDay.set(key, list);
   }
 
+  const mesParam = `${year}-${String(month).padStart(2, "0")}`;
+
   return (
     <div className="screen-in">
       <MonthHeader base="/gastos" subtitle="Movimientos" year={year} month={month} prev={prev} next={next} />
+
+      {expenses.length > 0 && (
+        <div className="mt-3 flex justify-end">
+          <a
+            href={`/api/export?mes=${mesParam}`}
+            download
+            className="flex items-center gap-1.5 rounded-full bg-white px-3.5 py-2 text-xs font-bold text-ink"
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 3v13M7 11l5 5 5-5M4 20h16" />
+            </svg>
+            Exportar CSV
+          </a>
+        </div>
+      )}
 
       {expenses.length === 0 ? (
         <div className="mt-6 rounded-[22px] bg-white p-6 text-center text-sm font-medium text-muted">
