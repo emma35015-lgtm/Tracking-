@@ -73,6 +73,7 @@ export function ShortcutSetup({ hasToken }: { hasToken: boolean }) {
   const [testResult, setTestResult] = useState<string | null>(null);
   const [confirmReplace, setConfirmReplace] = useState(false);
   const [tokenInvalid, setTokenInvalid] = useState(false);
+  const [showFromScratch, setShowFromScratch] = useState(false);
 
   useEffect(() => {
     setOrigin(window.location.origin);
@@ -290,6 +291,82 @@ export function ShortcutSetup({ hasToken }: { hasToken: boolean }) {
             Con el aviso de arriba te enteras y lo agregas con Siri o el botón ➕.
           </p>
         </div>
+
+        {/* Crear desde cero */}
+        <button
+          type="button"
+          onClick={() => setShowFromScratch((v) => !v)}
+          className="mt-4 w-full rounded-[14px] bg-sand py-2.5 text-xs font-bold text-muted-2"
+        >
+          {showFromScratch ? "Ocultar instrucciones" : "¿El link no funciona? Créalo desde cero"}
+        </button>
+
+        {showFromScratch && (
+          <div className="mt-3 flex flex-col gap-3 rounded-[18px] border-[1.6px] border-input-border p-4 text-xs leading-relaxed text-ink">
+            <p className="font-extrabold text-sm">Crear el atajo desde cero</p>
+
+            <p className="font-semibold text-muted-2">Parte 1 · El atajo (Mis Atajos)</p>
+            <ol className="flex flex-col gap-2.5">
+              <li className="flex gap-2">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-ink text-[10px] font-bold text-white">1</span>
+                <span>Abre <strong>Atajos</strong> → pestaña <strong>Mis Atajos</strong> → toca <strong>+</strong> para crear uno nuevo. Ponle nombre: <em>Apple Pay Gastos</em>.</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-ink text-[10px] font-bold text-white">2</span>
+                <span>Busca y añade: <strong>&quot;Recibir Transacción de Wallet como entrada&quot;</strong>. Esta acción captura automáticamente el monto y el comercio de tu pago.</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-ink text-[10px] font-bold text-white">3</span>
+                <span>Busca y añade: <strong>&quot;Repetir&quot;</strong>. Cambia el número a <strong>3</strong>.</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-ink text-[10px] font-bold text-white">4</span>
+                <span>
+                  Dentro del bloque Repetir añade <strong>&quot;Obtener contenido de URL&quot;</strong> y configúralo así:
+                  <br /><br />
+                  <strong>URL:</strong> <code className="break-all">{origin}/api/ingest</code><br />
+                  <strong>Método:</strong> POST<br />
+                  <strong>Encabezados →</strong> Clave: <code>Authorization</code> · Valor: <code>Bearer </code> + tu token<br />
+                  <strong>Cuerpo → JSON:</strong>
+                  <br />· <code>amount</code> → variable mágica <em>&quot;Monto de la transacción&quot;</em>
+                  <br />· <code>merchant</code> → variable mágica <em>&quot;Nombre del comerciante&quot;</em>
+                  <br />· <code>source</code> → texto literal <code>apple-pay</code>
+                  <br />· <code>idempotency_key</code> → variable mágica <em>&quot;Identificador de transacción&quot;</em>
+                </span>
+              </li>
+              <li className="flex gap-2">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-ink text-[10px] font-bold text-white">5</span>
+                <span>
+                  Todavía dentro del bloque Repetir, añade <strong>&quot;Mostrar notificación&quot;</strong> y pon como mensaje la variable <em>&quot;Contenido de la URL&quot;</em> (la respuesta del servidor).
+                </span>
+              </li>
+              <li className="flex gap-2">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-ink text-[10px] font-bold text-white">6</span>
+                <span>Guarda el atajo con el ícono ✓ arriba a la derecha.</span>
+              </li>
+            </ol>
+
+            <p className="mt-1 font-semibold text-muted-2">Parte 2 · La automatización (se dispara con Apple Pay)</p>
+            <ol className="flex flex-col gap-2.5">
+              <li className="flex gap-2">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-coral text-[10px] font-bold text-white">1</span>
+                <span>En <strong>Atajos</strong> → pestaña <strong>Automatización</strong> → <strong>+</strong> → busca <strong>Transacción</strong> (o <strong>Wallet</strong>).</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-coral text-[10px] font-bold text-white">2</span>
+                <span>Elige tu tarjeta, activa <strong>&quot;Ejecutar inmediatamente&quot;</strong> → Siguiente.</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-coral text-[10px] font-bold text-white">3</span>
+                <span>Añade la acción <strong>&quot;Ejecutar atajo&quot;</strong> y selecciona <em>Apple Pay Gastos</em> (el que creaste en la Parte 1). Toca <strong>Listo</strong>.</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-coral text-[10px] font-bold text-white">4</span>
+                <span>Haz un pago con Apple Pay y revisa que llegue la notificación con el gasto registrado.</span>
+              </li>
+            </ol>
+          </div>
+        )}
       </div>
 
       <div className="rounded-[24px] bg-white p-5">
