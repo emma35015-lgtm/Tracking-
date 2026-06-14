@@ -64,8 +64,12 @@ function Step({ n, children }: { n: number; children: React.ReactNode }) {
   );
 }
 
+// Clave en localStorage: el token se guarda en ESTE dispositivo para que siga
+// visible aunque cierres y reabras la app. En la BD solo queda el hash, así que
+// si abres la app en otro iPhone tendrás que generar uno nuevo.
+const TOKEN_KEY = "gastos_token";
+
 export function ShortcutSetup({ hasToken }: { hasToken: boolean }) {
-  // El token vive solo en memoria/sessionStorage: en la BD queda únicamente el hash.
   const [token, setToken] = useState<string | null>(null);
   const [origin, setOrigin] = useState("");
   const [loading, setLoading] = useState(false);
@@ -74,10 +78,17 @@ export function ShortcutSetup({ hasToken }: { hasToken: boolean }) {
   const [confirmReplace, setConfirmReplace] = useState(false);
   const [tokenInvalid, setTokenInvalid] = useState(false);
   const [showFromScratch, setShowFromScratch] = useState(false);
+  const [revealed, setRevealed] = useState(false);
 
   useEffect(() => {
     setOrigin(window.location.origin);
-    const saved = sessionStorage.getItem("gastos_token");
+    // Migra el token de quien lo tenía en sessionStorage (versiones previas).
+    const legacy = sessionStorage.getItem(TOKEN_KEY);
+    if (legacy) {
+      localStorage.setItem(TOKEN_KEY, legacy);
+      sessionStorage.removeItem(TOKEN_KEY);
+    }
+    const saved = localStorage.getItem(TOKEN_KEY);
     if (saved) setToken(saved);
   }, []);
 
@@ -90,7 +101,7 @@ export function ShortcutSetup({ hasToken }: { hasToken: boolean }) {
       setError(result.error ?? "Algo salió mal.");
       return;
     }
-    sessionStorage.setItem("gastos_token", result.token);
+    localStorage.setItem(TOKEN_KEY, result.token);
     setToken(result.token);
     setConfirmReplace(false);
     setTokenInvalid(false);
@@ -129,64 +140,109 @@ export function ShortcutSetup({ hasToken }: { hasToken: boolean }) {
     }
   }
 
-  if (!token) {
-    return (
-      <div className="rounded-[24px] bg-white p-5">
-        <h2 className="mb-2 font-semibold">Paso 1 · Genera tu token personal</h2>
-        <p className="mb-3 text-sm text-muted-2">
-          Es la llave con la que tu iPhone se identifica con la app. Se muestra una
-          sola vez{hasToken ? ". Ya tienes uno activo; generar otro lo reemplaza." : "."}
-        </p>
-
-        {hasToken && confirmReplace && (
-          <div className="mb-3 rounded-[16px] bg-sand px-4 py-3 text-[13px] font-medium leading-relaxed text-muted-2">
-            ⚠️ Ya tienes un token activo. Si generas uno nuevo, el atajo que ya
-            configuraste en tu iPhone <strong>dejará de funcionar</strong> hasta que
-            abras el atajo y pegues el token nuevo en el encabezado <code>Authorization</code>.
+  return (
+    <div className="flex flex-col gap-5">
+      {/* Token: si ya lo tienes en este dispositivo se queda visible; si no, lo generas. */}
+      {token ? (
+        <div className="rounded-2xl border-2 border-brand bg-white p-4 shadow-sm">
+          <h2 className="mb-2 font-semibold">Tu token personal</h2>
+          <p className="mb-3 text-sm text-muted-2">
+            Guardado en este iPhone, así que sigue aquí cuando vuelvas. Es lo que pegas
+            en el encabezado <code>Authorization</code> de cada atajo.
+          </p>
+          <div className="rounded-xl bg-input p-3">
+            <p className="mb-1 text-xs font-semibold text-muted">Valor del encabezado (pégalo en Authorization)</p>
+            <div className="flex items-center gap-2">
+              <code className="min-w-0 flex-1 break-all text-xs">
+                {revealed ? `Bearer ${token}` : `Bearer ${"•".repeat(Math.min(token.length, 24))}`}
+              </code>
+              <button
+                type="button"
+                onClick={() => setRevealed((v) => !v)}
+                className="shrink-0 rounded-lg bg-sand px-3 py-1.5 text-xs font-semibold text-muted-2"
+              >
+                {revealed ? "Ocultar" : "Mostrar"}
+              </button>
+              <CopyButton value={`Bearer ${token}`} />
+            </div>
           </div>
-        )}
 
-        {hasToken && !confirmReplace ? (
-          <button
-            onClick={() => setConfirmReplace(true)}
-            className="w-full rounded-xl bg-brand px-4 py-3 font-semibold text-white"
-          >
-            Generar token nuevo
-          </button>
-        ) : (
-          <>
-            <button
-              onClick={handleCreate}
-              disabled={loading}
-              className="w-full rounded-xl bg-brand px-4 py-3 font-semibold text-white disabled:opacity-50"
-            >
-              {loading ? "Generando…" : hasToken ? "Sí, reemplazar mi token" : "Generar mi token"}
-            </button>
-            {hasToken && (
+          {confirmReplace ? (
+            <div className="mt-3">
+              <div className="mb-2 rounded-[16px] bg-sand px-4 py-3 text-[13px] font-medium leading-relaxed text-muted-2">
+                ⚠️ Si generas uno nuevo, los atajos que ya configuraste{" "}
+                <strong>dejarán de funcionar</strong> hasta que pegues el token nuevo en cada uno.
+              </div>
+              <button
+                onClick={handleCreate}
+                disabled={loading}
+                className="w-full rounded-xl bg-brand px-4 py-2.5 font-semibold text-white disabled:opacity-50"
+              >
+                {loading ? "Generando…" : "Sí, reemplazar mi token"}
+              </button>
               <button
                 onClick={() => setConfirmReplace(false)}
                 className="mt-2 w-full rounded-xl px-4 py-2 text-sm font-semibold text-muted-2"
               >
                 Cancelar
               </button>
-            )}
-          </>
-        )}
-        {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
-      </div>
-    );
-  }
+            </div>
+          ) : (
+            <button
+              onClick={() => setConfirmReplace(true)}
+              className="mt-3 text-sm font-semibold text-coral-link"
+            >
+              Generar uno nuevo
+            </button>
+          )}
+          {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+        </div>
+      ) : (
+        <div className="rounded-[24px] bg-white p-5">
+          <h2 className="mb-2 font-semibold">Paso 1 · Genera tu token personal</h2>
+          <p className="mb-3 text-sm text-muted-2">
+            Es la llave con la que tu iPhone se identifica con la app. Se guarda en este
+            dispositivo para que siga visible cuando vuelvas
+            {hasToken ? "; ya tienes uno activo, generar otro lo reemplaza." : "."}
+          </p>
 
-  return (
-    <div className="flex flex-col gap-5">
-      <div className="rounded-2xl border-2 border-brand bg-white p-4 shadow-sm">
-        <h2 className="mb-2 font-semibold">Tu token personal</h2>
-        <p className="mb-3 text-sm text-muted-2">
-          Cópialo ahora: al salir de esta página ya no podrás verlo (solo generar otro).
-          Es lo que pegarás en el encabezado de cada atajo.
-        </p>
-        <CopyRow title="Valor del encabezado (pégalo en Authorization)" value={`Bearer ${token}`} />
-      </div>
+          {hasToken && confirmReplace && (
+            <div className="mb-3 rounded-[16px] bg-sand px-4 py-3 text-[13px] font-medium leading-relaxed text-muted-2">
+              ⚠️ Ya tienes un token activo. Si generas uno nuevo, el atajo que ya
+              configuraste en tu iPhone <strong>dejará de funcionar</strong> hasta que
+              abras el atajo y pegues el token nuevo en el encabezado <code>Authorization</code>.
+            </div>
+          )}
+
+          {hasToken && !confirmReplace ? (
+            <button
+              onClick={() => setConfirmReplace(true)}
+              className="w-full rounded-xl bg-brand px-4 py-3 font-semibold text-white"
+            >
+              Generar token nuevo
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={handleCreate}
+                disabled={loading}
+                className="w-full rounded-xl bg-brand px-4 py-3 font-semibold text-white disabled:opacity-50"
+              >
+                {loading ? "Generando…" : hasToken ? "Sí, reemplazar mi token" : "Generar mi token"}
+              </button>
+              {hasToken && (
+                <button
+                  onClick={() => setConfirmReplace(false)}
+                  className="mt-2 w-full rounded-xl px-4 py-2 text-sm font-semibold text-muted-2"
+                >
+                  Cancelar
+                </button>
+              )}
+            </>
+          )}
+          {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+        </div>
+      )}
 
       {/* Cómo poner el token en un atajo instalado */}
       <div className="rounded-[24px] bg-mint px-5 py-4 text-[13px] leading-relaxed text-mint-ink">
