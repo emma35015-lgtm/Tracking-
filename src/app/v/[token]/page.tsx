@@ -1,10 +1,14 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 import { formatMoneyShort } from "@/lib/format";
 import { TripSummary } from "@/components/trip-summary";
+import { joinTrip } from "@/app/(app)/viajes/actions";
 
 // Vista pública de solo lectura del bote (sin cuenta).
 // El share_token actúa como secreto; se sirve con la service-role key.
+// Si quien la abre tiene sesión, puede unirse para agregar gastos.
 export const dynamic = "force-dynamic";
 
 export default async function PublicTripPage({
@@ -32,6 +36,23 @@ export default async function PublicTripPage({
       .order("occurred_at", { ascending: false }),
   ]);
 
+  // ¿Quién está viendo? Si tiene sesión, ofrecemos unirse / abrir.
+  const auth = await createClient();
+  const {
+    data: { user },
+  } = await auth.auth.getUser();
+
+  let membership: "owner" | "member" | null = null;
+  if (user) {
+    const { data: m } = await supabase
+      .from("trip_members")
+      .select("role")
+      .eq("trip_id", trip.id)
+      .eq("user_id", user.id)
+      .maybeSingle();
+    membership = (m?.role as "owner" | "member" | undefined) ?? null;
+  }
+
   const expensesList = expenses ?? [];
   const fmt = (n: number) => formatMoneyShort(n, trip.currency);
 
@@ -46,6 +67,38 @@ export default async function PublicTripPage({
         Bote de viaje
       </div>
       <h1 className="mb-4 text-center text-[26px] font-extrabold tracking-tight">{trip.name}</h1>
+
+      {/* Acción para usuarios con cuenta */}
+      {user ? (
+        membership ? (
+          <Link
+            href={`/viajes/${trip.id}`}
+            className="mb-4 flex h-[52px] w-full items-center justify-center rounded-[16px] bg-coral text-base font-extrabold text-white"
+          >
+            Abrir en mis viajes
+          </Link>
+        ) : (
+          <form action={joinTrip} className="mb-4">
+            <input type="hidden" name="token" value={token} />
+            <button
+              type="submit"
+              className="flex h-[52px] w-full items-center justify-center rounded-[16px] bg-coral text-base font-extrabold text-white"
+            >
+              Unirme a este viaje
+            </button>
+            <p className="mt-2 text-center text-xs font-medium text-muted">
+              Podrás agregar tus propios gastos al bote.
+            </p>
+          </form>
+        )
+      ) : (
+        <Link
+          href="/login"
+          className="mb-4 flex h-[48px] w-full items-center justify-center rounded-[16px] bg-sand text-sm font-bold text-ink"
+        >
+          ¿Tienes la app? Inicia sesión para unirte
+        </Link>
+      )}
 
       <TripSummary
         people={people ?? []}

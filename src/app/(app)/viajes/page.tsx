@@ -7,12 +7,17 @@ const inputClass =
 
 export default async function ViajesPage() {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  // RLS devuelve tanto los viajes propios como aquellos en los que te invitaron.
   const { data: trips } = await supabase
     .from("trips")
-    .select("id, name, status, currency, created_at")
+    .select("id, name, status, currency, created_at, user_id")
     .order("created_at", { ascending: false });
 
   const list = trips ?? [];
+  const myId = user?.id ?? "";
 
   return (
     <div className="screen-in">
@@ -37,7 +42,14 @@ export default async function ViajesPage() {
                 </svg>
               </div>
               <div className="flex-1">
-                <div className="text-base font-bold tracking-tight">{t.name}</div>
+                <div className="flex items-center gap-2">
+                  <span className="text-base font-bold tracking-tight">{t.name}</span>
+                  {t.user_id !== myId && (
+                    <span className="rounded-full bg-mint px-2 py-0.5 text-[10px] font-bold text-mint-ink">
+                      INVITADO
+                    </span>
+                  )}
+                </div>
                 <div className="text-xs font-medium text-muted">
                   {t.status === "cerrado" ? "Cerrado" : "Activo"}
                 </div>

@@ -12,6 +12,7 @@ import {
   deletePerson,
   deleteTripExpense,
   deleteTrip,
+  leaveTrip,
   setTripStatus,
 } from "../actions";
 
@@ -25,34 +26,50 @@ export default async function ViajeDetailPage({
 }) {
   const { id } = await params;
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const { data: trip } = await supabase
     .from("trips")
-    .select("id, name, currency, status, share_token")
+    .select("id, name, currency, status, share_token, user_id")
     .eq("id", id)
     .maybeSingle();
   if (!trip) notFound();
 
-  const [{ data: people }, { data: contributions }, { data: expenses }] = await Promise.all([
-    supabase.from("trip_people").select("id, name").eq("trip_id", id).order("created_at"),
-    supabase
-      .from("trip_contributions")
-      .select("id, person_id, amount")
-      .eq("trip_id", id)
-      .order("created_at"),
-    supabase
-      .from("trip_expenses")
-      .select("id, concept, amount, occurred_at")
-      .eq("trip_id", id)
-      .order("occurred_at", { ascending: false }),
-  ]);
+  const [{ data: people }, { data: contributions }, { data: expenses }, { data: members }] =
+    await Promise.all([
+      supabase.from("trip_people").select("id, name").eq("trip_id", id).order("created_at"),
+      supabase
+        .from("trip_contributions")
+        .select("id, person_id, amount, added_by")
+        .eq("trip_id", id)
+        .order("created_at"),
+      supabase
+        .from("trip_expenses")
+        .select("id, concept, amount, occurred_at, added_by")
+        .eq("trip_id", id)
+        .order("occurred_at", { ascending: false }),
+      supabase.from("trip_members").select("user_id, role, display_name").eq("trip_id", id),
+    ]);
 
   const peopleList = people ?? [];
   const contributionsList = contributions ?? [];
   const expensesList = expenses ?? [];
+  const membersList = members ?? [];
   const currency = trip.currency;
   const fmt = (n: number) => formatMoneyShort(n, currency);
   const nameById = new Map(peopleList.map((p) => [p.id, p.name]));
+
+  const myId = user?.id ?? "";
+  const isOwner = trip.user_id === myId;
+  const memberName = new Map(
+    membersList.map((m) => [m.user_id, (m.display_name ?? "").trim() || "Miembro"])
+  );
+  const whoAdded = (addedBy: string | null) =>
+    addedBy ? (addedBy === myId ? "Tú" : memberName.get(addedBy) ?? "Miembro") : null;
+  // Puedo borrar lo que yo agregué; el dueño puede borrar cualquier cosa.
+  const canDelete = (addedBy: string | null) => isOwner || (!!addedBy && addedBy === myId);
 
   return (
     <div className="screen-in flex flex-col gap-4">
@@ -62,6 +79,11 @@ export default async function ViajeDetailPage({
             ← Viajes
           </Link>
           <h1 className="text-[24px] font-extrabold tracking-tight">{trip.name}</h1>
+          {membersList.length > 1 && (
+            <div className="mt-0.5 text-xs font-medium text-muted">
+              {membersList.length} personas en el bote{!isOwner && " · estás invitado"}
+            </div>
+          )}
         </div>
         <ShareTripButton token={trip.share_token} />
       </div>
@@ -78,21 +100,27 @@ export default async function ViajeDetailPage({
         <h2 className="mb-3 text-base font-extrabold tracking-tight">Gastos del bote</h2>
         {expensesList.length > 0 && (
           <div className="mb-3 flex flex-col divide-y divide-crema">
-            {expensesList.map((e) => (
-              <div key={e.id} className="flex items-center justify-between py-2.5">
-                <div className="min-w-0 flex-1 truncate text-[15px] font-medium">
-                  {e.concept ?? "Gasto"}
+            {expensesList.map((e) => {
+              const author = whoAdded(e.added_by);
+              return (
+                <div key={e.id} className="flex items-center justify-between py-2.5">
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-[15px] font-medium">{e.concept ?? "Gasto"}</div>
+                    {author && <div className="text-xs font-medium text-muted">agregó {author}</div>}
+                  </div>
+                  <div className="ml-2 text-[15px] font-extrabold tabular-nums">{fmt(Number(e.amount))}</div>
+                  {canDelete(e.added_by) && (
+                    <form action={deleteTripExpense} className="ml-2">
+                      <input type="hidden" name="trip_id" value={trip.id} />
+                      <input type="hidden" name="id" value={e.id} />
+                      <button type="submit" aria-label="Eliminar" className="px-1 text-muted">
+                        ×
+                      </button>
+                    </form>
+                  )}
                 </div>
-                <div className="ml-2 text-[15px] font-extrabold tabular-nums">{fmt(Number(e.amount))}</div>
-                <form action={deleteTripExpense} className="ml-2">
-                  <input type="hidden" name="trip_id" value={trip.id} />
-                  <input type="hidden" name="id" value={e.id} />
-                  <button type="submit" aria-label="Eliminar" className="px-1 text-muted">
-                    ×
-                  </button>
-                </form>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
         <form action={addTripExpense} className="flex gap-2">
@@ -110,21 +138,29 @@ export default async function ViajeDetailPage({
         <h2 className="mb-3 text-base font-extrabold tracking-tight">Aportaciones</h2>
         {contributionsList.length > 0 && (
           <div className="mb-3 flex flex-col divide-y divide-crema">
-            {contributionsList.map((c) => (
-              <div key={c.id} className="flex items-center justify-between py-2.5">
-                <div className="min-w-0 flex-1 truncate text-[15px] font-medium">
-                  {c.person_id ? nameById.get(c.person_id) ?? "—" : "Sin asignar"}
+            {contributionsList.map((c) => {
+              const author = whoAdded(c.added_by);
+              return (
+                <div key={c.id} className="flex items-center justify-between py-2.5">
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-[15px] font-medium">
+                      {c.person_id ? nameById.get(c.person_id) ?? "—" : "Sin asignar"}
+                    </div>
+                    {author && <div className="text-xs font-medium text-muted">agregó {author}</div>}
+                  </div>
+                  <div className="ml-2 text-[15px] font-extrabold tabular-nums">{fmt(Number(c.amount))}</div>
+                  {canDelete(c.added_by) && (
+                    <form action={deleteContribution} className="ml-2">
+                      <input type="hidden" name="trip_id" value={trip.id} />
+                      <input type="hidden" name="id" value={c.id} />
+                      <button type="submit" aria-label="Eliminar" className="px-1 text-muted">
+                        ×
+                      </button>
+                    </form>
+                  )}
                 </div>
-                <div className="ml-2 text-[15px] font-extrabold tabular-nums">{fmt(Number(c.amount))}</div>
-                <form action={deleteContribution} className="ml-2">
-                  <input type="hidden" name="trip_id" value={trip.id} />
-                  <input type="hidden" name="id" value={c.id} />
-                  <button type="submit" aria-label="Eliminar" className="px-1 text-muted">
-                    ×
-                  </button>
-                </form>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
         {peopleList.length === 0 ? (
@@ -175,20 +211,37 @@ export default async function ViajeDetailPage({
         </form>
       </div>
 
+      {/* Invitar amigos */}
+      <div className="rounded-[22px] bg-mint px-5 py-4 text-[13px] font-medium leading-relaxed text-mint-ink">
+        👋 Comparte el link (botón de arriba) con amigos que ya tengan la app. Al abrirlo podrán
+        unirse y agregar sus propios gastos al bote. Cada quien edita solo lo suyo.
+      </div>
+
       {/* Acciones del viaje */}
-      <form action={setTripStatus}>
-        <input type="hidden" name="trip_id" value={trip.id} />
-        <input type="hidden" name="status" value={trip.status === "cerrado" ? "activo" : "cerrado"} />
-        <button type="submit" className="h-[48px] w-full rounded-[14px] bg-sand font-bold text-ink">
-          {trip.status === "cerrado" ? "Reabrir viaje" : "Cerrar viaje"}
-        </button>
-      </form>
-      <form action={deleteTrip}>
-        <input type="hidden" name="trip_id" value={trip.id} />
-        <button type="submit" className="h-[44px] w-full rounded-[14px] text-sm font-bold text-coral-dark">
-          Eliminar viaje
-        </button>
-      </form>
+      {isOwner ? (
+        <>
+          <form action={setTripStatus}>
+            <input type="hidden" name="trip_id" value={trip.id} />
+            <input type="hidden" name="status" value={trip.status === "cerrado" ? "activo" : "cerrado"} />
+            <button type="submit" className="h-[48px] w-full rounded-[14px] bg-sand font-bold text-ink">
+              {trip.status === "cerrado" ? "Reabrir viaje" : "Cerrar viaje"}
+            </button>
+          </form>
+          <form action={deleteTrip}>
+            <input type="hidden" name="trip_id" value={trip.id} />
+            <button type="submit" className="h-[44px] w-full rounded-[14px] text-sm font-bold text-coral-dark">
+              Eliminar viaje
+            </button>
+          </form>
+        </>
+      ) : (
+        <form action={leaveTrip}>
+          <input type="hidden" name="trip_id" value={trip.id} />
+          <button type="submit" className="h-[44px] w-full rounded-[14px] text-sm font-bold text-coral-dark">
+            Salir del viaje
+          </button>
+        </form>
+      )}
     </div>
   );
 }
