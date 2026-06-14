@@ -25,14 +25,14 @@ const NAV_ICONS: Record<string, Shape[]> = {
   ],
 };
 
-function NavIcon({ name, color, size }: { name: string; color: string; size: number }) {
+function NavIcon({ name, size }: { name: string; size: number }) {
   return (
     <svg
       width={size}
       height={size}
       viewBox="0 0 24 24"
       fill="none"
-      stroke={color}
+      stroke="currentColor"
       strokeWidth={2}
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -72,14 +72,14 @@ export function TabBar() {
             href={tab.href}
             aria-label={tab.label}
             className={`flex h-[46px] w-[46px] items-center justify-center rounded-full transition-colors ${
-              isAdd ? "bg-coral" : active ? "bg-crema" : "bg-transparent"
+              isAdd
+                ? "bg-coral text-white"
+                : active
+                ? "bg-crema text-ink dark:bg-white/10 dark:text-[#ede7c9]"
+                : "bg-transparent text-[#9A9384] dark:text-[#7a7060]"
             }`}
           >
-            <NavIcon
-              name={tab.icon}
-              color={isAdd ? "#fff" : active ? "#15140F" : "#9A9384"}
-              size={isAdd ? 23 : 21}
-            />
+            <NavIcon name={tab.icon} size={isAdd ? 23 : 21} />
           </Link>
         );
       })}

@@ -36,6 +36,13 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&display=swap"
           rel="stylesheet"
         />
+        {/* Aplica dark antes del primer render para evitar destello */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){try{if(localStorage.getItem('theme')==='dark')document.documentElement.classList.add('dark');}catch(e){}})()",
+          }}
+        />
       </head>
       <body className="min-h-full bg-crema text-ink">
         {children}

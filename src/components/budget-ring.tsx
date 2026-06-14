@@ -28,7 +28,7 @@ export function BudgetRing({
     <div className="flex items-center gap-5 rounded-[26px] bg-white p-5">
       <div className="relative shrink-0" style={{ width: size, height: size }}>
         <svg width={size} height={size} className="-rotate-90">
-          <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#EFE6C6" strokeWidth={stroke} />
+          <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--color-track)" strokeWidth={stroke} />
           <circle
             cx={size / 2}
             cy={size / 2}
@@ -57,7 +57,7 @@ export function BudgetRing({
         </div>
         {over ? (
           <div className="mt-2 inline-block rounded-full bg-[#F8E3DC] px-3 py-1 text-[13px] font-bold text-coral-dark">
-            Te pasaste {formatMoneyShort(-remaining, currency)} 😬
+            Te pasaste {formatMoneyShort(-remaining, currency)}
           </div>
         ) : (
           <div className="mt-2 inline-block rounded-full bg-mint px-3 py-1 text-[13px] font-bold text-mint-ink">
