@@ -123,13 +123,26 @@ export default async function ViajeDetailPage({
             })}
           </div>
         )}
-        <form action={addTripExpense} className="flex gap-2">
+        <form action={addTripExpense} className="flex flex-col gap-2">
           <input type="hidden" name="trip_id" value={trip.id} />
-          <input name="concept" placeholder="Concepto" className={`${inputClass} flex-1`} />
-          <input name="amount" inputMode="decimal" placeholder="$" className={`${inputClass} w-24`} />
-          <button type="submit" className="rounded-xl bg-coral px-4 text-sm font-bold text-white">
-            +
-          </button>
+          <input
+            name="concept"
+            required
+            placeholder="¿En qué se gastó? Ej. Cena, gasolina, hotel…"
+            className={inputClass}
+          />
+          <div className="flex gap-2">
+            <input
+              name="amount"
+              inputMode="decimal"
+              required
+              placeholder="$ Monto"
+              className={`${inputClass} flex-1`}
+            />
+            <button type="submit" className="rounded-xl bg-coral px-5 text-sm font-bold text-white">
+              Agregar
+            </button>
+          </div>
         </form>
       </div>
 
