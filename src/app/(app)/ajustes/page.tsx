@@ -8,6 +8,7 @@ import {
   updateProfile,
 } from "@/app/(app)/actions";
 import { CategoryIcon, categoryColor } from "@/lib/category-style";
+import { DarkModeToggle } from "@/components/dark-mode-toggle";
 
 const CURRENCIES: [string, string][] = [
   ["MXN", "Peso mexicano"],
@@ -139,6 +140,12 @@ export default async function AjustesPage() {
             </Link>
           </>
         )}
+      </div>
+
+      {/* Apariencia */}
+      <SectionLabel>Apariencia</SectionLabel>
+      <div className="rounded-[24px] bg-white p-3">
+        <DarkModeToggle />
       </div>
 
       {/* Categorías */}

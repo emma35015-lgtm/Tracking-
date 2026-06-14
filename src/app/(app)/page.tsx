@@ -143,8 +143,12 @@ export default async function InicioPage() {
           href="/ajustes"
           className="mt-3 flex items-center gap-3.5 rounded-[22px] bg-white px-[17px] py-[15px]"
         >
-          <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-sand text-xl">
-            🎯
+          <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-sand">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5c5740" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="9" />
+              <circle cx="12" cy="12" r="5" />
+              <circle cx="12" cy="12" r="1.5" fill="#5c5740" stroke="none" />
+            </svg>
           </div>
           <div className="flex-1">
             <div className="text-base font-bold tracking-tight">Ponte un presupuesto</div>
@@ -208,8 +212,12 @@ export default async function InicioPage() {
         href="/viajes"
         className="mt-3 flex items-center gap-3.5 rounded-[22px] bg-white px-[17px] py-[15px]"
       >
-        <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-mint text-xl">
-          🐮
+        <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-mint">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E4435" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
         </div>
         <div className="flex-1">
           <div className="text-base font-bold tracking-tight">Viajes</div>

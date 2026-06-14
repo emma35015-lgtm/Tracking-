@@ -49,7 +49,7 @@ function buildTips(
   if (daysElapsed >= 5 && daysElapsed < daysInMonth) {
     const projected = (total / daysElapsed) * daysInMonth;
     tips.push(
-      `📅 Llevas ${formatMoneyShort(total, currency)} en ${daysElapsed} días. A este ritmo, cerrarás el mes en ~${formatMoneyShort(projected, currency)}.`
+      `Llevas ${formatMoneyShort(total, currency)} en ${daysElapsed} días. A este ritmo, cerrarás el mes en ~${formatMoneyShort(projected, currency)}.`
     );
   }
 
@@ -64,7 +64,7 @@ function buildTips(
   }
   if (worstCat) {
     tips.push(
-      `📈 Ojo: ${worstCat.name} creció ${Math.round(worstCat.growth)}% vs el mes pasado (${formatMoneyShort(worstCat.now, currency)}). Es el primer lugar donde buscar recortes.`
+      `Ojo: ${worstCat.name} creció ${Math.round(worstCat.growth)}% vs el mes pasado (${formatMoneyShort(worstCat.now, currency)}). Es el primer lugar donde buscar recortes.`
     );
   }
 
@@ -73,7 +73,7 @@ function buildTips(
   const smallTotal = sum(small);
   if (small.length >= 8 && smallTotal > total * 0.15) {
     tips.push(
-      `🐜 Gasto hormiga: ${small.length} compras de ${formatMoney(100, currency)} o menos suman ${formatMoneyShort(smallTotal, currency)} (${Math.round((smallTotal / total) * 100)}% de tu mes). Son las que menos se sienten y más pesan.`
+      `Gasto hormiga: ${small.length} compras de ${formatMoney(100, currency)} o menos suman ${formatMoneyShort(smallTotal, currency)} (${Math.round((smallTotal / total) * 100)}% de tu mes). Son las que menos se sienten y más pesan.`
     );
   }
 
@@ -81,7 +81,7 @@ function buildTips(
   const subs = byCat.get("Suscripciones");
   if (subs && subs.total > 0) {
     tips.push(
-      `📺 Tus suscripciones cuestan ${formatMoneyShort(subs.total, currency)} al mes — ${formatMoneyShort(subs.total * 12, currency)} al año. ¿Las usas todas?`
+      `Tus suscripciones cuestan ${formatMoneyShort(subs.total, currency)} al mes — ${formatMoneyShort(subs.total * 12, currency)} al año. ¿Las usas todas?`
     );
   }
 
@@ -97,7 +97,7 @@ function buildTips(
   const topMerchant = [...byMerchant.entries()].sort((a, b) => b[1].count - a[1].count)[0];
   if (topMerchant && topMerchant[1].count >= 4) {
     tips.push(
-      `🏪 Tu lugar más frecuente: ${topMerchant[0]} (${topMerchant[1].count} veces, ${formatMoneyShort(topMerchant[1].total, currency)}). Pequeños cambios ahí tienen el mayor impacto.`
+      `Tu lugar más frecuente: ${topMerchant[0]} (${topMerchant[1].count} veces, ${formatMoneyShort(topMerchant[1].total, currency)}). Pequeños cambios ahí tienen el mayor impacto.`
     );
   }
 
@@ -106,14 +106,14 @@ function buildTips(
   if (prevTotal > 0 && daysElapsed >= daysInMonth) {
     const diff = total - prevTotal;
     if (diff < 0) {
-      tips.push(`🎉 Gastaste ${formatMoneyShort(Math.abs(diff), currency)} menos que el mes pasado. ¡Sigue así!`);
+      tips.push(`Gastaste ${formatMoneyShort(Math.abs(diff), currency)} menos que el mes pasado. ¡Sigue así!`);
     }
   }
 
   // Regla general si hay pocos tips
   if (tips.length < 2) {
     tips.push(
-      "💡 Regla 50/30/20: intenta que lo esencial sea ~50% de tu ingreso, gustos ~30% y ahorro ~20%. Compara con tu desglose de arriba."
+      "Regla 50/30/20: intenta que lo esencial sea ~50% de tu ingreso, gustos ~30% y ahorro ~20%. Compara con tu desglose de arriba."
     );
   }
 
@@ -274,16 +274,25 @@ export default async function AnalisisPage({
           </section>
 
           {/* Tips */}
-          {tips.map((tip, i) => (
-            <section key={i} className="rounded-[24px] bg-mint px-5 py-[18px]">
-              {i === 0 && (
-                <div className="mb-1.5 text-sm font-extrabold tracking-tight text-mint-ink">
-                  💡 Según tus datos
-                </div>
-              )}
-              <div className="text-sm font-medium leading-relaxed text-mint-ink">{tip}</div>
+          {tips.length > 0 && (
+            <section className="rounded-[24px] bg-mint px-5 py-[18px]">
+              <div className="mb-3 flex items-center gap-2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-mint-ink">
+                  <path d="M12 2a7 7 0 0 1 7 7c0 3-1.8 5.4-4.3 6.5L14 17H10l-.7-1.5C6.8 14.4 5 12 5 9a7 7 0 0 1 7-7Z" />
+                  <path d="M10 21h4M12 17v4" />
+                </svg>
+                <span className="text-sm font-extrabold tracking-tight text-mint-ink">Según tus datos</span>
+              </div>
+              <div className="flex flex-col gap-3">
+                {tips.map((tip, i) => (
+                  <div key={i} className="text-sm font-medium leading-relaxed text-mint-ink">
+                    {i > 0 && <div className="mb-3 border-t border-mint-ink/20" />}
+                    {tip}
+                  </div>
+                ))}
+              </div>
             </section>
-          ))}
+          )}
         </div>
       )}
     </div>

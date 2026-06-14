@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
   /* Paleta "Cálido Pastel" del rediseño */
@@ -27,8 +28,8 @@ html {
 
 body {
   font-family: "Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background: #f3eac9;
-  color: #15140f;
+  background: var(--color-crema);
+  color: var(--color-ink);
   /* Respeta el notch y el home indicator del iPhone */
   padding-top: env(safe-area-inset-top);
 }
@@ -60,3 +61,41 @@ textarea {
 .screen-in {
   animation: scrin 0.32s ease;
 }
+
+/* ─── Modo oscuro ─────────────────────────────── */
+
+html.dark {
+  --color-crema:       #171410;
+  --color-ink:         #ede7c9;
+  --color-sand:        #1e1b13;
+  --color-input:       #1c1a11;
+  --color-input-border:#373020;
+  --color-track:       #272213;
+  --color-muted:       #a09060;
+  --color-muted-2:     #857a56;
+  --color-muted-3:     #635840;
+  --color-mint:        #162e23;
+  --color-mint-ink:    #9dcfb3;
+  --color-coral-link:  #d47c58;
+  --color-coral-dark:  #e07b58;
+}
+
+/* Cards blancas → superficie oscura */
+html.dark .bg-white { background-color: #232018; }
+
+/* Botones/nav oscuros → tono oscuro cálido (no negro puro) */
+html.dark .bg-ink { background-color: #2d2920; }
+
+/* Divisores entre items */
+html.dark .border-crema { border-color: #2a2519; }
+html.dark .divide-crema > * + * { border-color: #2a2519; }
+
+/* Borde de inputs */
+html.dark .border-input-border { border-color: #373020; }
+
+/* Badge "debe" — fondo rosado claro no sirve en dark */
+html.dark .bg-\[\#F8E3DC\] { background-color: #3d2318; }
+
+/* Pista de los anillos/barras de progreso con color explícito */
+html.dark circle[stroke="#EFE6C6"],
+html.dark circle[stroke="#efe6c6"] { stroke: #272213; }
