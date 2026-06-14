@@ -228,43 +228,55 @@ export function ShortcutSetup({ hasToken }: { hasToken: boolean }) {
           Cada pago con Apple Pay se registra solo, con monto y comercio.
         </p>
         <AddShortcutButton href={SHORTCUT_APPLEPAY}>Añadir atajo de Apple Pay</AddShortcutButton>
+
+        <div className="mt-3 rounded-[14px] bg-sand px-4 py-3 text-xs leading-relaxed text-muted-2">
+          <p className="font-semibold">¿Por qué no se activa solo todavía?</p>
+          El botón de arriba instala el atajo en la pestaña <strong>&quot;Mis Atajos&quot;</strong> (manual).
+          iOS no permite compartir automatizaciones por link. Para que se dispare con Apple Pay
+          necesitas crear la automatización tú mismo — es rápido, sigue los pasos de abajo.
+        </div>
+
         <ol className="mt-4 flex flex-col gap-3">
           <Step n={1}>
-            Toca el botón de arriba → <strong>&quot;Añadir atajo&quot;</strong>. Ábrelo y{" "}
-            <strong>pega tu token</strong> en el encabezado <code>Authorization</code>.
+            Toca <strong>&quot;Añadir atajo&quot;</strong> arriba. Ábrelo desde{" "}
+            <strong>Mis Atajos</strong> y <strong>pega tu token</strong> en el encabezado{" "}
+            <code>Authorization</code> (ver el aviso verde de arriba).
           </Step>
           <Step n={2}>
-            Ahora créale el disparador automático: abre <strong>Atajos</strong> → pestaña{" "}
-            <strong>Automatización</strong> → <strong>+</strong> → busca{" "}
-            <strong>Transacción</strong> (o <strong>Wallet</strong>).
+            Abre <strong>Atajos</strong> → pestaña <strong>Automatización</strong> (abajo al
+            centro) → toca <strong>+</strong> → busca <strong>Transacción</strong>{" "}
+            (o <strong>Wallet</strong>).
           </Step>
           <Step n={3}>
-            Elige tu(s) <strong>tarjeta(s)</strong>, marca{" "}
-            <strong>Ejecutar inmediatamente</strong> y toca <strong>Siguiente</strong>.
+            Elige tu(s) <strong>tarjeta(s)</strong>, activa{" "}
+            <strong>&quot;Ejecutar inmediatamente&quot;</strong> (sin pedir confirmación) y toca{" "}
+            <strong>Siguiente</strong>.
           </Step>
           <Step n={4}>
-            Añade la acción <strong>&quot;Ejecutar atajo&quot;</strong> y elige el atajo de
-            Apple Pay que acabas de añadir. <strong>Listo</strong>.
+            Añade la acción <strong>&quot;Ejecutar atajo&quot;</strong> y elige{" "}
+            <strong>el atajo de Apple Pay</strong> que instalaste en el paso 1.
+            Toca <strong>Listo</strong>.
           </Step>
           <Step n={5}>
-            Compra algo con Apple Pay: el gasto debe aparecer solo en unos segundos. 🪄
+            Compra algo con Apple Pay: el gasto debe aparecer solo en unos segundos.
           </Step>
         </ol>
 
         <div className="mt-4 rounded-[18px] bg-mint px-4 py-3 text-xs leading-relaxed text-mint-ink">
           <p className="mb-1 font-extrabold">🛡️ Para que nunca pierdas un gasto (recomendado)</p>
-          Abre el atajo y, <strong>después</strong> de &quot;Obtener contenido de URL&quot;, añade
-          estas dos acciones:
+          Abre el atajo (desde <strong>Mis Atajos</strong>) y ajusta el orden así:
           <p className="mt-2">
-            <strong>1. Mostrar notificación</strong> con el texto de la respuesta (la variable{" "}
-            <strong>&quot;Contenido de la URL&quot;</strong>). Así, tras cada compra te llega un
-            aviso: &quot;Gasto registrado: $250…&quot;. Si NO te llega aviso, sabrás que no se
-            guardó (por señal) y lo agregas a mano.
+            <strong>1. Repetir 3 veces</strong> — envuelve <em>dentro</em> del bloque tanto{" "}
+            <strong>&quot;Obtener contenido de URL&quot;</strong> como{" "}
+            <strong>&quot;Mostrar notificación&quot;</strong>. Si la señal falla en el primer
+            intento, el bloque lo vuelve a intentar. El servidor evita duplicados, así que
+            reintentar es seguro.
           </p>
           <p className="mt-1.5">
-            <strong>2. Reintento (opcional):</strong> envuelve la acción de la URL en un{" "}
-            <strong>&quot;Repetir 3 veces&quot;</strong>. Como el servidor evita duplicados, reintentar
-            es seguro: si un intento falla por señal, el siguiente lo logra sin registrar dos veces.
+            <strong>2. Mostrar notificación</strong> (dentro del bloque Repetir) con la variable{" "}
+            <strong>&quot;Contenido de la URL&quot;</strong>. Tras cada compra recibes un aviso:
+            &quot;Gasto registrado: $250…&quot;. Si no llega aviso, sabrás que no se guardó y lo
+            agregas a mano.
           </p>
         </div>
 
