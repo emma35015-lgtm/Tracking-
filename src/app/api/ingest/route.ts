@@ -16,7 +16,10 @@ export async function POST(request: Request) {
   const auth = request.headers.get("authorization") ?? "";
   const token = auth.startsWith("Bearer ") ? auth.slice(7).trim() : "";
   if (!token) {
-    return NextResponse.json({ ok: false, error: "Falta el token" }, { status: 401 });
+    return NextResponse.json(
+      { ok: false, error: "Falta el token en el encabezado Authorization del atajo." },
+      { status: 401 }
+    );
   }
 
   const supabase = createAdminClient();
@@ -27,7 +30,14 @@ export async function POST(request: Request) {
     .eq("token_hash", hashToken(token))
     .maybeSingle();
   if (!apiToken) {
-    return NextResponse.json({ ok: false, error: "Token inválido" }, { status: 401 });
+    return NextResponse.json(
+      {
+        ok: false,
+        error:
+          "Token inválido o caducado. Genera uno nuevo en la app (Ajustes → Configurar mi iPhone) y pégalo en el atajo.",
+      },
+      { status: 401 }
+    );
   }
 
   // Aceptamos los datos por donde vengan, para que el Atajo del iPhone sea

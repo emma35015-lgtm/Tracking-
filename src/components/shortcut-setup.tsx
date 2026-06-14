@@ -71,6 +71,8 @@ export function ShortcutSetup({ hasToken }: { hasToken: boolean }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [testResult, setTestResult] = useState<string | null>(null);
+  const [confirmReplace, setConfirmReplace] = useState(false);
+  const [tokenInvalid, setTokenInvalid] = useState(false);
 
   useEffect(() => {
     setOrigin(window.location.origin);
@@ -89,11 +91,15 @@ export function ShortcutSetup({ hasToken }: { hasToken: boolean }) {
     }
     sessionStorage.setItem("gastos_token", result.token);
     setToken(result.token);
+    setConfirmReplace(false);
+    setTokenInvalid(false);
+    setTestResult(null);
   }
 
   async function handleTest() {
     if (!token) return;
     setTestResult(null);
+    setTokenInvalid(false);
     try {
       const res = await fetch("/api/ingest", {
         method: "POST",
@@ -109,11 +115,14 @@ export function ShortcutSetup({ hasToken }: { hasToken: boolean }) {
         }),
       });
       const data = await res.json();
-      setTestResult(
-        data.ok
-          ? "✅ ¡Funciona! Se registró un gasto de prueba de $1 — revisa tu lista de gastos (puedes borrarlo)."
-          : `❌ Error: ${data.error ?? res.status}`
-      );
+      if (data.ok) {
+        setTestResult(
+          "✅ ¡Funciona! Se registró un gasto de prueba de $1 — revisa tu lista de gastos (puedes borrarlo)."
+        );
+      } else {
+        if (res.status === 401) setTokenInvalid(true);
+        setTestResult(`❌ ${data.error ?? `Error ${res.status}`}`);
+      }
     } catch {
       setTestResult("❌ No se pudo conectar. Revisa tu internet.");
     }
@@ -127,13 +136,41 @@ export function ShortcutSetup({ hasToken }: { hasToken: boolean }) {
           Es la llave con la que tu iPhone se identifica con la app. Se muestra una
           sola vez{hasToken ? ". Ya tienes uno activo; generar otro lo reemplaza." : "."}
         </p>
-        <button
-          onClick={handleCreate}
-          disabled={loading}
-          className="w-full rounded-xl bg-brand px-4 py-3 font-semibold text-white disabled:opacity-50"
-        >
-          {loading ? "Generando…" : hasToken ? "Generar token nuevo" : "Generar mi token"}
-        </button>
+
+        {hasToken && confirmReplace && (
+          <div className="mb-3 rounded-[16px] bg-sand px-4 py-3 text-[13px] font-medium leading-relaxed text-muted-2">
+            ⚠️ Ya tienes un token activo. Si generas uno nuevo, el atajo que ya
+            configuraste en tu iPhone <strong>dejará de funcionar</strong> hasta que
+            abras el atajo y pegues el token nuevo en el encabezado <code>Authorization</code>.
+          </div>
+        )}
+
+        {hasToken && !confirmReplace ? (
+          <button
+            onClick={() => setConfirmReplace(true)}
+            className="w-full rounded-xl bg-brand px-4 py-3 font-semibold text-white"
+          >
+            Generar token nuevo
+          </button>
+        ) : (
+          <>
+            <button
+              onClick={handleCreate}
+              disabled={loading}
+              className="w-full rounded-xl bg-brand px-4 py-3 font-semibold text-white disabled:opacity-50"
+            >
+              {loading ? "Generando…" : hasToken ? "Sí, reemplazar mi token" : "Generar mi token"}
+            </button>
+            {hasToken && (
+              <button
+                onClick={() => setConfirmReplace(false)}
+                className="mt-2 w-full rounded-xl px-4 py-2 text-sm font-semibold text-muted-2"
+              >
+                Cancelar
+              </button>
+            )}
+          </>
+        )}
         {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
       </div>
     );
@@ -256,6 +293,22 @@ export function ShortcutSetup({ hasToken }: { hasToken: boolean }) {
           Registrar un gasto de prueba
         </button>
         {testResult && <p className="mt-3 text-sm">{testResult}</p>}
+        {tokenInvalid && (
+          <div className="mt-3 rounded-[16px] bg-sand px-4 py-3 text-[13px] leading-relaxed text-muted-2">
+            <p className="mb-2 font-semibold">
+              El token guardado en este navegador ya no es válido — casi siempre es
+              porque generaste otro después (solo puede haber uno por cuenta). Genera
+              uno nuevo y vuelve a pegarlo en tus atajos.
+            </p>
+            <button
+              onClick={handleCreate}
+              disabled={loading}
+              className="w-full rounded-xl bg-brand px-4 py-2.5 font-semibold text-white disabled:opacity-50"
+            >
+              {loading ? "Generando…" : "Generar token nuevo"}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
