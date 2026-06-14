@@ -41,6 +41,14 @@ async function canAccessTrip(
   return Boolean(data);
 }
 
+// Nombre para mostrar: perfil → parte local del correo → "Miembro".
+function friendlyName(displayName?: string | null, email?: string | null): string {
+  const fromProfile = (displayName ?? "").trim();
+  if (fromProfile) return fromProfile;
+  const local = (email ?? "").split("@")[0]?.trim();
+  return local || "Miembro";
+}
+
 export async function createTrip(formData: FormData) {
   const { supabase, user } = await requireUser();
   const name = String(formData.get("name") ?? "").trim();
@@ -68,12 +76,18 @@ export async function createTrip(formData: FormData) {
     .select("display_name")
     .eq("id", user.id)
     .maybeSingle();
+  const ownerName = friendlyName(profile?.display_name, user.email);
   await supabase.from("trip_members").insert({
     trip_id: trip.id,
     user_id: user.id,
     role: "owner",
     display_name: profile?.display_name ?? null,
   });
+
+  // El dueño aparece como persona (ligada a su cuenta) para registrar aportaciones.
+  await supabase
+    .from("trip_people")
+    .insert({ trip_id: trip.id, name: ownerName, user_id: user.id });
 
   if (names.length > 0) {
     await supabase
@@ -119,6 +133,21 @@ export async function joinTrip(formData: FormData) {
         },
         { onConflict: "trip_id,user_id", ignoreDuplicates: true }
       );
+
+    // Aparece como persona ligada a su cuenta para poder registrar aportaciones.
+    const { data: existingPerson } = await admin
+      .from("trip_people")
+      .select("id")
+      .eq("trip_id", trip.id)
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (!existingPerson) {
+      await admin.from("trip_people").insert({
+        trip_id: trip.id,
+        name: friendlyName(profile?.display_name, user.email),
+        user_id: user.id,
+      });
+    }
   }
 
   revalidatePath("/viajes");

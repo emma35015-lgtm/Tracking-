@@ -39,7 +39,7 @@ export default async function ViajeDetailPage({
 
   const [{ data: people }, { data: contributions }, { data: expenses }, { data: members }] =
     await Promise.all([
-      supabase.from("trip_people").select("id, name").eq("trip_id", id).order("created_at"),
+      supabase.from("trip_people").select("id, name, user_id").eq("trip_id", id).order("created_at"),
       supabase
         .from("trip_contributions")
         .select("id, person_id, amount, added_by")
@@ -63,6 +63,7 @@ export default async function ViajeDetailPage({
 
   const myId = user?.id ?? "";
   const isOwner = trip.user_id === myId;
+  const myPersonId = peopleList.find((p) => p.user_id === myId)?.id;
   const memberName = new Map(
     membersList.map((m) => [m.user_id, (m.display_name ?? "").trim() || "Miembro"])
   );
@@ -181,10 +182,11 @@ export default async function ViajeDetailPage({
         ) : (
           <form action={addContribution} className="flex gap-2">
             <input type="hidden" name="trip_id" value={trip.id} />
-            <select name="person_id" className={`${inputClass} flex-1`}>
+            <select name="person_id" defaultValue={myPersonId} className={`${inputClass} flex-1`}>
               {peopleList.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name}
+                  {p.user_id === myId ? " (tú)" : ""}
                 </option>
               ))}
             </select>
@@ -209,7 +211,9 @@ export default async function ViajeDetailPage({
                   type="submit"
                   className="flex items-center gap-1.5 rounded-full border-[1.6px] border-input-border bg-input px-3 py-1.5 text-sm font-semibold"
                 >
-                  {p.name} <span className="text-muted">×</span>
+                  {p.name}
+                  {p.user_id === myId ? <span className="text-muted-3">(tú)</span> : null}{" "}
+                  <span className="text-muted">×</span>
                 </button>
               </form>
             ))}
