@@ -42,11 +42,12 @@ export default async function AjustesPage() {
       supabase.from("profiles").select("display_name, default_currency").maybeSingle(),
       supabase.from("categories").select("id, name, icon").order("name"),
       supabase.from("api_tokens").select("label, created_at, last_used_at").maybeSingle(),
-      // Aparte: si la columna no existe (migración pendiente), no rompe el resto.
-      supabase.from("profiles").select("monthly_budget").maybeSingle(),
+      // Aparte: si las columnas no existen (migración pendiente), no rompe el resto.
+      supabase.from("profiles").select("monthly_budget, monthly_income").maybeSingle(),
     ]);
 
   const monthlyBudget = budgetRow?.monthly_budget ? Number(budgetRow.monthly_budget) : null;
+  const monthlyIncome = budgetRow?.monthly_income ? Number(budgetRow.monthly_income) : null;
 
   return (
     <div className="screen-in">
@@ -75,6 +76,16 @@ export default async function AjustesPage() {
           ))}
         </select>
         <div className="mb-2 mt-4 text-[13px] font-bold text-muted-2">
+          Ingreso mensual <span className="font-medium text-muted">(opcional)</span>
+        </div>
+        <input
+          name="monthly_income"
+          inputMode="decimal"
+          defaultValue={monthlyIncome ? String(monthlyIncome) : ""}
+          placeholder="Cuánto recibes al mes — para ver cuánto te queda"
+          className={inputClass}
+        />
+        <div className="mb-2 mt-4 text-[13px] font-bold text-muted-2">
           Presupuesto mensual <span className="font-medium text-muted">(opcional)</span>
         </div>
         <input
@@ -91,6 +102,29 @@ export default async function AjustesPage() {
           Guardar
         </button>
       </form>
+
+      {/* Pagos fijos */}
+      <SectionLabel>Pagos fijos</SectionLabel>
+      <Link
+        href="/fijos"
+        className="flex items-center gap-3.5 rounded-[24px] bg-white px-[18px] py-4"
+      >
+        <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[#E2B5DA]">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15140F" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="5" width="18" height="14" rx="2.6" />
+            <path d="M3 9.5h18" />
+          </svg>
+        </div>
+        <div className="flex-1">
+          <div className="text-[15px] font-bold tracking-tight">Suscripciones, meses y tarjeta</div>
+          <div className="text-xs font-medium text-muted">
+            Lo que se repite cada mes y cuándo se paga
+          </div>
+        </div>
+        <svg width="9" height="15" viewBox="0 0 9 15" fill="none" stroke="#8A8167" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M1.5 1.5 7.5 7.5l-6 6" />
+        </svg>
+      </Link>
 
       {/* Automatización */}
       <SectionLabel>Automatización del iPhone</SectionLabel>

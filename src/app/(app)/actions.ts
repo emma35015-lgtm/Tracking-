@@ -122,11 +122,21 @@ export async function updateProfile(formData: FormData) {
   const monthlyBudget =
     String(formData.get("monthly_budget") ?? "").trim() === "" ? null : budgetRaw;
 
-  // Intentamos guardar con presupuesto. Si la columna aún no existe en la BD
-  // (migración 0002 sin correr), reintentamos sin ella para no romper el guardado.
+  // El ingreso también es opcional; vacío = no se muestra el "disponible".
+  const incomeRaw = parseAmount(formData.get("monthly_income"));
+  const monthlyIncome =
+    String(formData.get("monthly_income") ?? "").trim() === "" ? null : incomeRaw;
+
+  // Intentamos guardar con presupuesto + ingreso. Si alguna columna aún no existe
+  // (migración pendiente), reintentamos sin ellas para no romper el guardado.
   const { error } = await supabase
     .from("profiles")
-    .update({ display_name: displayName, default_currency: currency, monthly_budget: monthlyBudget })
+    .update({
+      display_name: displayName,
+      default_currency: currency,
+      monthly_budget: monthlyBudget,
+      monthly_income: monthlyIncome,
+    })
     .eq("id", user.id);
   if (error) {
     await supabase
@@ -135,6 +145,58 @@ export async function updateProfile(formData: FormData) {
       .eq("id", user.id);
   }
   revalidatePath("/", "layout");
+}
+
+// ── Pagos fijos: suscripciones, compras a meses y recordatorio de tarjeta ──
+
+export async function addRecurringPayment(formData: FormData) {
+  const { supabase, user } = await requireUser();
+  const kind = String(formData.get("kind") ?? "");
+  if (!["subscription", "installment", "card"].includes(kind)) return;
+
+  const name = String(formData.get("name") ?? "").trim();
+  if (!name) return;
+
+  const day = Math.min(Math.max(parseInt(String(formData.get("day_of_month") ?? "1"), 10) || 1, 1), 31);
+  const amount = parseAmount(formData.get("amount")); // null = sin monto (válido en tarjeta)
+  const categoryId = String(formData.get("category_id") ?? "").trim() || null;
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("default_currency")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const row: Record<string, unknown> = {
+    user_id: user.id,
+    kind,
+    name,
+    amount,
+    currency: profile?.default_currency ?? "MXN",
+    day_of_month: day,
+    category_id: categoryId,
+  };
+
+  if (kind === "installment") {
+    const totalMonths = parseInt(String(formData.get("total_months") ?? ""), 10);
+    if (Number.isFinite(totalMonths) && totalMonths > 0) row.total_months = totalMonths;
+    const startDate = String(formData.get("start_date") ?? "").trim();
+    row.start_date = startDate || new Date().toISOString().slice(0, 10);
+  }
+
+  await supabase.from("recurring_payments").insert(row);
+  revalidatePath("/", "layout");
+  redirect("/fijos");
+}
+
+export async function deleteRecurringPayment(formData: FormData) {
+  const { supabase, user } = await requireUser();
+  const id = String(formData.get("id") ?? "");
+  if (id) {
+    await supabase.from("recurring_payments").delete().eq("id", id).eq("user_id", user.id);
+  }
+  revalidatePath("/", "layout");
+  redirect("/fijos");
 }
 
 export async function addCategory(formData: FormData) {

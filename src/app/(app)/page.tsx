@@ -4,6 +4,13 @@ import { formatMonth, formatMoneyShort, dayKey } from "@/lib/format";
 import { CategoryIcon, categoryColor } from "@/lib/category-style";
 import { BudgetRing } from "@/components/budget-ring";
 import { AvatarEgg } from "@/components/avatar-egg";
+import {
+  isActiveNow,
+  daysUntilDay,
+  spendingStatus,
+  KIND_LABEL,
+  type RecurringPayment,
+} from "@/lib/finance";
 
 type ExpenseRow = {
   id: string;
@@ -25,7 +32,14 @@ export default async function InicioPage() {
   const prevStart = new Date(Date.UTC(year, month - 2, 1));
 
   const supabase = await createClient();
-  const [{ data }, { data: profile }, { data: token }, { data: budgetRow }] = await Promise.all([
+  const [
+    { data },
+    { data: profile },
+    { data: token },
+    { data: budgetRow },
+    { data: incomeRow },
+    { data: rawPayments },
+  ] = await Promise.all([
     supabase
       .from("expenses")
       .select("id, amount, currency, merchant, occurred_at, source, categories(name, icon)")
@@ -33,11 +47,17 @@ export default async function InicioPage() {
       .order("occurred_at", { ascending: false }),
     supabase.from("profiles").select("display_name, default_currency").maybeSingle(),
     supabase.from("api_tokens").select("id").maybeSingle(),
-    // En consulta aparte: si la columna no existe (migración pendiente), no rompe lo demás.
+    // En consultas aparte: si la columna/tabla no existe (migración pendiente), no rompe lo demás.
     supabase.from("profiles").select("monthly_budget").maybeSingle(),
+    supabase.from("profiles").select("monthly_income").maybeSingle(),
+    supabase
+      .from("recurring_payments")
+      .select("id, kind, name, amount, currency, day_of_month, category_id, total_months, start_date, active"),
   ]);
 
   const monthlyBudget = budgetRow?.monthly_budget ? Number(budgetRow.monthly_budget) : null;
+  const monthlyIncome = incomeRow?.monthly_income ? Number(incomeRow.monthly_income) : null;
+  const payments = ((rawPayments ?? []) as RecurringPayment[]).filter((p) => isActiveNow(p));
 
   const all = (data ?? []) as unknown as ExpenseRow[];
   const expenses = all.filter((e) => e.occurred_at >= start.toISOString());
@@ -46,6 +66,32 @@ export default async function InicioPage() {
   const currency = profile?.default_currency ?? expenses[0]?.currency ?? "MXN";
   const total = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
   const prevTotal = prevExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
+
+  // Pagos fijos que aún no se cobran este mes (su día todavía no pasa): es lo
+  // que tienes "apartado" además de lo ya gastado.
+  const today = now.getDate();
+  const pendingCommitted = payments
+    .filter((p) => p.amount && p.day_of_month >= today)
+    .reduce((sum, p) => sum + Number(p.amount), 0);
+  const status = monthlyIncome && monthlyIncome > 0
+    ? spendingStatus(monthlyIncome, total, pendingCommitted)
+    : null;
+
+  // Próximos cobros ordenados por cercanía (incluye el recordatorio de tarjeta).
+  const upcoming = [...payments]
+    .map((p) => ({ p, days: daysUntilDay(p.day_of_month, now) }))
+    .sort((a, b) => a.days - b.days)
+    .slice(0, 4);
+  // Aviso destacado si una tarjeta está por vencer en los próximos 5 días.
+  const cardSoon = upcoming.find((u) => u.p.kind === "card" && u.days <= 5);
+
+  const STATUS_STYLE: Record<string, { bg: string; text: string }> = {
+    ok: { bg: "bg-mint", text: "text-mint-ink" },
+    good: { bg: "bg-mint", text: "text-mint-ink" },
+    watch: { bg: "bg-sand", text: "text-muted-2" },
+    tight: { bg: "bg-[#F6D9CE]", text: "text-coral-dark" },
+    over: { bg: "bg-[#F3C2B3]", text: "text-coral-dark" },
+  };
 
   const name = profile?.display_name?.trim() || null;
   const initial = (name ?? "G").charAt(0).toUpperCase();
@@ -133,6 +179,42 @@ export default async function InicioPage() {
         </div>
       </div>
 
+      {/* Disponible + salud financiera (solo si configuraste tu ingreso) */}
+      {status && (
+        <div className="mt-3 rounded-[24px] bg-white p-5">
+          <div className="flex items-baseline justify-between">
+            <span className="text-sm font-semibold text-muted">Disponible este mes</span>
+            <span className="text-xs font-medium text-muted">de {formatMoneyShort(monthlyIncome!, currency)}</span>
+          </div>
+          <div
+            className={`mt-1 text-[40px] font-extrabold leading-none tracking-tight tabular-nums ${
+              status.available < 0 ? "text-coral-dark" : "text-ink"
+            }`}
+          >
+            {formatMoneyShort(status.available, currency)}
+          </div>
+          {/* Barra de uso: gastado + pagos fijos pendientes contra el ingreso */}
+          <div className="mt-4 h-2.5 w-full overflow-hidden rounded-full bg-track">
+            <div
+              className={`h-full rounded-full ${
+                status.level === "over" || status.level === "tight" ? "bg-coral" : "bg-ink"
+              }`}
+              style={{ width: `${Math.min(Math.round(status.pct * 100), 100)}%` }}
+            />
+          </div>
+          <div className="mt-2 text-xs font-medium text-muted">
+            Llevas {formatMoneyShort(total, currency)} gastado
+            {pendingCommitted > 0 && <> · {formatMoneyShort(pendingCommitted, currency)} en pagos fijos por venir</>}
+          </div>
+          <div className={`mt-3 rounded-[16px] px-4 py-3 ${STATUS_STYLE[status.level].bg}`}>
+            <div className={`text-sm font-extrabold ${STATUS_STYLE[status.level].text}`}>{status.title}</div>
+            <div className={`mt-0.5 text-[13px] font-medium leading-relaxed ${STATUS_STYLE[status.level].text}`}>
+              {status.message}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Presupuesto */}
       {monthlyBudget && monthlyBudget > 0 ? (
         <div className="mt-3">
@@ -160,6 +242,54 @@ export default async function InicioPage() {
             <path d="M1.5 1.5 7.5 7.5l-6 6" />
           </svg>
         </Link>
+      )}
+
+      {/* Próximos pagos fijos */}
+      {upcoming.length > 0 && (
+        <div className="mt-3 rounded-[24px] bg-white p-5">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-base font-extrabold tracking-tight">Próximos pagos</h2>
+            <Link href="/fijos" className="text-[13px] font-bold text-coral-link">
+              Administrar
+            </Link>
+          </div>
+
+          {cardSoon && (
+            <div className="mb-3 rounded-[16px] bg-[#F6D9CE] px-4 py-3 text-[13px] font-medium leading-relaxed text-coral-dark">
+              💳 <strong>{cardSoon.p.name}</strong> se paga{" "}
+              {cardSoon.days === 0 ? "hoy" : cardSoon.days === 1 ? "mañana" : `en ${cardSoon.days} días`}
+              {cardSoon.p.amount ? ` · ${formatMoneyShort(Number(cardSoon.p.amount), currency)}` : ""}.
+            </div>
+          )}
+
+          <div className="flex flex-col divide-y divide-crema">
+            {upcoming.map(({ p, days }) => (
+              <div key={p.id} className="flex items-center gap-3 py-2.5">
+                <div
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] text-xs font-extrabold tabular-nums ${
+                    p.kind === "card" ? "bg-[#F6D9CE] text-coral-dark" : "bg-sand text-muted-2"
+                  }`}
+                >
+                  {p.day_of_month}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-[15px] font-bold tracking-tight">{p.name}</div>
+                  <div className="text-xs font-medium text-muted">
+                    {KIND_LABEL[p.kind]} ·{" "}
+                    {days === 0 ? "hoy" : days === 1 ? "mañana" : `en ${days} días`}
+                  </div>
+                </div>
+                {p.amount ? (
+                  <div className="text-[15px] font-extrabold tabular-nums">
+                    {formatMoneyShort(Number(p.amount), currency)}
+                  </div>
+                ) : (
+                  <span className="text-xs font-medium text-muted">monto variable</span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
       )}
 
       {/* Conectar iPhone (solo si aún no hay token) */}

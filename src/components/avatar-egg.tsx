@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from "react";
 
 // Avatar con la inicial del usuario. Easter egg: 6 toques abren el panel
 // de Developer Info. La versión sirve para saber qué build está corriendo.
-const VERSION = "1.1.2";
-const BUILD = "EJ-112";
+const VERSION = "1.2.0";
+const BUILD = "EJ-120";
 
 export function AvatarEgg({ initial }: { initial: string }) {
   const [taps, setTaps] = useState(0);
