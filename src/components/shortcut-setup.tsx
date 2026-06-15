@@ -5,7 +5,7 @@ import { createToken } from "@/app/(app)/actions";
 
 // Atajos compartidos por iCloud (ya traen URL, método y JSON listos).
 // Cada quien pega SU token al instalarlos.
-const SHORTCUT_APPLEPAY = "https://www.icloud.com/shortcuts/becb6b8b6ee2482997ac01bc7603b3b9";
+const SHORTCUT_APPLEPAY = "https://www.icloud.com/shortcuts/6baa20ff54c14b33a2ec2c84cb57b54f";
 const SHORTCUT_SIRI = "https://www.icloud.com/shortcuts/21c6f812dd934320a8f2bde51ef04a20";
 
 function AddShortcutButton({ href, children }: { href: string; children: React.ReactNode }) {
@@ -320,21 +320,12 @@ export function ShortcutSetup({ hasToken }: { hasToken: boolean }) {
         </ol>
 
         <div className="mt-4 rounded-[18px] bg-mint px-4 py-3 text-xs leading-relaxed text-mint-ink">
-          <p className="mb-1 font-extrabold">🛡️ Para que nunca pierdas un gasto (recomendado)</p>
-          Abre el atajo (desde <strong>Mis Atajos</strong>) y ajusta el orden así:
-          <p className="mt-2">
-            <strong>1. Repetir 3 veces</strong> — envuelve <em>dentro</em> del bloque tanto{" "}
-            <strong>&quot;Obtener contenido de URL&quot;</strong> como{" "}
-            <strong>&quot;Mostrar notificación&quot;</strong>. Si la señal falla en el primer
-            intento, el bloque lo vuelve a intentar. El servidor evita duplicados, así que
-            reintentar es seguro.
-          </p>
-          <p className="mt-1.5">
-            <strong>2. Mostrar notificación</strong> (dentro del bloque Repetir) con la variable{" "}
-            <strong>&quot;Contenido de la URL&quot;</strong>. Tras cada compra recibes un aviso:
-            &quot;Gasto registrado: $250…&quot;. Si no llega aviso, sabrás que no se guardó y lo
-            agregas a mano.
-          </p>
+          <p className="mb-1 font-extrabold">🛡️ Ya viene listo para no perder gastos</p>
+          Este atajo ya incluye un <strong>&quot;Repetir 3 veces&quot;</strong>: si la señal falla
+          en un intento, lo vuelve a intentar (el servidor evita duplicados, así que reintentar
+          es seguro). También trae una <strong>notificación</strong> tras cada compra
+          (&quot;Gasto registrado: $250…&quot;); si no te llega, sabrás que no se guardó y lo
+          agregas a mano. No tienes que configurar nada de esto: solo pega tu token.
         </div>
 
         <div className="mt-3 rounded-xl bg-sand p-3 text-xs leading-relaxed text-muted-2">
