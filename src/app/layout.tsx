@@ -11,7 +11,9 @@ export const metadata: Metadata = {
     title: "COCO",
   },
   icons: {
-    apple: "/icons/apple-touch-icon.png",
+    icon: "/brand/coco-logo.png",
+    shortcut: "/brand/coco-logo.png",
+    apple: "/brand/coco-logo.png",
   },
 };
 

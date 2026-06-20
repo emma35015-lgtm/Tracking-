@@ -79,7 +79,7 @@ export default async function ViajeDetailPage({
           <Link href="/viajes" className="text-sm font-bold text-coral-link">
             ← Viajes
           </Link>
-          <h1 className="text-[24px] font-extrabold tracking-tight">{trip.name}</h1>
+          <h1 className="text-[30px] font-extrabold leading-[0.98] tracking-[-0.02em]">{trip.name}</h1>
           {membersList.length > 1 && (
             <div className="mt-0.5 text-xs font-medium text-muted">
               {membersList.length} personas en el bote{!isOwner && " · estás invitado"}

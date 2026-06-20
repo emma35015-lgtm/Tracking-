@@ -12,9 +12,9 @@ export default async function DividirPage() {
   const defaultCategoryId = cats.find((c) => c.name === "Comida")?.id ?? "";
 
   return (
-    <div className="screen-in">
-      <h1 className="mt-1.5 text-[26px] font-extrabold tracking-tight">Dividir cuenta</h1>
-      <p className="mt-1 text-sm font-medium text-muted">
+    <div className="screen-in px-1 pt-2">
+      <h1 className="text-[34px] font-extrabold leading-[0.95] tracking-[-0.03em]">Dividir cuenta</h1>
+      <p className="mt-2 text-sm font-medium text-muted">
         Foto del ticket, marca lo tuyo y calculamos cuánto te toca.
       </p>
       <SplitFlow

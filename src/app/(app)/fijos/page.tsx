@@ -33,66 +33,68 @@ export default async function FijosPage() {
   const fmt = (n: number) => formatMoneyShort(n, currency);
 
   return (
-    <div className="screen-in flex flex-col gap-4">
-      <div className="mt-1.5">
-        <Link href="/" className="text-sm font-bold text-coral-link">
-          ← Inicio
-        </Link>
-        <h1 className="text-[26px] font-extrabold tracking-tight">Pagos fijos</h1>
-        <p className="mt-1 text-sm font-medium text-muted">
-          Suscripciones, compras a meses y el recordatorio del pago de tu tarjeta.
-        </p>
-      </div>
+    <div className="screen-in px-1 pt-2">
+      <Link href="/" className="text-sm font-bold text-coral-link">
+        ← Inicio
+      </Link>
+      <h1 className="mt-1 text-[34px] font-extrabold leading-[0.95] tracking-[-0.03em]">Pagos fijos</h1>
+      <p className="mt-2 text-sm font-medium text-muted">
+        Suscripciones, compras a meses y el recordatorio del pago de tu tarjeta.
+      </p>
 
-      {/* Lista actual */}
+      {/* Lista actual — fichas de color encimadas */}
       {list.length > 0 && (
-        <div className="flex flex-col gap-2">
+        <div className="mt-7 -mx-[14px]">
           {list.map((p, i) => {
             const prog = installmentProgress(p);
             const vigente = isActiveNow(p);
-            const dayColor =
+            const cardColor =
               p.color ||
               (p.category_id ? catColorById.get(p.category_id) : undefined) ||
-              (p.kind === "card" ? "#FF6518" : "var(--color-sand)");
+              (p.kind === "card" ? "#e0532b" : "#D8CFB8");
             return (
               <div
                 key={p.id}
-                className={`flex items-center gap-3.5 rounded-[22px] bg-white px-[17px] py-[15px] ${
-                  vigente ? "" : "opacity-60"
-                }`}
-                style={{ animation: `slide-r .5s ${(0.05 + i * 0.06).toFixed(2)}s both` }}
+                className="relative rounded-[28px] px-6 pb-5 pt-5 text-[#111]"
+                style={{
+                  background: cardColor,
+                  opacity: vigente ? 1 : 0.6,
+                  marginTop: i === 0 ? 0 : -22,
+                  zIndex: i + 1,
+                  boxShadow: "0 -10px 24px -12px rgba(0,0,0,0.28)",
+                  animation: `slide-r .5s ${(0.05 + i * 0.06).toFixed(2)}s both`,
+                }}
               >
-                <div
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px] text-xs font-extrabold tabular-nums text-ink"
-                  style={{ background: dayColor }}
-                >
-                  {p.day_of_month}
+                <div className="flex items-center justify-between">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-black/10 text-[15px] font-extrabold tabular-nums text-[#111]">
+                    {p.day_of_month}
+                  </div>
+                  <span className="rounded-full bg-black/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-[#111]">
+                    {KIND_LABEL[p.kind]}
+                  </span>
                 </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="truncate text-base font-bold tracking-tight">{p.name}</span>
-                    <span className="shrink-0 rounded-full bg-crema px-2 py-0.5 text-[10px] font-bold uppercase text-muted-2">
-                      {KIND_LABEL[p.kind]}
-                    </span>
+                <div className="mt-6 flex items-end justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="truncate text-[22px] font-extrabold tracking-[-0.02em]">{p.name}</div>
+                    <div className="text-[13px] font-semibold text-black/50">
+                      {prog
+                        ? prog.done
+                          ? `Pagado · ${prog.total} de ${prog.total}`
+                          : `Mensualidad ${prog.paid} de ${prog.total} · termina ${prog.endLabel}`
+                        : `Cada día ${p.day_of_month}`}
+                    </div>
                   </div>
-                  <div className="text-xs font-medium text-muted">
-                    {prog
-                      ? prog.done
-                        ? `Pagado · ${prog.total} de ${prog.total}`
-                        : `Mensualidad ${prog.paid} de ${prog.total} · termina ${prog.endLabel}`
-                      : `Cada día ${p.day_of_month}`}
+                  <div className="shrink-0 text-right">
+                    <div className="text-[20px] font-extrabold tabular-nums">
+                      {p.amount ? fmt(Number(p.amount)) : "—"}
+                    </div>
+                    <form action={deleteRecurringPayment}>
+                      <input type="hidden" name="id" value={p.id} />
+                      <button type="submit" className="text-[11px] font-bold text-black/45">
+                        Eliminar
+                      </button>
+                    </form>
                   </div>
-                </div>
-                <div className="shrink-0 text-right">
-                  <div className="text-[15px] font-extrabold tabular-nums">
-                    {p.amount ? fmt(Number(p.amount)) : "—"}
-                  </div>
-                  <form action={deleteRecurringPayment}>
-                    <input type="hidden" name="id" value={p.id} />
-                    <button type="submit" className="text-[11px] font-bold text-coral-dark">
-                      Eliminar
-                    </button>
-                  </form>
                 </div>
               </div>
             );
@@ -101,7 +103,7 @@ export default async function FijosPage() {
       )}
 
       {/* Nueva suscripción */}
-      <form action={addRecurringPayment} className="rounded-[24px] bg-white p-5">
+      <form action={addRecurringPayment} className="mt-10 border-t border-crema pt-6">
         <input type="hidden" name="kind" value="subscription" />
         <h2 className="text-base font-extrabold tracking-tight">Nueva suscripción</h2>
         <p className="mt-0.5 text-[13px] font-medium text-muted">Netflix, Spotify, gym…</p>
@@ -127,7 +129,7 @@ export default async function FijosPage() {
       </form>
 
       {/* Nuevo pago a meses */}
-      <form action={addRecurringPayment} className="rounded-[24px] bg-white p-5">
+      <form action={addRecurringPayment} className="mt-10 border-t border-crema pt-6">
         <input type="hidden" name="kind" value="installment" />
         <h2 className="text-base font-extrabold tracking-tight">Pago a meses</h2>
         <p className="mt-0.5 text-[13px] font-medium text-muted">
@@ -165,7 +167,7 @@ export default async function FijosPage() {
       </form>
 
       {/* Recordatorio de tarjeta */}
-      <form action={addRecurringPayment} className="rounded-[24px] bg-white p-5">
+      <form action={addRecurringPayment} className="mt-10 border-t border-crema pt-6">
         <input type="hidden" name="kind" value="card" />
         <h2 className="text-base font-extrabold tracking-tight">Pago de tarjeta</h2>
         <p className="mt-0.5 text-[13px] font-medium text-muted">
