@@ -5,8 +5,8 @@ import { useEffect, useRef, useState } from "react";
 
 // Avatar con la inicial del usuario. Easter egg: 6 toques abren el panel
 // del creador. La versión sirve para saber qué build está corriendo.
-const VERSION = "2.3.0";
-const BUILD = "COCO-230";
+const VERSION = "2.4.0";
+const BUILD = "COCO-240";
 
 export function AvatarEgg({ initial }: { initial: string }) {
   const [taps, setTaps] = useState(0);

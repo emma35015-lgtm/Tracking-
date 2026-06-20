@@ -2,19 +2,19 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  /* Paleta "COCO — Editorial". crema = fondo taupe; coral = bermellón de acento. */
-  --color-crema: #c8c1b2;
-  --color-ink: #111111;
+  /* Paleta "COCO — Her". crema = marfil cálido; coral = bermellón de acento. */
+  --color-crema: #ece4d2;
+  --color-ink: #1a1714;
   --color-coral: #ff6518;
   --color-coral-dark: #c2480c;
   --color-coral-link: #c2480c;
-  --color-muted: rgba(17, 17, 17, 0.5);
-  --color-muted-2: rgba(17, 17, 17, 0.62);
-  --color-muted-3: rgba(17, 17, 17, 0.4);
-  --color-sand: rgba(17, 17, 17, 0.05);
-  --color-input: rgba(255, 255, 255, 0.18);
-  --color-input-border: rgba(17, 17, 17, 0.16);
-  --color-track: rgba(17, 17, 17, 0.16);
+  --color-muted: rgba(26, 23, 20, 0.5);
+  --color-muted-2: rgba(26, 23, 20, 0.62);
+  --color-muted-3: rgba(26, 23, 20, 0.4);
+  --color-sand: rgba(26, 23, 20, 0.05);
+  --color-input: rgba(255, 255, 255, 0.45);
+  --color-input-border: rgba(26, 23, 20, 0.14);
+  --color-track: rgba(26, 23, 20, 0.14);
   --color-mint: #a7d9bf;
   --color-mint-ink: #1e4435;
   /* Compatibilidad: brand = acento */
@@ -145,8 +145,8 @@ html.dark {
   --color-coral-dark:   #ff7a3d;
 }
 
-/* Cards "blancas" → superficie translúcida del estilo editorial */
-.bg-white { background-color: rgba(255, 255, 255, 0.22); }
+/* Cards "blancas" → superficie cálida suave sobre el marfil */
+.bg-white { background-color: rgba(255, 255, 255, 0.55); }
 html.dark .bg-white { background-color: rgba(255, 255, 255, 0.06); }
 
 /* Botones/dock oscuros */

@@ -4,8 +4,8 @@
   "description": "Tracking de gastos automático con Apple Pay y Siri",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#C8C1B2",
-  "theme_color": "#C8C1B2",
+  "background_color": "#ece4d2",
+  "theme_color": "#ece4d2",
   "icons": [
     {
       "src": "/icons/icon-192.png",
