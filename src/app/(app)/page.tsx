@@ -138,16 +138,6 @@ export default async function InicioPage() {
   const maxWeek = Math.max(...week.map((w) => w.total), 1);
   const todayKey = dayKey(new Date());
 
-  // Racha: días consecutivos con al menos un gasto, terminando hoy (o ayer).
-  const daysWithExpense = new Set(all.map((e) => dayKey(new Date(e.occurred_at))));
-  let streak = 0;
-  let cursor = new Date();
-  if (!daysWithExpense.has(dayKey(cursor))) cursor = new Date(Date.now() - 86_400_000);
-  while (daysWithExpense.has(dayKey(cursor))) {
-    streak++;
-    cursor = new Date(cursor.getTime() - 86_400_000);
-  }
-
   const prevMonthName = formatMonth(month === 1 ? year - 1 : year, month === 1 ? 12 : month - 1)
     .split(" ")[0]
     .toLowerCase();
@@ -190,20 +180,15 @@ export default async function InicioPage() {
         </div>
 
         <div className="mt-6">
-          <div className="count-up text-[76px] font-extrabold leading-[0.9] tracking-[-0.05em] tabular-nums">
+          <div className="count-up text-[96px] font-light leading-[0.92] tracking-[-0.04em] tabular-nums">
             {formatMoneyShort(total, currency)}
           </div>
-          <div className="mt-1.5 text-[12px] font-bold uppercase tracking-[0.16em] text-muted">
+          <div className="mt-2 text-[12px] font-bold uppercase tracking-[0.16em] text-muted">
             Gastos del mes
           </div>
         </div>
 
         <div className="mt-4 flex flex-wrap gap-2">
-          {streak >= 2 && (
-            <span className="whitespace-nowrap rounded-full bg-coral px-3 py-1.5 text-xs font-bold text-ink">
-              🔥 {streak} días seguidos
-            </span>
-          )}
           {deltaPct !== null && (
             <span className="whitespace-nowrap rounded-full bg-ink px-3 py-1.5 text-xs font-bold text-crema">
               {deltaPct >= 0 ? "↑" : "↓"} {Math.abs(deltaPct)}% vs {prevMonthName}
