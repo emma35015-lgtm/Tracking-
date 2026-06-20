@@ -161,10 +161,23 @@ export default async function AnalisisPage({
   const topPct = total > 0 ? Math.round((topCat.total / total) * 100) : 0;
   const maxExpense = current.reduce((m, e) => Math.max(m, Number(e.amount)), 0);
 
-  // Dona: r=78, circunferencia ≈ 490 (coincide con la animación donut-draw)
+  // Dona multicolor: un arco por categoría, en su color, apilados por fracción.
+  // r=78, circunferencia ≈ 490 (coincide con la animación donut-draw).
   const R = 78;
   const C = 2 * Math.PI * R;
-  const dash = C * (topPct / 100);
+  let donutAcc = 0;
+  const donutSegments = catRows.map(([name, { total: catTotal }], i) => {
+    const frac = total > 0 ? catTotal / total : 0;
+    const seg = {
+      name,
+      color: categoryColor(name),
+      len: C * frac,
+      rotation: -90 + donutAcc * 360,
+      delay: (0.1 + i * 0.08).toFixed(2),
+    };
+    donutAcc += frac;
+    return seg;
+  });
 
   return (
     <div className="screen-in px-1 pt-2">
@@ -176,22 +189,24 @@ export default async function AnalisisPage({
         </div>
       ) : (
         <div className="mt-5 flex flex-col gap-5">
-          {/* Dona */}
+          {/* Dona multicolor */}
           <div className="pop-in flex justify-center">
             <svg width="200" height="200" viewBox="0 0 200 200">
               <circle cx="100" cy="100" r={R} fill="none" stroke="var(--color-track)" strokeWidth="14" />
-              <circle
-                cx="100"
-                cy="100"
-                r={R}
-                fill="none"
-                stroke="#FF6518"
-                strokeWidth="14"
-                strokeLinecap="round"
-                strokeDasharray={`${dash} ${C}`}
-                transform="rotate(-90 100 100)"
-                style={{ animation: "donut-draw 1.1s cubic-bezier(.3,.9,.3,1) both" }}
-              />
+              {donutSegments.map((seg) => (
+                <circle
+                  key={seg.name}
+                  cx="100"
+                  cy="100"
+                  r={R}
+                  fill="none"
+                  stroke={seg.color}
+                  strokeWidth="14"
+                  strokeDasharray={`${seg.len} ${C}`}
+                  transform={`rotate(${seg.rotation} 100 100)`}
+                  style={{ animation: `donut-draw 1.1s cubic-bezier(.3,.9,.3,1) ${seg.delay}s both` }}
+                />
+              ))}
               <text x="100" y="90" textAnchor="middle" fontSize="13" fontWeight="600" fill="var(--color-muted)">
                 {topCat.name}
               </text>

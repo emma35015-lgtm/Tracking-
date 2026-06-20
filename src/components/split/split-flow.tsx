@@ -495,9 +495,9 @@ export function SplitFlow({
                     onClick={() => updateRow(row.id, { shared: !row.shared })}
                     className="rounded-full px-3 py-2 text-xs font-bold transition-all"
                     style={{
-                      border: `1.6px solid ${row.shared ? "#E07C55" : "#E2D8B6"}`,
-                      background: row.shared ? "#E07C55" : "#FBF6E6",
-                      color: row.shared ? "#fff" : "#15140F",
+                      border: `1.6px solid ${row.shared ? "#FF6518" : "var(--color-input-border)"}`,
+                      background: row.shared ? "#FF6518" : "transparent",
+                      color: "#111111",
                     }}
                   >
                     Compartido
@@ -575,9 +575,9 @@ export function SplitFlow({
               }}
               className="rounded-full px-4 py-2.5 text-sm font-bold transition-all"
               style={{
-                border: `1.6px solid ${selected ? "#E07C55" : "#E2D8B6"}`,
-                background: selected ? "#E07C55" : "#FBF6E6",
-                color: selected ? "#fff" : "#15140F",
+                border: `1.6px solid ${selected ? "#FF6518" : "var(--color-input-border)"}`,
+                background: selected ? "#FF6518" : "transparent",
+                color: selected ? "#fff" : "#111111",
               }}
             >
               {pct}%
@@ -593,9 +593,9 @@ export function SplitFlow({
           }}
           className="rounded-full px-4 py-2.5 text-sm font-bold transition-all"
           style={{
-            border: `1.6px solid ${tip.mode === "custom" ? "#E07C55" : "#E2D8B6"}`,
-            background: tip.mode === "custom" ? "#E07C55" : "#FBF6E6",
-            color: tip.mode === "custom" ? "#fff" : "#15140F",
+            border: `1.6px solid ${tip.mode === "custom" ? "#FF6518" : "var(--color-input-border)"}`,
+            background: tip.mode === "custom" ? "#FF6518" : "transparent",
+            color: tip.mode === "custom" ? "#fff" : "#111111",
           }}
         >
           Otro
@@ -624,21 +624,22 @@ export function SplitFlow({
 
         <div className="mb-2 text-[13px] font-bold text-muted-2">Guardar en la categoría</div>
         <div className="mb-3 flex flex-wrap gap-2">
-          {categories.map((c) => {
+          {categories.map((c, i) => {
             const selected = categoryId === c.id;
-            const pastel = categoryColor(c.name);
+            const color = categoryColor(c.name);
             return (
               <button
                 key={c.id}
                 type="button"
                 onClick={() => setCategoryId(selected ? "" : c.id)}
-                className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-[13px] font-semibold text-ink transition-all"
+                className="press inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-[13px] font-semibold text-ink transition-all"
                 style={{
-                  border: `1.6px solid ${selected ? pastel : "#E2D8B6"}`,
-                  background: selected ? pastel : "#FBF6E6",
+                  border: `1.6px solid ${selected ? "transparent" : "var(--color-input-border)"}`,
+                  background: selected ? color : "transparent",
+                  animation: `pop-in .3s ${(0.03 + i * 0.03).toFixed(2)}s both`,
                 }}
               >
-                <CategoryIcon name={c.name} emoji={c.icon} color="#15140F" size={16} />
+                <CategoryIcon name={c.name} emoji={c.icon} color="#111111" size={16} />
                 {c.name}
               </button>
             );

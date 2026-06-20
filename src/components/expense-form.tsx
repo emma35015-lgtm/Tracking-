@@ -32,10 +32,10 @@ export function ExpenseForm({
       <input type="hidden" name="category_id" value={categoryId} />
 
       {/* Monto */}
-      <div className="mt-[22px]">
+      <div className="count-up mt-[22px]">
         <div className="text-[13px] font-semibold text-muted">Monto</div>
         <div className="mt-0.5 text-[64px] font-extrabold leading-none tracking-[-0.05em] tabular-nums">
-          $<span>{amount === "" ? "0" : amount}</span>
+          $<span key={amount} style={{ display: "inline-block", animation: "pop-in .2s ease" }}>{amount === "" ? "0" : amount}</span>
         </div>
       </div>
 
@@ -50,7 +50,7 @@ export function ExpenseForm({
 
       {/* Categoría */}
       <div className="mt-[18px] flex flex-wrap gap-2">
-        {categories.map((c) => {
+        {categories.map((c, i) => {
           const selected = categoryId === c.id;
           const color = categoryColor(c.name);
           return (
@@ -58,10 +58,11 @@ export function ExpenseForm({
               key={c.id}
               type="button"
               onClick={() => setCategoryId(selected ? "" : c.id)}
-              className="rounded-full px-[15px] py-[9px] text-sm font-bold text-ink transition-all"
+              className="press rounded-full px-[15px] py-[9px] text-sm font-bold text-ink transition-all"
               style={{
                 border: `1.5px solid ${selected ? "transparent" : "var(--color-input-border)"}`,
                 background: selected ? color : "transparent",
+                animation: `pop-in .3s ${(0.04 + i * 0.03).toFixed(2)}s both`,
               }}
             >
               {c.name}
@@ -72,12 +73,13 @@ export function ExpenseForm({
 
       {/* Teclado */}
       <div className="mt-5 grid grid-cols-3 gap-2">
-        {KEYS.map((k) => (
+        {KEYS.map((k, i) => (
           <button
             key={k}
             type="button"
             onClick={() => press(k)}
             className="press h-[52px] rounded-[14px] border border-input-border bg-white text-2xl font-bold text-ink"
+            style={{ animation: `pop-in .3s ${(0.02 + i * 0.025).toFixed(3)}s both` }}
           >
             {k}
           </button>
@@ -87,7 +89,8 @@ export function ExpenseForm({
       <button
         type="submit"
         disabled={saving || !(parseFloat(amount) > 0)}
-        className="mt-4 h-[58px] rounded-[16px] bg-ink text-lg font-extrabold tracking-tight text-crema disabled:opacity-40"
+        className="press mt-4 h-[58px] rounded-[16px] bg-ink text-lg font-extrabold tracking-tight text-crema disabled:opacity-40"
+        style={{ animation: "count-up .5s .35s both" }}
       >
         {saving ? "Guardando…" : "Guardar gasto →"}
       </button>

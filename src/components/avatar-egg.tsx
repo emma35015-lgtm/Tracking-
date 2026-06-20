@@ -1,11 +1,12 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 // Avatar con la inicial del usuario. Easter egg: 6 toques abren el panel
-// de Developer Info. La versión sirve para saber qué build está corriendo.
-const VERSION = "2.0.0";
-const BUILD = "COCO-200";
+// del creador. La versión sirve para saber qué build está corriendo.
+const VERSION = "2.1.0";
+const BUILD = "COCO-210";
 
 export function AvatarEgg({ initial }: { initial: string }) {
   const [taps, setTaps] = useState(0);
@@ -37,38 +38,50 @@ export function AvatarEgg({ initial }: { initial: string }) {
         type="button"
         onClick={handleTap}
         aria-label="Perfil"
-        className="flex h-[38px] w-[38px] items-center justify-center rounded-full border-[1.4px] border-input-border text-base font-extrabold text-ink"
+        className="press flex h-[38px] w-[38px] items-center justify-center rounded-full border-[1.4px] border-input-border text-base font-extrabold text-ink"
       >
         {initial}
       </button>
 
       {open && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 px-8"
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/55 px-8"
           onClick={() => setOpen(false)}
         >
           <div
-            className="w-full max-w-xs rounded-[24px] bg-white p-6 text-center"
+            className="w-full max-w-xs rounded-[26px] bg-[#1c1a18] p-7 text-center text-[#efe7d2]"
+            style={{ animation: "pop-in .4s cubic-bezier(.2,.9,.3,1.15) both" }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="text-4xl">🥚</div>
-            <div className="mt-3 flex items-center justify-center gap-1.5 text-sm font-extrabold tracking-tight">
-              🔒 Developer Info
+            <Image
+              src="/brand/coco-logo.png"
+              alt="COCO"
+              width={72}
+              height={72}
+              className="mx-auto h-[72px] w-[72px] object-contain"
+              style={{ animation: "floaty 6s ease-in-out infinite" }}
+            />
+            <div className="mt-2 text-2xl font-extrabold leading-none tracking-[-0.05em]">COCO</div>
+            <div className="mt-1.5 text-[10px] font-bold uppercase tracking-[0.22em] text-[#efe7d2]/50">
+              gasta con cabeza
             </div>
-            <div className="mt-4 flex flex-col gap-1 text-sm">
+
+            <div className="mt-5 border-t border-white/10 pt-4">
               <div className="text-lg font-extrabold tracking-tight text-coral">Procesa Lab</div>
-              <div className="text-muted-2">
-                <span className="font-semibold">Creator:</span> Emma Juárez
+              <div className="mt-1 text-sm text-[#efe7d2]/65">
+                <span className="font-semibold">Creador:</span> Emma Juárez
               </div>
             </div>
+
             <div className="mt-4 flex justify-center gap-2 text-xs font-bold">
-              <span className="rounded-full bg-sand px-3 py-1 text-muted-2">Version {VERSION}</span>
-              <span className="rounded-full bg-ink px-3 py-1 text-white tabular-nums">Build {BUILD}</span>
+              <span className="rounded-full bg-white/10 px-3 py-1.5 text-[#efe7d2]">Version {VERSION}</span>
+              <span className="rounded-full bg-coral px-3 py-1.5 text-ink tabular-nums">Build {BUILD}</span>
             </div>
+
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="mt-5 w-full rounded-[14px] bg-sand py-2.5 text-sm font-bold text-ink"
+              className="press mt-6 w-full rounded-[14px] bg-[#efe7d2] py-3 text-sm font-extrabold text-[#1c1a18]"
             >
               Cerrar
             </button>

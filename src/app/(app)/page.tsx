@@ -38,6 +38,7 @@ export default async function InicioPage() {
     { data: budgetRow },
     { data: incomeRow },
     { data: rawPayments },
+    { data: categories },
   ] = await Promise.all([
     supabase
       .from("expenses")
@@ -51,11 +52,16 @@ export default async function InicioPage() {
     supabase
       .from("recurring_payments")
       .select("id, kind, name, amount, currency, day_of_month, category_id, total_months, start_date, active"),
+    supabase.from("categories").select("id, name"),
   ]);
 
   const monthlyBudget = budgetRow?.monthly_budget ? Number(budgetRow.monthly_budget) : null;
   const monthlyIncome = incomeRow?.monthly_income ? Number(incomeRow.monthly_income) : null;
   const payments = ((rawPayments ?? []) as RecurringPayment[]).filter((p) => isActiveNow(p));
+  // Mapa categoría → color para pintar los badges de pagos fijos.
+  const catColorById = new Map(
+    (categories ?? []).map((c) => [c.id, categoryColor(c.name)] as const)
+  );
 
   const all = (data ?? []) as unknown as ExpenseRow[];
   const expenses = all.filter((e) => e.occurred_at >= start.toISOString());
@@ -93,17 +99,28 @@ export default async function InicioPage() {
   }
   const cats = [...byCategory.entries()].sort((a, b) => b[1].total - a[1].total);
 
-  // Esta semana: últimos 7 días
-  const week: { label: string; key: string; total: number }[] = [];
+  // Esta semana: últimos 7 días, con la categoría dominante de cada día.
+  const week: { label: string; key: string; total: number; cats: Map<string, number> }[] = [];
   for (let i = 6; i >= 0; i--) {
     const d = new Date(Date.now() - i * 86_400_000);
-    week.push({ label: WEEKDAY[d.getDay()], key: dayKey(d), total: 0 });
+    week.push({ label: WEEKDAY[d.getDay()], key: dayKey(d), total: 0, cats: new Map() });
   }
   for (const e of all) {
     const key = dayKey(new Date(e.occurred_at));
     const slot = week.find((w) => w.key === key);
-    if (slot) slot.total += Number(e.amount);
+    if (slot) {
+      const amt = Number(e.amount);
+      slot.total += amt;
+      const cn = e.categories?.name ?? "Otros";
+      slot.cats.set(cn, (slot.cats.get(cn) ?? 0) + amt);
+    }
   }
+  const weekTopColor = (w: { cats: Map<string, number> }) => {
+    let best: string | null = null;
+    let max = 0;
+    for (const [n, v] of w.cats) if (v > max) { max = v; best = n; }
+    return categoryColor(best);
+  };
   const maxWeek = Math.max(...week.map((w) => w.total), 1);
   const todayKey = dayKey(new Date());
 
@@ -220,12 +237,18 @@ export default async function InicioPage() {
             </div>
           )}
           <div className="flex flex-col divide-y divide-crema rounded-[20px] bg-white px-[18px]">
-            {upcoming.map(({ p, days }) => (
-              <div key={p.id} className="flex items-center gap-3 py-3">
+            {upcoming.map(({ p, days }, i) => {
+              const catColor = p.category_id ? catColorById.get(p.category_id) : undefined;
+              const badgeBg = p.kind === "card" ? "#FF6518" : catColor ?? "var(--color-sand)";
+              return (
+              <div
+                key={p.id}
+                className="flex items-center gap-3 py-3"
+                style={{ animation: `slide-r .5s ${(0.05 + i * 0.06).toFixed(2)}s both` }}
+              >
                 <div
-                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-extrabold tabular-nums ${
-                    p.kind === "card" ? "bg-coral text-ink" : "bg-sand"
-                  }`}
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-extrabold tabular-nums text-ink"
+                  style={{ background: badgeBg }}
                 >
                   {p.day_of_month}
                 </div>
@@ -243,7 +266,8 @@ export default async function InicioPage() {
                   <span className="text-xs font-medium text-muted">variable</span>
                 )}
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
@@ -295,20 +319,21 @@ export default async function InicioPage() {
           {week.map((w, i) => {
             const peak = w.total === maxWeek && w.total > 0;
             const isToday = w.key === todayKey;
+            const barColor = w.total > 0 ? weekTopColor(w) : "var(--color-ink)";
             return (
               <div key={i} className="flex flex-1 flex-col items-center gap-2">
                 <span
                   className="text-[10px] font-bold tabular-nums"
-                  style={{ color: peak ? "#FF6518" : "var(--color-muted)" }}
+                  style={{ color: w.total > 0 ? barColor : "var(--color-muted)" }}
                 >
                   ${Math.round(w.total).toLocaleString("es-MX")}
                 </span>
                 <div
                   className="rounded"
                   style={{
-                    width: peak ? 13 : 10,
+                    width: peak ? 14 : 11,
                     height: Math.max(8, (w.total / maxWeek) * 90),
-                    background: peak ? "#FF6518" : "var(--color-ink)",
+                    background: barColor,
                     opacity: w.total > 0 ? 1 : 0.25,
                     transformOrigin: "bottom",
                     animation: `bar-rise .6s cubic-bezier(.2,.8,.2,1) ${(0.1 + i * 0.06).toFixed(2)}s both`,
@@ -337,17 +362,21 @@ export default async function InicioPage() {
             <span className="text-lg font-extrabold text-coral">→</span>
           </Link>
         )}
-        <HomeLink href="/dividir" title="Dividir cuenta" sub="Foto del ticket y calculamos tu parte" />
-        <HomeLink href="/viajes" title="Viajes" sub="El bote compartido: cuánto queda y quién debe" />
-        <HomeLink href="/fijos" title="Pagos fijos" sub="Suscripciones, meses y tu tarjeta" />
+        <HomeLink i={0} href="/dividir" title="Dividir cuenta" sub="Foto del ticket y calculamos tu parte" />
+        <HomeLink i={1} href="/viajes" title="Viajes" sub="El bote compartido: cuánto queda y quién debe" />
+        <HomeLink i={2} href="/fijos" title="Pagos fijos" sub="Suscripciones, meses y tu tarjeta" />
       </div>
     </div>
   );
 }
 
-function HomeLink({ href, title, sub }: { href: string; title: string; sub: string }) {
+function HomeLink({ href, title, sub, i }: { href: string; title: string; sub: string; i: number }) {
   return (
-    <Link href={href} className="flex items-center justify-between rounded-[18px] border border-input-border bg-white px-[18px] py-4">
+    <Link
+      href={href}
+      className="flex items-center justify-between rounded-[18px] border border-input-border bg-white px-[18px] py-4"
+      style={{ animation: `slide-r .5s ${(0.06 + i * 0.07).toFixed(2)}s both` }}
+    >
       <div>
         <div className="text-[15px] font-bold tracking-tight">{title}</div>
         <div className="text-xs font-medium text-muted">{sub}</div>

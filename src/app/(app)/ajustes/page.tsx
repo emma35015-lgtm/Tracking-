@@ -205,6 +205,7 @@ export default async function AjustesPage() {
             className={`flex items-center gap-[13px] px-[18px] py-3.5 ${
               i < arr.length - 1 ? "border-b border-crema" : ""
             }`}
+            style={{ animation: `slide-r .45s ${(0.04 + i * 0.04).toFixed(2)}s both` }}
           >
             <div
               className="flex h-[34px] w-[34px] items-center justify-center rounded-[11px]"

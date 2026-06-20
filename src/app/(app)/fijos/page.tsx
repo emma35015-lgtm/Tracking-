@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { formatMoneyShort } from "@/lib/format";
+import { categoryColor } from "@/lib/category-style";
 import {
   installmentProgress,
   isActiveNow,
@@ -26,6 +27,7 @@ export default async function FijosPage() {
 
   const list = (payments ?? []) as RecurringPayment[];
   const cats = categories ?? [];
+  const catColorById = new Map(cats.map((c) => [c.id, categoryColor(c.name)] as const));
   const currency = profile?.default_currency ?? "MXN";
   const fmt = (n: number) => formatMoneyShort(n, currency);
 
@@ -44,17 +46,23 @@ export default async function FijosPage() {
       {/* Lista actual */}
       {list.length > 0 && (
         <div className="flex flex-col gap-2">
-          {list.map((p) => {
+          {list.map((p, i) => {
             const prog = installmentProgress(p);
             const vigente = isActiveNow(p);
+            const dayColor =
+              p.kind === "card" ? "#FF6518" : (p.category_id && catColorById.get(p.category_id)) || "var(--color-sand)";
             return (
               <div
                 key={p.id}
                 className={`flex items-center gap-3.5 rounded-[22px] bg-white px-[17px] py-[15px] ${
                   vigente ? "" : "opacity-60"
                 }`}
+                style={{ animation: `slide-r .5s ${(0.05 + i * 0.06).toFixed(2)}s both` }}
               >
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px] bg-sand text-xs font-extrabold tabular-nums text-muted-2">
+                <div
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px] text-xs font-extrabold tabular-nums text-ink"
+                  style={{ background: dayColor }}
+                >
                   {p.day_of_month}
                 </div>
                 <div className="min-w-0 flex-1">

@@ -28,11 +28,12 @@ export default async function ViajesPage() {
 
       {list.length > 0 && (
         <div className="mt-4 flex flex-col gap-2">
-          {list.map((t) => (
+          {list.map((t, i) => (
             <Link
               key={t.id}
               href={`/viajes/${t.id}`}
               className="flex items-center gap-3.5 rounded-[22px] bg-white px-[17px] py-[15px]"
+              style={{ animation: `slide-r .5s ${(0.05 + i * 0.06).toFixed(2)}s both` }}
             >
               <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-mint">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E4435" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">

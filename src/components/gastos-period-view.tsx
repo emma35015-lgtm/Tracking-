@@ -48,7 +48,7 @@ export function GastosPeriodView({ items }: { items: GastoItem[] }) {
 
       {/* Selector de periodo: números grandes */}
       <div className="mt-2.5">
-        {PERIODS.map((p) => {
+        {PERIODS.map((p, i) => {
           const active = period === p;
           return (
             <button
@@ -56,6 +56,7 @@ export function GastosPeriodView({ items }: { items: GastoItem[] }) {
               type="button"
               onClick={() => setPeriod(p)}
               className="block w-full border-b border-crema py-2.5 text-left"
+              style={{ animation: `slide-r .5s ${(0.05 + i * 0.05).toFixed(2)}s both` }}
             >
               <span
                 className="text-[42px] font-extrabold tracking-[-0.035em] transition-colors"
@@ -84,11 +85,12 @@ export function GastosPeriodView({ items }: { items: GastoItem[] }) {
             Sin gastos en este periodo.
           </div>
         ) : (
-          filtered.map((it) => (
+          filtered.map((it, i) => (
             <Link
               key={it.id}
               href={`/gastos/${it.id}`}
               className="flex items-center gap-3 border-b border-crema py-3"
+              style={{ animation: `slide-r .45s ${(0.04 + i * 0.04).toFixed(2)}s both` }}
             >
               <div
                 className="flex h-10 w-10 flex-none items-center justify-center rounded-full text-[15px] font-extrabold text-[#111]"
