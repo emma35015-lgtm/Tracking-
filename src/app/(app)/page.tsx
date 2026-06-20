@@ -217,9 +217,9 @@ export default async function InicioPage() {
 
       {/* Banda oscura: restante del presupuesto */}
       {monthlyBudget && monthlyBudget > 0 ? (
-        <Link href="/ajustes" className="pop-in mt-5 block rounded-[26px] bg-ink p-5 text-crema">
+        <Link href="/ajustes" className="pop-in mt-5 block rounded-[26px] bg-[#15140f] p-5 text-[#efe7d2] dark:bg-[#2c2820]">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-crema/55">
+            <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#efe7d2]/55">
               Restante del presupuesto
             </span>
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10">
@@ -235,13 +235,13 @@ export default async function InicioPage() {
             <span className="text-[44px] font-extrabold leading-none tracking-[-0.04em] tabular-nums">
               {formatMoneyShort(budgetAvail, currency)}
             </span>
-            <span className="text-xs font-semibold text-crema/55">de {formatMoneyShort(monthlyBudget, currency)}</span>
+            <span className="text-xs font-semibold text-[#efe7d2]/55">de {formatMoneyShort(monthlyBudget, currency)}</span>
           </div>
         </Link>
       ) : (
         <Link
           href="/ajustes"
-          className="mt-5 flex items-center justify-between rounded-[26px] bg-ink p-5 text-crema"
+          className="mt-5 flex items-center justify-between rounded-[26px] bg-[#15140f] p-5 text-[#efe7d2] dark:bg-[#2c2820]"
         >
           <span className="text-[15px] font-bold">Ponte un presupuesto mensual</span>
           <span className="text-xl font-extrabold text-coral">→</span>
@@ -499,10 +499,12 @@ function HomeCard({
   return (
     <Link
       href={href}
-      className="relative block rounded-[28px] px-6 pb-5 pt-5"
+      className={`relative block rounded-[28px] px-6 pb-5 pt-5 ${
+        dark ? "bg-[#15140f] text-[#efe7d2] dark:bg-[#2c2820]" : ""
+      }`}
       style={{
-        background: color,
-        color: dark ? "var(--color-crema)" : "#111",
+        background: dark ? undefined : color,
+        color: dark ? undefined : "#111",
         marginTop: i === 0 ? 0 : -22,
         zIndex: i + 1,
         boxShadow: "0 -10px 24px -12px rgba(0,0,0,0.28)",
