@@ -17,9 +17,16 @@ export const CATEGORY_COLORS: Record<string, string> = {
   Viajes: "#9FD0C4",
 };
 
-export function categoryColor(name?: string | null): string {
-  return (name && CATEGORY_COLORS[name]) || "#D8CFB8";
+export function categoryColor(name?: string | null, stored?: string | null): string {
+  return (stored && stored.trim()) || (name && CATEGORY_COLORS[name]) || "#D8CFB8";
 }
+
+// Paleta de muestras para el selector de color (la base COCO + extras).
+export const SWATCHES: string[] = [
+  "#FF6518", "#F4CF12", "#A7D9BF", "#9EC8E0", "#C9B8E8",
+  "#D995AF", "#F2B79F", "#B8D9E8", "#9FD0C4", "#E8956B",
+  "#7FB5A6", "#D8CFB8",
+];
 
 type Shape =
   | ["path", string]

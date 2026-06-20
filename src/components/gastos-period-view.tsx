@@ -59,7 +59,7 @@ export function GastosPeriodView({ items }: { items: GastoItem[] }) {
               style={{ animation: `slide-r .5s ${(0.05 + i * 0.05).toFixed(2)}s both` }}
             >
               <span
-                className="text-[42px] font-extrabold tracking-[-0.035em] transition-colors"
+                className="font-display text-[44px] font-black tracking-[-0.02em] transition-colors"
                 style={{ color: active ? "#FF6518" : "var(--color-muted-3)" }}
               >
                 {p}

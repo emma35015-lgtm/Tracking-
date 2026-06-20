@@ -20,6 +20,13 @@
   /* Compatibilidad: brand = acento */
   --color-brand: #ff6518;
   --font-sans: "Archivo", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: "Fraunces", "Archivo", Georgia, serif;
+}
+
+/* Tipografía editorial para títulos y números grandes */
+.font-display {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
 }
 
 html {
@@ -104,6 +111,17 @@ textarea {
 .ed-in { animation: ed-in 0.36s ease both; }
 .pop-in { animation: pop-in 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.15) both; }
 .count-up { animation: count-up 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+
+/* Festejo al guardar un gasto */
+@keyframes confetti-fall {
+  0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(150px) rotate(420deg); opacity: 0; }
+}
+@keyframes success-pop {
+  0% { transform: scale(0.4); opacity: 0; }
+  60% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
 
 /* Banda de categoría a todo lo ancho: al pasar/tocar se expande un poco */
 .band-row {

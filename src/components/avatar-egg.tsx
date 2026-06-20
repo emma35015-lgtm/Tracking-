@@ -5,8 +5,8 @@ import { useEffect, useRef, useState } from "react";
 
 // Avatar con la inicial del usuario. Easter egg: 6 toques abren el panel
 // del creador. La versión sirve para saber qué build está corriendo.
-const VERSION = "2.1.0";
-const BUILD = "COCO-210";
+const VERSION = "2.2.0";
+const BUILD = "COCO-220";
 
 export function AvatarEgg({ initial }: { initial: string }) {
   const [taps, setTaps] = useState(0);
@@ -38,7 +38,8 @@ export function AvatarEgg({ initial }: { initial: string }) {
         type="button"
         onClick={handleTap}
         aria-label="Perfil"
-        className="press flex h-[38px] w-[38px] items-center justify-center rounded-full border-[1.4px] border-input-border text-base font-extrabold text-ink"
+        className="press flex h-[40px] w-[40px] items-center justify-center rounded-full text-base font-extrabold text-white shadow-[0_4px_12px_-3px_rgba(242,100,30,0.6)]"
+        style={{ background: "linear-gradient(135deg, #FF6518, #D995AF)" }}
       >
         {initial}
       </button>

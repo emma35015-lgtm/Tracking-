@@ -9,7 +9,7 @@ type ExpenseRow = {
   currency: string;
   merchant: string | null;
   occurred_at: string;
-  categories: { name: string; icon: string } | null;
+  categories: { name: string; icon: string; color: string | null } | null;
 };
 
 export default async function GastosPage() {
@@ -19,7 +19,7 @@ export default async function GastosPage() {
   const supabase = await createClient();
   const { data } = await supabase
     .from("expenses")
-    .select("id, amount, currency, merchant, occurred_at, categories(name, icon)")
+    .select("id, amount, currency, merchant, occurred_at, categories(name, icon, color)")
     .gte("occurred_at", yearStart.toISOString())
     .order("occurred_at", { ascending: false });
 
@@ -45,7 +45,7 @@ export default async function GastosPage() {
       thisMonth: d.getUTCFullYear() === now.getFullYear() && d.getUTCMonth() === now.getMonth(),
       thisYear: d.getUTCFullYear() === now.getFullYear(),
       mono: (title || "?").trim().charAt(0).toUpperCase(),
-      color: categoryColor(category),
+      color: categoryColor(category, e.categories?.color),
     };
   });
 

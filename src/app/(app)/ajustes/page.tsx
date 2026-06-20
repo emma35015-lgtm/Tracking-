@@ -10,6 +10,7 @@ import {
 } from "@/app/(app)/actions";
 import { CategoryIcon, categoryColor } from "@/lib/category-style";
 import { DarkModeToggle } from "@/components/dark-mode-toggle";
+import { ColorSwatches } from "@/components/color-swatches";
 
 const CURRENCIES: [string, string][] = [
   ["MXN", "Peso mexicano"],
@@ -41,7 +42,7 @@ export default async function AjustesPage() {
   const [{ data: profile }, { data: categories }, { data: token }, { data: budgetRow }] =
     await Promise.all([
       supabase.from("profiles").select("display_name, default_currency").maybeSingle(),
-      supabase.from("categories").select("id, name, icon").order("name"),
+      supabase.from("categories").select("id, name, icon, color").order("name"),
       supabase.from("api_tokens").select("label, created_at, last_used_at").maybeSingle(),
       // Aparte: si las columnas no existen (migración pendiente), no rompe el resto.
       supabase.from("profiles").select("monthly_budget, monthly_income").maybeSingle(),
@@ -209,7 +210,7 @@ export default async function AjustesPage() {
           >
             <div
               className="flex h-[34px] w-[34px] items-center justify-center rounded-[11px]"
-              style={{ background: categoryColor(c.name) }}
+              style={{ background: categoryColor(c.name, c.color) }}
             >
               <CategoryIcon name={c.name} emoji={c.icon} color="#15140F" size={18} />
             </div>
@@ -223,21 +224,25 @@ export default async function AjustesPage() {
           </div>
         ))}
       </div>
-      <form action={addCategory} className="mt-3 flex gap-2">
-        <input
-          name="icon"
-          placeholder="🛍️"
-          maxLength={4}
-          className="w-16 rounded-[14px] border-[1.6px] border-input-border bg-input px-2 py-[13px] text-center outline-none focus:border-coral"
-        />
-        <input
-          name="name"
-          required
-          placeholder="Nueva categoría"
-          className="flex-1 rounded-[14px] border-[1.6px] border-input-border bg-input px-[15px] py-[13px] text-[15px] font-medium outline-none focus:border-coral"
-        />
-        <button type="submit" className="rounded-[14px] bg-ink px-4 text-sm font-bold text-white">
-          Añadir
+      <form action={addCategory} className="mt-3 rounded-[18px] bg-white p-4">
+        <div className="flex gap-2">
+          <input
+            name="icon"
+            placeholder="🛍️"
+            maxLength={4}
+            className="w-16 rounded-[14px] border-[1.6px] border-input-border bg-input px-2 py-[13px] text-center outline-none focus:border-coral"
+          />
+          <input
+            name="name"
+            required
+            placeholder="Nueva categoría"
+            className="flex-1 rounded-[14px] border-[1.6px] border-input-border bg-input px-[15px] py-[13px] text-[15px] font-medium outline-none focus:border-coral"
+          />
+        </div>
+        <div className="mb-2 mt-3 text-[13px] font-bold text-muted-2">Color</div>
+        <ColorSwatches name="color" />
+        <button type="submit" className="mt-4 h-[46px] w-full rounded-[14px] bg-ink text-sm font-bold text-white">
+          Añadir categoría
         </button>
       </form>
       <p className="mx-1 mt-2 text-xs font-medium text-muted">

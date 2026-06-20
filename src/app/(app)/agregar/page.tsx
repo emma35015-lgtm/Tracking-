@@ -6,7 +6,7 @@ export default async function AgregarPage() {
   const supabase = await createClient();
   const { data: categories } = await supabase
     .from("categories")
-    .select("id, name, icon")
+    .select("id, name, icon, color")
     .order("name");
 
   return (

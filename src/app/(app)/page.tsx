@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { formatMonth, formatMoneyShort, dayKey } from "@/lib/format";
 import { categoryColor } from "@/lib/category-style";
 import { AvatarEgg } from "@/components/avatar-egg";
+import { MonthlyRecap } from "@/components/monthly-recap";
 import {
   isActiveNow,
   daysUntilDay,
@@ -18,10 +19,24 @@ type ExpenseRow = {
   merchant: string | null;
   occurred_at: string;
   source: string;
-  categories: { name: string; icon: string } | null;
+  categories: { name: string; icon: string; color: string | null } | null;
 };
 
 const WEEKDAY = ["D", "L", "M", "M", "J", "V", "S"];
+// Colores distintos para los accesos de Inicio.
+const LINK_COLORS: Record<string, string> = {
+  "/dividir": "#A7D9BF",
+  "/viajes": "#9EC8E0",
+  "/fijos": "#C9B8E8",
+};
+// Color del número/barra de "Disponible" según la salud del gasto.
+const STATUS_COLOR: Record<string, string> = {
+  ok: "#2FA37A",
+  good: "#2FA37A",
+  watch: "#E0A012",
+  tight: "#FF6518",
+  over: "#D8402A",
+};
 
 export default async function InicioPage() {
   const now = new Date();
@@ -42,7 +57,7 @@ export default async function InicioPage() {
   ] = await Promise.all([
     supabase
       .from("expenses")
-      .select("id, amount, currency, merchant, occurred_at, source, categories(name, icon)")
+      .select("id, amount, currency, merchant, occurred_at, source, categories(name, icon, color)")
       .gte("occurred_at", prevStart.toISOString())
       .order("occurred_at", { ascending: false }),
     supabase.from("profiles").select("display_name, default_currency").maybeSingle(),
@@ -51,8 +66,8 @@ export default async function InicioPage() {
     supabase.from("profiles").select("monthly_income").maybeSingle(),
     supabase
       .from("recurring_payments")
-      .select("id, kind, name, amount, currency, day_of_month, category_id, total_months, start_date, active"),
-    supabase.from("categories").select("id, name"),
+      .select("id, kind, name, amount, currency, day_of_month, category_id, total_months, start_date, active, color"),
+    supabase.from("categories").select("id, name, color"),
   ]);
 
   const monthlyBudget = budgetRow?.monthly_budget ? Number(budgetRow.monthly_budget) : null;
@@ -60,8 +75,12 @@ export default async function InicioPage() {
   const payments = ((rawPayments ?? []) as RecurringPayment[]).filter((p) => isActiveNow(p));
   // Mapa categoría → color para pintar los badges de pagos fijos.
   const catColorById = new Map(
-    (categories ?? []).map((c) => [c.id, categoryColor(c.name)] as const)
+    (categories ?? []).map((c) => [c.id, categoryColor(c.name, c.color)] as const)
   );
+  const catColorByName = new Map(
+    (categories ?? []).map((c) => [c.name, categoryColor(c.name, c.color)] as const)
+  );
+  const colorOfCat = (n?: string | null) => (n && catColorByName.get(n)) || categoryColor(n);
 
   const all = (data ?? []) as unknown as ExpenseRow[];
   const expenses = all.filter((e) => e.occurred_at >= start.toISOString());
@@ -119,10 +138,20 @@ export default async function InicioPage() {
     let best: string | null = null;
     let max = 0;
     for (const [n, v] of w.cats) if (v > max) { max = v; best = n; }
-    return categoryColor(best);
+    return colorOfCat(best);
   };
   const maxWeek = Math.max(...week.map((w) => w.total), 1);
   const todayKey = dayKey(new Date());
+
+  // Racha: días consecutivos con al menos un gasto, terminando hoy (o ayer).
+  const daysWithExpense = new Set(all.map((e) => dayKey(new Date(e.occurred_at))));
+  let streak = 0;
+  let cursor = new Date();
+  if (!daysWithExpense.has(dayKey(cursor))) cursor = new Date(Date.now() - 86_400_000);
+  while (daysWithExpense.has(dayKey(cursor))) {
+    streak++;
+    cursor = new Date(cursor.getTime() - 86_400_000);
+  }
 
   const prevMonthName = formatMonth(month === 1 ? year - 1 : year, month === 1 ? 12 : month - 1)
     .split(" ")[0]
@@ -132,12 +161,23 @@ export default async function InicioPage() {
   const budgetPct = monthlyBudget && monthlyBudget > 0 ? Math.min(100, Math.round((total / monthlyBudget) * 100)) : 0;
   const budgetAvail = monthlyBudget ? Math.max(0, monthlyBudget - total) : 0;
 
+  // Resumen del mes pasado (categoría top).
+  const prevByCat = new Map<string, number>();
+  for (const e of prevExpenses) {
+    const n = e.categories?.name ?? "Otros";
+    prevByCat.set(n, (prevByCat.get(n) ?? 0) + Number(e.amount));
+  }
+  let prevTopCat = "—";
+  let prevTopMax = 0;
+  for (const [n, v] of prevByCat) if (v > prevTopMax) { prevTopMax = v; prevTopCat = n; }
+  const prevTopColor = colorOfCat(prevTopCat);
+
   return (
     <div className="screen-in px-1 pt-2.5">
       {/* Wordmark */}
       <div className="flex items-center justify-between">
         <div>
-          <div className="text-[26px] font-extrabold leading-[0.85] tracking-[-0.05em]">COCO</div>
+          <div className="font-display text-[34px] font-black leading-[0.85] tracking-[-0.02em]">COCO</div>
           <div className="mt-1 text-[8.5px] font-bold uppercase tracking-[0.2em] text-muted">
             gasta con cabeza
           </div>
@@ -150,20 +190,35 @@ export default async function InicioPage() {
         <div className="text-[13px] font-semibold text-muted">
           Gastos del mes — {formatMonth(year, month)}
         </div>
-        <div className="count-up mt-1.5 text-[66px] font-extrabold leading-[0.95] tracking-[-0.05em] tabular-nums">
+        <div className="count-up font-display mt-1.5 text-[78px] font-black leading-[0.92] tracking-[-0.03em] tabular-nums">
           {formatMoneyShort(total, currency)}
         </div>
         <div className="mt-3.5 flex flex-wrap gap-2">
+          {streak >= 2 && (
+            <span className="whitespace-nowrap rounded-full bg-coral px-3 py-1.5 text-xs font-bold text-ink">
+              🔥 {streak} días seguidos
+            </span>
+          )}
           {deltaPct !== null && (
             <span className="whitespace-nowrap rounded-full bg-ink px-3 py-1.5 text-xs font-bold text-crema">
               {deltaPct >= 0 ? "↑" : "↓"} {Math.abs(deltaPct)}% vs {prevMonthName}
             </span>
           )}
-          <span className="whitespace-nowrap rounded-full bg-coral px-3 py-1.5 text-xs font-bold text-ink">
+          <span className="whitespace-nowrap rounded-full border border-input-border px-3 py-1.5 text-xs font-bold text-ink">
             {expenses.length} {expenses.length === 1 ? "gasto" : "gastos"}
           </span>
         </div>
       </div>
+
+      {prevTotal > 0 && (
+        <MonthlyRecap
+          monthName={prevMonthName}
+          total={formatMoneyShort(prevTotal, currency)}
+          topCategory={prevTopCat}
+          topColor={prevTopColor}
+          count={prevExpenses.length}
+        />
+      )}
 
       {/* Presupuesto */}
       {monthlyBudget && monthlyBudget > 0 ? (
@@ -203,20 +258,19 @@ export default async function InicioPage() {
             <span className="text-xs font-semibold text-muted">de {formatMoneyShort(monthlyIncome!, currency)}</span>
           </div>
           <div
-            className={`mt-1 text-[34px] font-extrabold leading-none tracking-[-0.04em] tabular-nums ${
-              status.available < 0 ? "text-coral" : ""
-            }`}
+            className="font-display mt-1 text-[40px] font-black leading-none tracking-[-0.03em] tabular-nums"
+            style={{ color: STATUS_COLOR[status.level] }}
           >
             {formatMoneyShort(status.available, currency)}
           </div>
           <div className="mt-3.5 h-2.5 overflow-hidden rounded-full bg-track">
             <div
-              className="h-full rounded-full bg-coral"
-              style={{ width: `${Math.min(Math.round(status.pct * 100), 100)}%` }}
+              className="h-full rounded-full"
+              style={{ width: `${Math.min(Math.round(status.pct * 100), 100)}%`, background: STATUS_COLOR[status.level] }}
             />
           </div>
           <div className="mt-2.5 text-[13px] font-semibold leading-snug">
-            {status.title}.{" "}
+            <span style={{ color: STATUS_COLOR[status.level] }}>{status.title}.</span>{" "}
             <span className="font-medium text-muted">{status.message}</span>
           </div>
         </div>
@@ -284,13 +338,13 @@ export default async function InicioPage() {
                   key={catName}
                   href="/gastos"
                   className="band-row flex items-center gap-3.5"
-                  style={{ background: categoryColor(catName), padding: "17px 22px", animation: `slide-r .5s ${(0.06 + i * 0.06).toFixed(2)}s both` }}
+                  style={{ background: colorOfCat(catName), padding: "17px 22px", animation: `slide-r .5s ${(0.06 + i * 0.06).toFixed(2)}s both` }}
                 >
                   <span className="flex h-[27px] w-[27px] flex-none items-center justify-center rounded-full border-[1.6px] border-black/50 text-xs font-extrabold text-[#111]">
                     {i + 1}
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[25px] font-extrabold leading-none tracking-[-0.03em] text-[#111]">
+                    <span className="font-display block truncate text-[26px] font-black leading-none tracking-[-0.02em] text-[#111]">
                       {catName}
                     </span>
                     <span className="mt-1.5 block text-xs font-semibold text-black/55">
@@ -374,14 +428,14 @@ function HomeLink({ href, title, sub, i }: { href: string; title: string; sub: s
   return (
     <Link
       href={href}
-      className="flex items-center justify-between rounded-[18px] border border-input-border bg-white px-[18px] py-4"
-      style={{ animation: `slide-r .5s ${(0.06 + i * 0.07).toFixed(2)}s both` }}
+      className="press flex items-center justify-between rounded-[18px] px-[18px] py-4 text-[#111]"
+      style={{ background: LINK_COLORS[href] ?? "var(--color-sand)", animation: `slide-r .5s ${(0.06 + i * 0.07).toFixed(2)}s both` }}
     >
       <div>
         <div className="text-[15px] font-bold tracking-tight">{title}</div>
-        <div className="text-xs font-medium text-muted">{sub}</div>
+        <div className="text-xs font-medium text-black/55">{sub}</div>
       </div>
-      <span className="text-lg font-extrabold text-coral">→</span>
+      <span className="text-lg font-extrabold">→</span>
     </Link>
   );
 }

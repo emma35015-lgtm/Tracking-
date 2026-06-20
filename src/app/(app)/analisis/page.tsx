@@ -4,13 +4,16 @@ import { resolveMonth } from "@/lib/months";
 import { MonthHeader } from "@/components/month-header";
 import { categoryColor } from "@/lib/category-style";
 
+// Colores rotativos para las tarjetas de tips ("Según tus datos").
+const TIP_COLORS = ["#A7D9BF", "#9EC8E0", "#F2B79F", "#C9B8E8", "#F4CF12"];
+
 type ExpenseRow = {
   amount: number;
   currency: string;
   merchant: string | null;
   occurred_at: string;
   source: string;
-  categories: { name: string; icon: string } | null;
+  categories: { name: string; icon: string; color: string | null } | null;
 };
 
 function sum(list: ExpenseRow[]) {
@@ -18,11 +21,11 @@ function sum(list: ExpenseRow[]) {
 }
 
 function groupByCategory(list: ExpenseRow[]) {
-  const map = new Map<string, { icon: string; total: number; count: number }>();
+  const map = new Map<string, { icon: string; total: number; count: number; color: string | null }>();
   for (const e of list) {
     const name = e.categories?.name ?? "Sin categoría";
     const icon = e.categories?.icon ?? "❓";
-    const entry = map.get(name) ?? { icon, total: 0, count: 0 };
+    const entry = map.get(name) ?? { icon, total: 0, count: 0, color: e.categories?.color ?? null };
     entry.total += Number(e.amount);
     entry.count += 1;
     map.set(name, entry);
@@ -134,7 +137,7 @@ export default async function AnalisisPage({
   const supabase = await createClient();
   const { data } = await supabase
     .from("expenses")
-    .select("amount, currency, merchant, occurred_at, source, categories(name, icon)")
+    .select("amount, currency, merchant, occurred_at, source, categories(name, icon, color)")
     .gte("occurred_at", prevStart.toISOString())
     .lt("occurred_at", end.toISOString())
     .order("occurred_at", { ascending: true });
@@ -166,11 +169,11 @@ export default async function AnalisisPage({
   const R = 78;
   const C = 2 * Math.PI * R;
   let donutAcc = 0;
-  const donutSegments = catRows.map(([name, { total: catTotal }], i) => {
+  const donutSegments = catRows.map(([name, { total: catTotal, color }], i) => {
     const frac = total > 0 ? catTotal / total : 0;
     const seg = {
       name,
-      color: categoryColor(name),
+      color: categoryColor(name, color),
       len: C * frac,
       rotation: -90 + donutAcc * 360,
       delay: (0.1 + i * 0.08).toFixed(2),
@@ -210,7 +213,7 @@ export default async function AnalisisPage({
               <text x="100" y="90" textAnchor="middle" fontSize="13" fontWeight="600" fill="var(--color-muted)">
                 {topCat.name}
               </text>
-              <text x="100" y="126" textAnchor="middle" fontSize="40" fontWeight="800" letterSpacing="-0.03em" fill="var(--color-ink)">
+              <text x="100" y="128" textAnchor="middle" fontSize="46" fontWeight="800" letterSpacing="-0.02em" fill="var(--color-ink)" style={{ fontFamily: "var(--font-display)" }}>
                 {topPct}%
               </text>
             </svg>
@@ -236,7 +239,7 @@ export default async function AnalisisPage({
 
           {/* Ranking por categoría */}
           <div>
-            {catRows.slice(0, 6).map(([name, { total: catTotal }], i) => {
+            {catRows.slice(0, 6).map(([name, { total: catTotal, color }], i) => {
               const pct = total > 0 ? Math.round((catTotal / total) * 100) : 0;
               return (
                 <div
@@ -244,13 +247,13 @@ export default async function AnalisisPage({
                   className="flex items-center gap-3.5 border-t border-crema py-3.5"
                   style={{ animation: `slide-r .5s ${(0.1 + i * 0.07).toFixed(2)}s both` }}
                 >
-                  <div className="h-[15px] w-[15px] flex-none rounded-[5px]" style={{ background: categoryColor(name) }} />
+                  <div className="h-[15px] w-[15px] flex-none rounded-[5px]" style={{ background: categoryColor(name, color) }} />
                   <div className="flex-1">
                     <div className="text-[15px] font-bold tracking-[-0.01em]">{name}</div>
                     <div className="text-xs font-medium text-muted">{formatMoneyShort(catTotal, currency)}</div>
                   </div>
                   <div
-                    className="text-[36px] font-extrabold leading-none tracking-[-0.03em]"
+                    className="font-display text-[38px] font-black leading-none tracking-[-0.02em]"
                     style={{ color: i === 0 ? "#FF6518" : "var(--color-ink)" }}
                   >
                     {pct}
@@ -261,17 +264,30 @@ export default async function AnalisisPage({
             })}
           </div>
 
-          {/* Tips */}
+          {/* Tips — cada uno en su tarjeta con ícono y color */}
           {tips.length > 0 && (
-            <section className="rounded-[20px] px-5 py-[18px]" style={{ background: "#A7D9BF" }}>
-              <div className="mb-3 text-sm font-extrabold tracking-tight text-mint-ink">Según tus datos</div>
-              <div className="flex flex-col gap-3">
-                {tips.map((tip, i) => (
-                  <div key={i} className="text-sm font-medium leading-relaxed text-mint-ink">
-                    {i > 0 && <div className="mb-3 border-t border-black/15" />}
-                    {tip}
-                  </div>
-                ))}
+            <section>
+              <div className="font-display mb-3 px-1 text-[22px] font-black tracking-[-0.02em]">
+                Según tus datos
+              </div>
+              <div className="flex flex-col gap-2.5">
+                {tips.map((tip, i) => {
+                  const tipColor = TIP_COLORS[i % TIP_COLORS.length];
+                  return (
+                    <div
+                      key={i}
+                      className="flex items-start gap-3 rounded-[18px] p-4"
+                      style={{ background: tipColor, animation: `slide-r .5s ${(0.06 + i * 0.07).toFixed(2)}s both` }}
+                    >
+                      <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-black/15">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M9 18h6M10 21h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.2 1 2h6c0-.8.4-1.5 1-2A7 7 0 0 0 12 2Z" />
+                        </svg>
+                      </div>
+                      <div className="text-[13px] font-semibold leading-relaxed text-[#111]">{tip}</div>
+                    </div>
+                  );
+                })}
               </div>
             </section>
           )}

@@ -107,7 +107,7 @@ export function SplitFlow({
   currency,
   defaultCategoryId,
 }: {
-  categories: { id: string; name: string; icon: string }[];
+  categories: { id: string; name: string; icon: string; color?: string | null }[];
   currency: string;
   defaultCategoryId: string;
 }) {
@@ -626,7 +626,7 @@ export function SplitFlow({
         <div className="mb-3 flex flex-wrap gap-2">
           {categories.map((c, i) => {
             const selected = categoryId === c.id;
-            const color = categoryColor(c.name);
+            const color = categoryColor(c.name, c.color);
             return (
               <button
                 key={c.id}

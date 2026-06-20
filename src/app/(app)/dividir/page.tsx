@@ -4,7 +4,7 @@ import { SplitFlow } from "@/components/split/split-flow";
 export default async function DividirPage() {
   const supabase = await createClient();
   const [{ data: categories }, { data: profile }] = await Promise.all([
-    supabase.from("categories").select("id, name, icon").order("name"),
+    supabase.from("categories").select("id, name, icon, color").order("name"),
     supabase.from("profiles").select("default_currency").maybeSingle(),
   ]);
 

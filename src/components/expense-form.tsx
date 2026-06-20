@@ -5,11 +5,40 @@ import { addExpense } from "@/app/(app)/actions";
 import { categoryColor } from "@/lib/category-style";
 
 const KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", "⌫"];
+const CONFETTI = ["#FF6518", "#F4CF12", "#A7D9BF", "#9EC8E0", "#C9B8E8", "#D995AF"];
+
+function Celebration() {
+  return (
+    <div className="fixed inset-0 z-[150] flex items-center justify-center bg-crema/70 backdrop-blur-sm">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        {Array.from({ length: 18 }).map((_, i) => (
+          <span
+            key={i}
+            className="absolute top-0 h-2.5 w-2.5 rounded-[2px]"
+            style={{
+              left: `${(i * 5.5 + 6) % 100}%`,
+              background: CONFETTI[i % CONFETTI.length],
+              animation: `confetti-fall ${0.9 + (i % 5) * 0.15}s ${(i % 7) * 0.05}s ease-in forwards`,
+            }}
+          />
+        ))}
+      </div>
+      <div
+        className="flex h-20 w-20 items-center justify-center rounded-full bg-coral"
+        style={{ animation: "success-pop .45s cubic-bezier(.2,.9,.3,1.2) both" }}
+      >
+        <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M20 6 9 17l-5-5" />
+        </svg>
+      </div>
+    </div>
+  );
+}
 
 export function ExpenseForm({
   categories,
 }: {
-  categories: { id: string; name: string; icon: string }[];
+  categories: { id: string; name: string; icon: string; color?: string | null }[];
 }) {
   const [amount, setAmount] = useState("");
   const [categoryId, setCategoryId] = useState("");
@@ -28,6 +57,7 @@ export function ExpenseForm({
 
   return (
     <form action={addExpense} onSubmit={() => setSaving(true)} className="flex flex-col">
+      {saving && <Celebration />}
       <input type="hidden" name="amount" value={amount} />
       <input type="hidden" name="category_id" value={categoryId} />
 
@@ -52,7 +82,7 @@ export function ExpenseForm({
       <div className="mt-[18px] flex flex-wrap gap-2">
         {categories.map((c, i) => {
           const selected = categoryId === c.id;
-          const color = categoryColor(c.name);
+          const color = categoryColor(c.name, c.color);
           return (
             <button
               key={c.id}

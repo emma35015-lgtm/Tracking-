@@ -167,6 +167,7 @@ export async function addRecurringPayment(formData: FormData) {
     .eq("id", user.id)
     .maybeSingle();
 
+  const color = String(formData.get("color") ?? "").trim() || null;
   const row: Record<string, unknown> = {
     user_id: user.id,
     kind,
@@ -175,6 +176,7 @@ export async function addRecurringPayment(formData: FormData) {
     currency: profile?.default_currency ?? "MXN",
     day_of_month: day,
     category_id: categoryId,
+    color,
   };
 
   if (kind === "installment") {
@@ -184,7 +186,12 @@ export async function addRecurringPayment(formData: FormData) {
     row.start_date = startDate || new Date().toISOString().slice(0, 10);
   }
 
-  await supabase.from("recurring_payments").insert(row);
+  // Si la columna color aún no existe (migración 0007 pendiente), reintenta sin ella.
+  const { error } = await supabase.from("recurring_payments").insert(row);
+  if (error) {
+    delete row.color;
+    await supabase.from("recurring_payments").insert(row);
+  }
   revalidatePath("/", "layout");
   redirect("/fijos");
 }
@@ -203,8 +210,13 @@ export async function addCategory(formData: FormData) {
   const { supabase, user } = await requireUser();
   const name = String(formData.get("name") ?? "").trim();
   const icon = String(formData.get("icon") ?? "").trim() || "🏷️";
+  const color = String(formData.get("color") ?? "").trim() || null;
   if (!name) return;
-  await supabase.from("categories").insert({ user_id: user.id, name, icon });
+  // Si la columna color aún no existe (migración 0007 pendiente), reintenta sin ella.
+  const { error } = await supabase.from("categories").insert({ user_id: user.id, name, icon, color });
+  if (error) {
+    await supabase.from("categories").insert({ user_id: user.id, name, icon });
+  }
   revalidatePath("/", "layout");
 }
 

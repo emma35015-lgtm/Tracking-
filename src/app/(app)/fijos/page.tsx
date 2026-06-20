@@ -8,6 +8,7 @@ import {
   KIND_LABEL,
   type RecurringPayment,
 } from "@/lib/finance";
+import { ColorSwatches } from "@/components/color-swatches";
 import { addRecurringPayment, deleteRecurringPayment } from "../actions";
 
 const inputClass =
@@ -19,15 +20,15 @@ export default async function FijosPage() {
   const [{ data: payments }, { data: categories }, { data: profile }] = await Promise.all([
     supabase
       .from("recurring_payments")
-      .select("id, kind, name, amount, currency, day_of_month, category_id, total_months, start_date, active")
+      .select("id, kind, name, amount, currency, day_of_month, category_id, total_months, start_date, active, color")
       .order("day_of_month"),
-    supabase.from("categories").select("id, name").order("name"),
+    supabase.from("categories").select("id, name, color").order("name"),
     supabase.from("profiles").select("default_currency").maybeSingle(),
   ]);
 
   const list = (payments ?? []) as RecurringPayment[];
   const cats = categories ?? [];
-  const catColorById = new Map(cats.map((c) => [c.id, categoryColor(c.name)] as const));
+  const catColorById = new Map(cats.map((c) => [c.id, categoryColor(c.name, c.color)] as const));
   const currency = profile?.default_currency ?? "MXN";
   const fmt = (n: number) => formatMoneyShort(n, currency);
 
@@ -50,7 +51,9 @@ export default async function FijosPage() {
             const prog = installmentProgress(p);
             const vigente = isActiveNow(p);
             const dayColor =
-              p.kind === "card" ? "#FF6518" : (p.category_id && catColorById.get(p.category_id)) || "var(--color-sand)";
+              p.color ||
+              (p.category_id ? catColorById.get(p.category_id) : undefined) ||
+              (p.kind === "card" ? "#FF6518" : "var(--color-sand)");
             return (
               <div
                 key={p.id}
@@ -116,6 +119,8 @@ export default async function FijosPage() {
         </div>
         <div className={labelClass}>Categoría</div>
         <CategorySelect cats={cats} defaultName="Suscripciones" />
+        <div className={labelClass}>Color</div>
+        <ColorSwatches name="color" defaultValue="#D995AF" />
         <button type="submit" className="mt-4 h-[50px] w-full rounded-[15px] bg-coral text-base font-extrabold text-white">
           Agregar suscripción
         </button>
@@ -152,6 +157,8 @@ export default async function FijosPage() {
         </div>
         <div className={labelClass}>Categoría</div>
         <CategorySelect cats={cats} defaultName="Otros" />
+        <div className={labelClass}>Color</div>
+        <ColorSwatches name="color" defaultValue="#9EC8E0" />
         <button type="submit" className="mt-4 h-[50px] w-full rounded-[15px] bg-coral text-base font-extrabold text-white">
           Agregar pago a meses
         </button>
@@ -178,6 +185,8 @@ export default async function FijosPage() {
             <input name="day_of_month" inputMode="numeric" required placeholder="20" className={inputClass} />
           </div>
         </div>
+        <div className={labelClass}>Color</div>
+        <ColorSwatches name="color" defaultValue="#FF6518" />
         <button type="submit" className="mt-4 h-[50px] w-full rounded-[15px] bg-ink text-base font-extrabold text-white">
           Agregar tarjeta
         </button>

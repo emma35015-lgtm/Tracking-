@@ -14,6 +14,7 @@ export type RecurringPayment = {
   total_months: number | null;
   start_date: string | null;
   active: boolean;
+  color: string | null;
 };
 
 // Diferencia en meses calendario entre dos fechas (b - a). Ej. ene→mar = 2.
