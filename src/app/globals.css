@@ -5,9 +5,9 @@
   /* Paleta "COCO — Her". crema = marfil cálido; coral = bermellón de acento. */
   --color-crema: #ece4d2;
   --color-ink: #1a1714;
-  --color-coral: #ff6518;
-  --color-coral-dark: #c2480c;
-  --color-coral-link: #c2480c;
+  --color-coral: #e0532b;
+  --color-coral-dark: #b23d18;
+  --color-coral-link: #b23d18;
   --color-muted: rgba(26, 23, 20, 0.5);
   --color-muted-2: rgba(26, 23, 20, 0.62);
   --color-muted-3: rgba(26, 23, 20, 0.4);
@@ -18,7 +18,7 @@
   --color-mint: #a7d9bf;
   --color-mint-ink: #1e4435;
   /* Compatibilidad: brand = acento */
-  --color-brand: #ff6518;
+  --color-brand: #e0532b;
   --font-sans: "Archivo", -apple-system, BlinkMacSystemFont, sans-serif;
 }
 

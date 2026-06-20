@@ -185,7 +185,7 @@ export default async function InicioPage() {
         <div className="text-[15px] font-semibold text-muted">
           {name ? `Buenas, ${name}` : "Buenas"}
         </div>
-        <div className="mt-1 text-[27px] font-extrabold leading-[1.05] tracking-[-0.03em]">
+        <div className="mt-1 text-[30px] font-extrabold leading-[1.04] tracking-[-0.03em]">
           Esto llevas en {formatMonth(year, month)}
         </div>
 
@@ -376,7 +376,7 @@ export default async function InicioPage() {
       <div className="mt-12 flex items-end justify-between px-1">
         <div>
           <div className="text-xs font-semibold text-muted">Tendencia</div>
-          <div className="mt-0.5 text-2xl font-extrabold leading-none tracking-[-0.03em]">Esta semana</div>
+          <div className="mt-0.5 text-[26px] font-extrabold leading-none tracking-[-0.03em]">Esta semana</div>
         </div>
       </div>
       <div className="mt-4 px-1">

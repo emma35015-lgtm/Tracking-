@@ -31,7 +31,7 @@ export function LaunchSplash() {
   const squares = ["#ece4d2", "#ffd84d", "#A7D9BF", "#9EC8E0", "#C9B8E8"];
   return (
     <div
-      style={{ animation: "splash-out 2.1s ease forwards", background: "#ff6518" }}
+      style={{ animation: "splash-out 2.1s ease forwards", background: "#e0532b" }}
       className="fixed inset-0 z-[200] flex flex-col items-center justify-center"
     >
       {/* Barrita de colores estilo póster */}
@@ -47,7 +47,7 @@ export function LaunchSplash() {
         width={188}
         height={188}
         priority
-        style={{ width: 150, height: "auto", animation: "splash-logo 1s cubic-bezier(.2,.9,.3,1.2) both" }}
+        style={{ width: 240, height: "auto", animation: "splash-logo 1s cubic-bezier(.2,.9,.3,1.2) both" }}
       />
       <div
         className="-mt-1 text-[56px] font-extrabold tracking-[-0.05em] text-[#ece4d2]"

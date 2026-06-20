@@ -219,19 +219,18 @@ export default async function AnalisisPage({
             </svg>
           </div>
 
-          {/* Dos mosaicos */}
-          <div className="flex gap-[11px]">
-            <div className="pop-in flex-1 rounded-[18px] border border-input-border p-4" style={{ background: "#A7D9BF" }}>
-              <div className="text-xs font-semibold leading-tight text-black/60">Promedio<br />diario</div>
-              <div className="my-2.5 h-0.5 w-6 bg-black" />
-              <div className="text-[28px] font-extrabold leading-none tracking-[-0.03em] text-[#111] tabular-nums">
+          {/* Stats abiertos sobre el crema */}
+          <div className="flex">
+            <div className="flex-1">
+              <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">Promedio diario</div>
+              <div className="mt-2 text-[32px] font-extrabold leading-none tracking-[-0.03em] tabular-nums" style={{ color: "#1E8C63" }}>
                 {formatMoneyShort(dailyAvg, currency)}
               </div>
             </div>
-            <div className="pop-in flex-1 rounded-[18px] border border-input-border p-4" style={{ background: "#F4CF12" }}>
-              <div className="text-xs font-semibold leading-tight text-black/60">Mayor<br />gasto</div>
-              <div className="my-2.5 h-0.5 w-6 bg-black" />
-              <div className="text-[28px] font-extrabold leading-none tracking-[-0.03em] text-[#111] tabular-nums">
+            <div className="w-px self-stretch bg-track" />
+            <div className="flex-1 pl-5">
+              <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">Mayor gasto</div>
+              <div className="mt-2 text-[32px] font-extrabold leading-none tracking-[-0.03em] tabular-nums" style={{ color: "#C99700" }}>
                 {formatMoneyShort(maxExpense, currency)}
               </div>
             </div>
