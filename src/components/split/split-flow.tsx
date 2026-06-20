@@ -306,7 +306,7 @@ export function SplitFlow({
   if (step === "leyendo") {
     return (
       <div className="mt-4">
-        <div className="rounded-[26px] bg-white p-6">
+        <div className="px-1">
           <div className="text-lg font-extrabold tracking-tight">Leyendo tu ticket…</div>
           <div className="mt-1 text-[13px] font-medium text-muted">
             La primera vez tarda un poco más mientras se descarga el lector.
@@ -364,7 +364,7 @@ export function SplitFlow({
         </div>
         <div className="flex flex-col gap-2">
           {rows.map((row) => (
-            <div key={row.id} className="rounded-[18px] bg-white p-3">
+            <div key={row.id} className="border-b border-crema pb-3">
               <div className="flex items-center gap-2">
                 <input
                   value={row.name}
@@ -448,7 +448,7 @@ export function SplitFlow({
       <div className="mt-2 pb-20">
         <BackLink onClick={() => setStep("revisar")} />
 
-        <div className="flex items-center justify-between rounded-[22px] bg-white p-4">
+        <div className="flex items-center justify-between border-y border-crema py-4">
           <div>
             <div className="text-[15px] font-extrabold tracking-tight">¿Cuántas personas?</div>
             <div className="text-xs font-medium text-muted">Para lo que compartieron</div>
@@ -470,7 +470,7 @@ export function SplitFlow({
             const qty = rowQty(row);
             const share = itemShareCents(toSplitItem(row));
             return (
-              <div key={row.id} className="rounded-[20px] bg-white p-4">
+              <div key={row.id} className="border-b border-crema pb-4">
                 <div className="flex items-baseline justify-between gap-2">
                   <div className="min-w-0 flex-1 truncate text-[15px] font-bold tracking-tight">
                     {row.name}
@@ -551,9 +551,9 @@ export function SplitFlow({
     <div className="mt-2">
       <BackLink onClick={() => setStep("asignar")} />
 
-      <div className="rounded-[26px] bg-white px-5 py-7 text-center">
-        <div className="text-xs font-bold uppercase tracking-[0.08em] text-muted">Te toca pagar</div>
-        <div className="mt-2 text-[56px] font-extrabold leading-none tracking-[-0.04em] tabular-nums">
+      <div className="px-1 py-4 text-center">
+        <div className="text-xs font-bold uppercase tracking-[0.12em] text-muted">Te toca pagar</div>
+        <div className="mt-2 text-[64px] font-light leading-none tracking-[-0.04em] tabular-nums">
           {fmt(totals.totalCents)}
         </div>
         <div className="mt-3 text-[13px] font-medium text-muted-2">
