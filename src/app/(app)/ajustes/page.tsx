@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import {
   addCategory,
@@ -50,8 +51,21 @@ export default async function AjustesPage() {
   const monthlyIncome = budgetRow?.monthly_income ? Number(budgetRow.monthly_income) : null;
 
   return (
-    <div className="screen-in">
-      <h1 className="mt-1.5 text-[26px] font-extrabold tracking-tight">Ajustes</h1>
+    <div className="screen-in px-1 pt-2">
+      <div className="flex items-center gap-3.5">
+        <Image
+          src="/brand/coco-logo.png"
+          alt="COCO"
+          width={54}
+          height={54}
+          className="h-[54px] w-[54px] object-contain"
+          style={{ animation: "floaty 6s ease-in-out infinite" }}
+        />
+        <div>
+          <div className="text-[27px] font-extrabold leading-[0.95] tracking-[-0.045em]">Ajustes</div>
+          <div className="mt-0.5 text-xs font-semibold text-muted">COCO · gasta con cabeza</div>
+        </div>
+      </div>
 
       {/* Perfil */}
       <form action={updateProfile} className="mt-[18px] rounded-[24px] bg-white p-5">

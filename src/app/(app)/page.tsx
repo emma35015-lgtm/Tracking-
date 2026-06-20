@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { formatMonth, formatMoneyShort, dayKey } from "@/lib/format";
-import { CategoryIcon, categoryColor } from "@/lib/category-style";
-import { BudgetRing } from "@/components/budget-ring";
+import { categoryColor } from "@/lib/category-style";
 import { AvatarEgg } from "@/components/avatar-egg";
 import {
   isActiveNow,
@@ -47,7 +46,6 @@ export default async function InicioPage() {
       .order("occurred_at", { ascending: false }),
     supabase.from("profiles").select("display_name, default_currency").maybeSingle(),
     supabase.from("api_tokens").select("id").maybeSingle(),
-    // En consultas aparte: si la columna/tabla no existe (migración pendiente), no rompe lo demás.
     supabase.from("profiles").select("monthly_budget").maybeSingle(),
     supabase.from("profiles").select("monthly_income").maybeSingle(),
     supabase
@@ -67,48 +65,35 @@ export default async function InicioPage() {
   const total = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
   const prevTotal = prevExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
 
-  // Pagos fijos que aún no se cobran este mes (su día todavía no pasa): es lo
-  // que tienes "apartado" además de lo ya gastado.
+  const name = profile?.display_name?.trim() || null;
+  const initial = (name ?? "C").charAt(0).toUpperCase();
+
+  // Pagos fijos que aún no se cobran este mes.
   const today = now.getDate();
   const pendingCommitted = payments
     .filter((p) => p.amount && p.day_of_month >= today)
     .reduce((sum, p) => sum + Number(p.amount), 0);
-  const status = monthlyIncome && monthlyIncome > 0
-    ? spendingStatus(monthlyIncome, total, pendingCommitted)
-    : null;
+  const status =
+    monthlyIncome && monthlyIncome > 0 ? spendingStatus(monthlyIncome, total, pendingCommitted) : null;
 
-  // Próximos cobros ordenados por cercanía (incluye el recordatorio de tarjeta).
   const upcoming = [...payments]
     .map((p) => ({ p, days: daysUntilDay(p.day_of_month, now) }))
     .sort((a, b) => a.days - b.days)
     .slice(0, 4);
-  // Aviso destacado si una tarjeta está por vencer en los próximos 5 días.
   const cardSoon = upcoming.find((u) => u.p.kind === "card" && u.days <= 5);
 
-  const STATUS_STYLE: Record<string, { bg: string; text: string }> = {
-    ok: { bg: "bg-mint", text: "text-mint-ink" },
-    good: { bg: "bg-mint", text: "text-mint-ink" },
-    watch: { bg: "bg-sand", text: "text-muted-2" },
-    tight: { bg: "bg-[#F6D9CE]", text: "text-coral-dark" },
-    over: { bg: "bg-[#F3C2B3]", text: "text-coral-dark" },
-  };
-
-  const name = profile?.display_name?.trim() || null;
-  const initial = (name ?? "G").charAt(0).toUpperCase();
-
-  // Desglose por categoría
-  const byCategory = new Map<string, { icon: string; total: number; count: number }>();
+  // Desglose por categoría → bandas
+  const byCategory = new Map<string, { total: number; count: number }>();
   for (const e of expenses) {
     const catName = e.categories?.name ?? "Sin categoría";
-    const icon = e.categories?.icon ?? "❓";
-    const entry = byCategory.get(catName) ?? { icon, total: 0, count: 0 };
+    const entry = byCategory.get(catName) ?? { total: 0, count: 0 };
     entry.total += Number(e.amount);
     entry.count += 1;
     byCategory.set(catName, entry);
   }
   const cats = [...byCategory.entries()].sort((a, b) => b[1].total - a[1].total);
 
-  // Esta semana: últimos 7 días (incluye hoy)
+  // Esta semana: últimos 7 días
   const week: { label: string; key: string; total: number }[] = [];
   for (let i = 6; i >= 0; i--) {
     const d = new Date(Date.now() - i * 86_400_000);
@@ -122,152 +107,124 @@ export default async function InicioPage() {
   const maxWeek = Math.max(...week.map((w) => w.total), 1);
   const todayKey = dayKey(new Date());
 
-  const prevMonthName = formatMonth(
-    month === 1 ? year - 1 : year,
-    month === 1 ? 12 : month - 1
-  ).split(" ")[0].toLowerCase();
+  const prevMonthName = formatMonth(month === 1 ? year - 1 : year, month === 1 ? 12 : month - 1)
+    .split(" ")[0]
+    .toLowerCase();
   const deltaPct = prevTotal > 0 ? Math.round(((total - prevTotal) / prevTotal) * 100) : null;
 
+  const budgetPct = monthlyBudget && monthlyBudget > 0 ? Math.min(100, Math.round((total / monthlyBudget) * 100)) : 0;
+  const budgetAvail = monthlyBudget ? Math.max(0, monthlyBudget - total) : 0;
+
   return (
-    <div className="screen-in">
-      {/* Header */}
-      <div className="mt-1.5 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <AvatarEgg initial={initial} />
-          <div>
-            <div className="text-[13px] font-medium text-muted">
-              {name ? `Buenas, ${name}` : "Buenas"}
-            </div>
-            <div className="text-xl font-extrabold leading-tight tracking-tight">
-              {formatMonth(year, month)}
-            </div>
+    <div className="screen-in px-1 pt-2.5">
+      {/* Wordmark */}
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="text-[26px] font-extrabold leading-[0.85] tracking-[-0.05em]">COCO</div>
+          <div className="mt-1 text-[8.5px] font-bold uppercase tracking-[0.2em] text-muted">
+            gasta con cabeza
           </div>
         </div>
-        <Link
-          href="/agregar"
-          aria-label="Agregar gasto"
-          className="flex h-[42px] w-[42px] items-center justify-center rounded-full border-[1.6px] border-ink"
-        >
-          <svg width="19" height="19" viewBox="0 0 19 19" fill="none" stroke="#15140F" strokeWidth="2" strokeLinecap="round">
-            <path d="M9.5 3.5v12M3.5 9.5h12" />
-          </svg>
-        </Link>
+        <AvatarEgg initial={initial} />
       </div>
 
-      {/* Balance card */}
-      <div className="relative mt-[18px] overflow-hidden rounded-[28px] bg-coral p-6 pb-[22px] text-white">
-        <div className="absolute right-[22px] top-6 flex">
-          <div className="h-6 w-6 rounded-full bg-[#F3C9A0]" />
-          <div className="-ml-2.5 h-6 w-6 rounded-full bg-[#C9533A]" />
+      {/* HERO — gastos del mes */}
+      <div className="mt-[30px]">
+        <div className="text-[13px] font-semibold text-muted">
+          Gastos del mes — {formatMonth(year, month)}
         </div>
-        <div className="text-sm font-semibold opacity-90">Gastos del mes</div>
-        <div className="mt-1 text-[54px] font-extrabold leading-none tracking-[-0.04em] tabular-nums">
+        <div className="count-up mt-1.5 text-[66px] font-extrabold leading-[0.95] tracking-[-0.05em] tabular-nums">
           {formatMoneyShort(total, currency)}
         </div>
-        <div className="mt-4 flex flex-wrap gap-x-2.5 gap-y-1 text-[13px] font-semibold opacity-90">
-          <span>{expenses.length} {expenses.length === 1 ? "gasto" : "gastos"}</span>
-          <span className="opacity-50">·</span>
-          <span>{cats.length} {cats.length === 1 ? "categoría" : "categorías"}</span>
+        <div className="mt-3.5 flex flex-wrap gap-2">
           {deltaPct !== null && (
-            <>
-              <span className="opacity-50">·</span>
-              <span>
-                {deltaPct >= 0 ? "↑" : "↓"} {Math.abs(deltaPct)}% vs {prevMonthName}
-              </span>
-            </>
+            <span className="whitespace-nowrap rounded-full bg-ink px-3 py-1.5 text-xs font-bold text-crema">
+              {deltaPct >= 0 ? "↑" : "↓"} {Math.abs(deltaPct)}% vs {prevMonthName}
+            </span>
           )}
+          <span className="whitespace-nowrap rounded-full bg-coral px-3 py-1.5 text-xs font-bold text-ink">
+            {expenses.length} {expenses.length === 1 ? "gasto" : "gastos"}
+          </span>
         </div>
       </div>
-
-      {/* Disponible + salud financiera (solo si configuraste tu ingreso) */}
-      {status && (
-        <div className="mt-3 rounded-[24px] bg-white p-5">
-          <div className="flex items-baseline justify-between">
-            <span className="text-sm font-semibold text-muted">Disponible este mes</span>
-            <span className="text-xs font-medium text-muted">de {formatMoneyShort(monthlyIncome!, currency)}</span>
-          </div>
-          <div
-            className={`mt-1 text-[40px] font-extrabold leading-none tracking-tight tabular-nums ${
-              status.available < 0 ? "text-coral-dark" : "text-ink"
-            }`}
-          >
-            {formatMoneyShort(status.available, currency)}
-          </div>
-          {/* Barra de uso: gastado + pagos fijos pendientes contra el ingreso */}
-          <div className="mt-4 h-2.5 w-full overflow-hidden rounded-full bg-track">
-            <div
-              className={`h-full rounded-full ${
-                status.level === "over" || status.level === "tight" ? "bg-coral" : "bg-ink"
-              }`}
-              style={{ width: `${Math.min(Math.round(status.pct * 100), 100)}%` }}
-            />
-          </div>
-          <div className="mt-2 text-xs font-medium text-muted">
-            Llevas {formatMoneyShort(total, currency)} gastado
-            {pendingCommitted > 0 && <> · {formatMoneyShort(pendingCommitted, currency)} en pagos fijos por venir</>}
-          </div>
-          <div className={`mt-3 rounded-[16px] px-4 py-3 ${STATUS_STYLE[status.level].bg}`}>
-            <div className={`text-sm font-extrabold ${STATUS_STYLE[status.level].text}`}>{status.title}</div>
-            <div className={`mt-0.5 text-[13px] font-medium leading-relaxed ${STATUS_STYLE[status.level].text}`}>
-              {status.message}
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Presupuesto */}
       {monthlyBudget && monthlyBudget > 0 ? (
-        <div className="mt-3">
-          <BudgetRing spent={total} budget={monthlyBudget} currency={currency} />
+        <div className="pop-in mt-[22px] rounded-[22px] border border-input-border bg-white px-[18px] py-5">
+          <div className="flex items-baseline justify-between">
+            <span className="text-[13px] font-bold">Presupuesto de {formatMonth(year, month).split(" ")[0].toLowerCase()}</span>
+            <span className="text-[13px] font-extrabold text-coral">{budgetPct}%</span>
+          </div>
+          <div className="mt-3 h-3.5 overflow-hidden rounded-full bg-track">
+            <div className="h-full rounded-full bg-coral" style={{ width: `${budgetPct}%` }} />
+          </div>
+          <div className="mt-3 flex items-baseline justify-between">
+            <span className="text-xs font-semibold text-muted">
+              {formatMoneyShort(total, currency)} de {formatMoneyShort(monthlyBudget, currency)}
+            </span>
+            <span className="text-[15px] font-extrabold tracking-tight">
+              {formatMoneyShort(budgetAvail, currency)}{" "}
+              <span className="text-[11px] font-semibold text-muted">disponible</span>
+            </span>
+          </div>
         </div>
       ) : (
         <Link
           href="/ajustes"
-          className="mt-3 flex items-center gap-3.5 rounded-[22px] bg-white px-[17px] py-[15px]"
+          className="mt-[22px] flex items-center justify-between rounded-[22px] border border-input-border bg-white px-[18px] py-4"
         >
-          <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-sand">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5c5740" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="9" />
-              <circle cx="12" cy="12" r="5" />
-              <circle cx="12" cy="12" r="1.5" fill="#5c5740" stroke="none" />
-            </svg>
-          </div>
-          <div className="flex-1">
-            <div className="text-base font-bold tracking-tight">Ponte un presupuesto</div>
-            <div className="text-xs font-medium text-muted">
-              Y mira cuánto te queda con un anillo de progreso
-            </div>
-          </div>
-          <svg width="9" height="15" viewBox="0 0 9 15" fill="none" stroke="#8A8167" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M1.5 1.5 7.5 7.5l-6 6" />
-          </svg>
+          <span className="text-[15px] font-bold">Ponte un presupuesto mensual</span>
+          <span className="text-xl font-extrabold text-coral">→</span>
         </Link>
       )}
 
-      {/* Próximos pagos fijos */}
-      {upcoming.length > 0 && (
-        <div className="mt-3 rounded-[24px] bg-white p-5">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-base font-extrabold tracking-tight">Próximos pagos</h2>
-            <Link href="/fijos" className="text-[13px] font-bold text-coral-link">
-              Administrar
-            </Link>
+      {/* Disponible + salud financiera */}
+      {status && (
+        <div className="pop-in mt-3 rounded-[22px] border border-input-border bg-white px-[18px] py-5">
+          <div className="flex items-baseline justify-between">
+            <span className="text-[13px] font-bold">Disponible este mes</span>
+            <span className="text-xs font-semibold text-muted">de {formatMoneyShort(monthlyIncome!, currency)}</span>
           </div>
+          <div
+            className={`mt-1 text-[34px] font-extrabold leading-none tracking-[-0.04em] tabular-nums ${
+              status.available < 0 ? "text-coral" : ""
+            }`}
+          >
+            {formatMoneyShort(status.available, currency)}
+          </div>
+          <div className="mt-3.5 h-2.5 overflow-hidden rounded-full bg-track">
+            <div
+              className="h-full rounded-full bg-coral"
+              style={{ width: `${Math.min(Math.round(status.pct * 100), 100)}%` }}
+            />
+          </div>
+          <div className="mt-2.5 text-[13px] font-semibold leading-snug">
+            {status.title}.{" "}
+            <span className="font-medium text-muted">{status.message}</span>
+          </div>
+        </div>
+      )}
 
+      {/* Próximos pagos */}
+      {upcoming.length > 0 && (
+        <div className="mt-6">
+          <div className="mb-2.5 flex items-center justify-between px-1">
+            <span className="text-xs font-bold uppercase tracking-[0.08em] text-muted">Próximos pagos</span>
+            <Link href="/fijos" className="text-[13px] font-bold text-coral-link">Administrar</Link>
+          </div>
           {cardSoon && (
-            <div className="mb-3 rounded-[16px] bg-[#F6D9CE] px-4 py-3 text-[13px] font-medium leading-relaxed text-coral-dark">
-              💳 <strong>{cardSoon.p.name}</strong> se paga{" "}
+            <div className="mb-2.5 rounded-[16px] bg-coral px-4 py-3 text-[13px] font-bold leading-snug text-ink">
+              💳 {cardSoon.p.name} se paga{" "}
               {cardSoon.days === 0 ? "hoy" : cardSoon.days === 1 ? "mañana" : `en ${cardSoon.days} días`}
               {cardSoon.p.amount ? ` · ${formatMoneyShort(Number(cardSoon.p.amount), currency)}` : ""}.
             </div>
           )}
-
-          <div className="flex flex-col divide-y divide-crema">
+          <div className="flex flex-col divide-y divide-crema rounded-[20px] bg-white px-[18px]">
             {upcoming.map(({ p, days }) => (
-              <div key={p.id} className="flex items-center gap-3 py-2.5">
+              <div key={p.id} className="flex items-center gap-3 py-3">
                 <div
-                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] text-xs font-extrabold tabular-nums ${
-                    p.kind === "card" ? "bg-[#F6D9CE] text-coral-dark" : "bg-sand text-muted-2"
+                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-extrabold tabular-nums ${
+                    p.kind === "card" ? "bg-coral text-ink" : "bg-sand"
                   }`}
                 >
                   {p.day_of_month}
@@ -275,8 +232,7 @@ export default async function InicioPage() {
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-[15px] font-bold tracking-tight">{p.name}</div>
                   <div className="text-xs font-medium text-muted">
-                    {KIND_LABEL[p.kind]} ·{" "}
-                    {days === 0 ? "hoy" : days === 1 ? "mañana" : `en ${days} días`}
+                    {KIND_LABEL[p.kind]} · {days === 0 ? "hoy" : days === 1 ? "mañana" : `en ${days} días`}
                   </div>
                 </div>
                 {p.amount ? (
@@ -284,7 +240,7 @@ export default async function InicioPage() {
                     {formatMoneyShort(Number(p.amount), currency)}
                   </div>
                 ) : (
-                  <span className="text-xs font-medium text-muted">monto variable</span>
+                  <span className="text-xs font-medium text-muted">variable</span>
                 )}
               </div>
             ))}
@@ -292,80 +248,50 @@ export default async function InicioPage() {
         </div>
       )}
 
-      {/* Conectar iPhone (solo si aún no hay token) */}
-      {!token && (
-        <Link
-          href="/ajustes/atajos"
-          className="mt-3 flex items-center gap-3.5 rounded-[22px] bg-ink px-[17px] py-[15px] text-white"
-        >
-          <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-coral">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="6" y="2.5" width="12" height="19" rx="3" />
-              <path d="M11 18.5h2" />
-            </svg>
+      {/* Bandas de categoría */}
+      {cats.length > 0 && (
+        <div className="mt-7">
+          <div className="px-1 pb-3 text-xs font-bold uppercase tracking-[0.08em] text-muted">Por categoría</div>
+          <div className="overflow-hidden rounded-[20px]">
+            {cats.map(([catName, { total: catTotal, count }], i) => {
+              const pct = total > 0 ? Math.round((catTotal / total) * 100) : 0;
+              return (
+                <Link
+                  key={catName}
+                  href="/gastos"
+                  className="band-row flex items-center gap-3.5"
+                  style={{ background: categoryColor(catName), padding: "17px 22px", animation: `slide-r .5s ${(0.06 + i * 0.06).toFixed(2)}s both` }}
+                >
+                  <span className="flex h-[27px] w-[27px] flex-none items-center justify-center rounded-full border-[1.6px] border-black/50 text-xs font-extrabold text-[#111]">
+                    {i + 1}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-[25px] font-extrabold leading-none tracking-[-0.03em] text-[#111]">
+                      {catName}
+                    </span>
+                    <span className="mt-1.5 block text-xs font-semibold text-black/55">
+                      {count} {count === 1 ? "gasto" : "gastos"} · {pct}%
+                    </span>
+                  </span>
+                  <span className="flex-none text-[19px] font-extrabold tracking-[-0.02em] text-[#111]">
+                    {formatMoneyShort(catTotal, currency)}
+                  </span>
+                </Link>
+              );
+            })}
           </div>
-          <div className="flex-1">
-            <div className="text-base font-bold tracking-tight">Conecta tu iPhone</div>
-            <div className="text-xs font-medium text-white/70">
-              Que tus gastos se registren solos
-            </div>
-          </div>
-          <svg width="9" height="15" viewBox="0 0 9 15" fill="none" stroke="#ffffffaa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M1.5 1.5 7.5 7.5l-6 6" />
-          </svg>
-        </Link>
+        </div>
       )}
 
-      {/* Dividir cuenta */}
-      <Link
-        href="/dividir"
-        className="mt-3 flex items-center gap-3.5 rounded-[22px] bg-white px-[17px] py-[15px]"
-      >
-        <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-mint">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E4435" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M6 3h12v18l-2-1.5L14 21l-2-1.5L10 21l-2-1.5L6 21V3Z M9 8h6 M9 12h6" />
-          </svg>
-        </div>
-        <div className="flex-1">
-          <div className="text-base font-bold tracking-tight">Dividir cuenta</div>
-          <div className="text-xs font-medium text-muted">
-            Foto del ticket y calculamos tu parte
-          </div>
-        </div>
-        <svg width="9" height="15" viewBox="0 0 9 15" fill="none" stroke="#8A8167" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M1.5 1.5 7.5 7.5l-6 6" />
-        </svg>
-      </Link>
-
-      {/* Viajes / bote */}
-      <Link
-        href="/viajes"
-        className="mt-3 flex items-center gap-3.5 rounded-[22px] bg-white px-[17px] py-[15px]"
-      >
-        <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-mint">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E4435" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-            <circle cx="9" cy="7" r="4" />
-            <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-          </svg>
-        </div>
-        <div className="flex-1">
-          <div className="text-base font-bold tracking-tight">Viajes</div>
-          <div className="text-xs font-medium text-muted">
-            El bote compartido: cuánto queda y quién debe
-          </div>
-        </div>
-        <svg width="9" height="15" viewBox="0 0 9 15" fill="none" stroke="#8A8167" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M1.5 1.5 7.5 7.5l-6 6" />
-        </svg>
-      </Link>
-
       {/* Esta semana */}
-      <div className="mt-[26px] flex items-center justify-between">
-        <h2 className="text-[19px] font-extrabold tracking-tight">Esta semana</h2>
+      <div className="mt-7 flex items-end justify-between px-1">
+        <div>
+          <div className="text-xs font-semibold text-muted">Tendencia</div>
+          <div className="mt-0.5 text-2xl font-extrabold leading-none tracking-[-0.03em]">Esta semana</div>
+        </div>
       </div>
-      <div className="mt-3 rounded-[26px] bg-sand px-4 pb-4 pt-[22px]">
-        <div className="flex items-end justify-between gap-1" style={{ height: 150 }}>
+      <div className="mt-4 px-1">
+        <div className="flex items-end justify-between gap-2" style={{ height: 130 }}>
           {week.map((w, i) => {
             const peak = w.total === maxWeek && w.total > 0;
             const isToday = w.key === todayKey;
@@ -373,25 +299,24 @@ export default async function InicioPage() {
               <div key={i} className="flex flex-1 flex-col items-center gap-2">
                 <span
                   className="text-[10px] font-bold tabular-nums"
-                  style={{ color: peak ? "#C56A47" : "#A79C78" }}
+                  style={{ color: peak ? "#FF6518" : "var(--color-muted)" }}
                 >
                   ${Math.round(w.total).toLocaleString("es-MX")}
                 </span>
                 <div
-                  className="rounded-md"
+                  className="rounded"
                   style={{
-                    width: peak ? 13 : 9,
-                    height: Math.max(8, (w.total / maxWeek) * 100),
-                    background: peak ? "#E07C55" : "#15140F",
+                    width: peak ? 13 : 10,
+                    height: Math.max(8, (w.total / maxWeek) * 90),
+                    background: peak ? "#FF6518" : "var(--color-ink)",
                     opacity: w.total > 0 ? 1 : 0.25,
+                    transformOrigin: "bottom",
+                    animation: `bar-rise .6s cubic-bezier(.2,.8,.2,1) ${(0.1 + i * 0.06).toFixed(2)}s both`,
                   }}
                 />
                 <span
                   className="text-[11px]"
-                  style={{
-                    fontWeight: isToday ? 800 : 600,
-                    color: isToday ? "#15140F" : "#A79C78",
-                  }}
+                  style={{ fontWeight: isToday ? 800 : 600, color: isToday ? "var(--color-ink)" : "var(--color-muted)" }}
                 >
                   {w.label}
                 </span>
@@ -401,44 +326,33 @@ export default async function InicioPage() {
         </div>
       </div>
 
-      {/* Por categoría */}
-      <div className="mt-[26px] flex items-center justify-between">
-        <h2 className="text-[19px] font-extrabold tracking-tight">Por categoría</h2>
-        <Link href="/gastos" className="text-[13px] font-bold text-coral-link">
-          Ver todo
-        </Link>
-      </div>
-      {cats.length === 0 ? (
-        <div className="mt-3.5 rounded-[22px] bg-white p-6 text-center text-sm font-medium text-muted">
-          Sin gastos este mes.{" "}
-          <Link href="/ajustes/atajos" className="font-bold text-coral-link">
-            Configura tu iPhone
-          </Link>{" "}
-          para registrarlos automáticamente.
-        </div>
-      ) : (
-        <div className="mt-3.5 flex flex-col gap-[11px]">
-          {cats.map(([catName, { icon, total: catTotal, count }]) => (
-            <div key={catName} className="flex items-center gap-3.5 rounded-[22px] bg-white px-[17px] py-[15px]">
-              <div
-                className="flex h-11 w-11 items-center justify-center rounded-[14px]"
-                style={{ background: categoryColor(catName) }}
-              >
-                <CategoryIcon name={catName} emoji={icon} color="#15140F" size={22} />
-              </div>
-              <div className="flex-1">
-                <div className="text-base font-bold tracking-tight">{catName}</div>
-                <div className="text-xs font-medium text-muted">
-                  {count} {count === 1 ? "gasto" : "gastos"}
-                </div>
-              </div>
-              <div className="text-lg font-extrabold tracking-tight tabular-nums">
-                {formatMoneyShort(catTotal, currency)}
-              </div>
+      {/* Accesos: dividir, viajes, fijos, conectar iPhone */}
+      <div className="mt-7 flex flex-col gap-2">
+        {!token && (
+          <Link href="/ajustes/atajos" className="flex items-center justify-between rounded-[18px] bg-ink px-[18px] py-4 text-crema">
+            <div>
+              <div className="text-[15px] font-bold">Conecta tu iPhone</div>
+              <div className="text-xs font-medium opacity-70">Que tus gastos se registren solos</div>
             </div>
-          ))}
-        </div>
-      )}
+            <span className="text-lg font-extrabold text-coral">→</span>
+          </Link>
+        )}
+        <HomeLink href="/dividir" title="Dividir cuenta" sub="Foto del ticket y calculamos tu parte" />
+        <HomeLink href="/viajes" title="Viajes" sub="El bote compartido: cuánto queda y quién debe" />
+        <HomeLink href="/fijos" title="Pagos fijos" sub="Suscripciones, meses y tu tarjeta" />
+      </div>
     </div>
+  );
+}
+
+function HomeLink({ href, title, sub }: { href: string; title: string; sub: string }) {
+  return (
+    <Link href={href} className="flex items-center justify-between rounded-[18px] border border-input-border bg-white px-[18px] py-4">
+      <div>
+        <div className="text-[15px] font-bold tracking-tight">{title}</div>
+        <div className="text-xs font-medium text-muted">{sub}</div>
+      </div>
+      <span className="text-lg font-extrabold text-coral">→</span>
+    </Link>
   );
 }

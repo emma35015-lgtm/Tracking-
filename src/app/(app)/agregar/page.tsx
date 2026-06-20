@@ -10,8 +10,10 @@ export default async function AgregarPage() {
     .order("name");
 
   return (
-    <div className="screen-in">
-      <h1 className="mt-1.5 text-[26px] font-extrabold tracking-tight">Nuevo gasto</h1>
+    <div className="screen-in px-1 pt-2">
+      <h1 className="text-[30px] font-extrabold leading-[0.98] tracking-[-0.03em]">
+        Nuevo<br />gasto
+      </h1>
       <ExpenseForm categories={categories ?? []} />
       <p className="mt-5 text-center text-xs font-medium text-muted">
         Tip: para no teclear nada,{" "}

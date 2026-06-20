@@ -2,23 +2,23 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  /* Paleta "Cálido Pastel" del rediseño */
-  --color-crema: #f3eac9;
-  --color-ink: #15140f;
-  --color-coral: #e07c55;
-  --color-coral-dark: #c9533a;
-  --color-coral-link: #c56a47;
-  --color-muted: #8a8167;
-  --color-muted-2: #5c5740;
-  --color-muted-3: #a79c78;
-  --color-sand: #ece1bc;
-  --color-input: #fbf6e6;
-  --color-input-border: #e2d8b6;
-  --color-track: #efe6c6;
-  --color-mint: #a4d9bf;
+  /* Paleta "COCO — Editorial". crema = fondo taupe; coral = bermellón de acento. */
+  --color-crema: #c8c1b2;
+  --color-ink: #111111;
+  --color-coral: #ff6518;
+  --color-coral-dark: #c2480c;
+  --color-coral-link: #c2480c;
+  --color-muted: rgba(17, 17, 17, 0.5);
+  --color-muted-2: rgba(17, 17, 17, 0.62);
+  --color-muted-3: rgba(17, 17, 17, 0.4);
+  --color-sand: rgba(17, 17, 17, 0.05);
+  --color-input: rgba(255, 255, 255, 0.18);
+  --color-input-border: rgba(17, 17, 17, 0.16);
+  --color-track: rgba(17, 17, 17, 0.16);
+  --color-mint: #a7d9bf;
   --color-mint-ink: #1e4435;
-  /* Compatibilidad: brand = coral */
-  --color-brand: #e07c55;
+  /* Compatibilidad: brand = acento */
+  --color-brand: #ff6518;
   --font-sans: "Archivo", -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
@@ -62,40 +62,92 @@ textarea {
   animation: scrin 0.32s ease;
 }
 
+/* Animaciones del estilo editorial */
+@keyframes ed-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pop-in {
+  0% { transform: scale(0.82); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes count-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slide-r {
+  from { opacity: 0; transform: translateX(-16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes bar-rise {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+@keyframes floaty {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+@keyframes donut-draw {
+  from { stroke-dashoffset: 490; }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes splash-out { 0%, 62% { opacity: 1; } 100% { opacity: 0; pointer-events: none; } }
+@keyframes splash-logo {
+  0% { opacity: 0; transform: scale(0.7) translateY(14px); }
+  45%, 100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes splash-word {
+  0%, 25% { opacity: 0; transform: translateY(10px); }
+  55%, 100% { opacity: 1; transform: translateY(0); }
+}
+
+.ed-in { animation: ed-in 0.36s ease both; }
+.pop-in { animation: pop-in 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.15) both; }
+.count-up { animation: count-up 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+
+/* Banda de categoría a todo lo ancho: al pasar/tocar se expande un poco */
+.band-row {
+  transition: padding-left 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.2s;
+}
+.band-row:hover { padding-left: 30px !important; filter: saturate(1.15); }
+.band-row:active { transform: scale(0.99); }
+.press { transition: transform 0.12s ease; }
+.press:active { transform: scale(0.93); }
+
 /* ─── Modo oscuro ─────────────────────────────── */
 
 html.dark {
-  --color-crema:       #171410;
-  --color-ink:         #ede7c9;
-  --color-sand:        #1e1b13;
-  --color-input:       #1c1a11;
-  --color-input-border:#373020;
-  --color-track:       #272213;
-  --color-muted:       #a09060;
-  --color-muted-2:     #857a56;
-  --color-muted-3:     #635840;
-  --color-mint:        #162e23;
-  --color-mint-ink:    #9dcfb3;
-  --color-coral-link:  #d47c58;
-  --color-coral-dark:  #e07b58;
+  --color-crema:        #1c1a18;
+  --color-ink:          #efe7d2;
+  --color-sand:         rgba(255, 255, 255, 0.05);
+  --color-input:        rgba(255, 255, 255, 0.06);
+  --color-input-border: rgba(239, 231, 210, 0.16);
+  --color-track:        rgba(239, 231, 210, 0.16);
+  --color-muted:        rgba(239, 231, 210, 0.55);
+  --color-muted-2:      rgba(239, 231, 210, 0.62);
+  --color-muted-3:      rgba(239, 231, 210, 0.4);
+  --color-mint:         #a7d9bf;
+  --color-mint-ink:     #14352a;
+  --color-coral-link:   #ff7a3d;
+  --color-coral-dark:   #ff7a3d;
 }
 
-/* Cards blancas → superficie oscura */
-html.dark .bg-white { background-color: #232018; }
+/* Cards "blancas" → superficie translúcida del estilo editorial */
+.bg-white { background-color: rgba(255, 255, 255, 0.22); }
+html.dark .bg-white { background-color: rgba(255, 255, 255, 0.06); }
 
-/* Botones/nav oscuros → tono oscuro cálido (no negro puro) */
-html.dark .bg-ink { background-color: #2d2920; }
+/* Botones/dock oscuros */
+html.dark .bg-ink { background-color: #0b0a09; }
 
 /* Divisores entre items */
-html.dark .border-crema { border-color: #2a2519; }
-html.dark .divide-crema > * + * { border-color: #2a2519; }
+html.dark .border-crema { border-color: rgba(239, 231, 210, 0.14); }
+html.dark .divide-crema > * + * { border-color: rgba(239, 231, 210, 0.14); }
+.border-crema { border-color: rgba(17, 17, 17, 0.12); }
+.divide-crema > * + * { border-color: rgba(17, 17, 17, 0.12); }
 
 /* Borde de inputs */
-html.dark .border-input-border { border-color: #373020; }
+html.dark .border-input-border { border-color: rgba(239, 231, 210, 0.16); }
 
-/* Badge "debe" — fondo rosado claro no sirve en dark */
-html.dark .bg-\[\#F8E3DC\] { background-color: #3d2318; }
-
-/* Pista de los anillos/barras de progreso con color explícito */
+/* Pista de los anillos/barras de progreso */
 html.dark circle[stroke="#EFE6C6"],
-html.dark circle[stroke="#efe6c6"] { stroke: #272213; }
+html.dark circle[stroke="#efe6c6"] { stroke: rgba(239, 231, 210, 0.16); }

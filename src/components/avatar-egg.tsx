@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from "react";
 
 // Avatar con la inicial del usuario. Easter egg: 6 toques abren el panel
 // de Developer Info. La versión sirve para saber qué build está corriendo.
-const VERSION = "1.2.0";
-const BUILD = "EJ-120";
+const VERSION = "2.0.0";
+const BUILD = "COCO-200";
 
 export function AvatarEgg({ initial }: { initial: string }) {
   const [taps, setTaps] = useState(0);
@@ -37,7 +37,7 @@ export function AvatarEgg({ initial }: { initial: string }) {
         type="button"
         onClick={handleTap}
         aria-label="Perfil"
-        className="flex h-[46px] w-[46px] items-center justify-center rounded-full bg-gradient-to-br from-[#E89B6C] to-[#D9694A] text-lg font-extrabold text-white"
+        className="flex h-[38px] w-[38px] items-center justify-center rounded-full border-[1.4px] border-input-border text-base font-extrabold text-ink"
       >
         {initial}
       </button>

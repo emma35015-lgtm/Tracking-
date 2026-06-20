@@ -2,13 +2,13 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Gastos",
+  title: "COCO — gasta con cabeza",
   description: "Tracking de gastos automático con Apple Pay y Siri",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Gastos",
+    title: "COCO",
   },
   icons: {
     apple: "/icons/apple-touch-icon.png",
@@ -19,7 +19,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#F3EAC9",
+  themeColor: "#C8C1B2",
 };
 
 export default function RootLayout({
@@ -44,7 +44,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-full bg-crema text-ink">
+      <body className="min-h-full bg-crema text-ink antialiased">
         {children}
         <script
           dangerouslySetInnerHTML={{

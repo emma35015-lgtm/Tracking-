@@ -5,20 +5,20 @@ import type { ReactNode } from "react";
 // caen al emoji guardado en la BD sobre fondo sand.
 
 export const CATEGORY_COLORS: Record<string, string> = {
-  Comida: "#AEC0EC",
-  Transporte: "#F2C84B",
-  Supermercado: "#A4D9BF",
-  Suscripciones: "#E2B5DA",
-  Salud: "#F2A98C",
-  Otros: "#ECE1BC",
-  Entretenimiento: "#C9C2F0",
-  Hogar: "#F2D49B",
+  Comida: "#FF6518",
+  Transporte: "#F4CF12",
+  Supermercado: "#A7D9BF",
+  Suscripciones: "#D995AF",
+  Salud: "#9EC8E0",
+  Otros: "#D8CFB8",
+  Entretenimiento: "#C9B8E8",
+  Hogar: "#F2B79F",
   Ropa: "#B8D9E8",
   Viajes: "#9FD0C4",
 };
 
 export function categoryColor(name?: string | null): string {
-  return (name && CATEGORY_COLORS[name]) || "#ECE1BC";
+  return (name && CATEGORY_COLORS[name]) || "#D8CFB8";
 }
 
 type Shape =

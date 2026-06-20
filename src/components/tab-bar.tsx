@@ -14,8 +14,7 @@ const NAV_ICONS: Record<string, Shape[]> = {
     ["rect", 5, 3, 14, 18, 2.5],
     ["path", "M9 8h6 M9 12h6 M9 16h4"],
   ],
-  plus: [["path", "M12 5v14 M5 12h14"]],
-  chart: [["path", "M4 16 9 11l4 4 7-8"]],
+  chart: [["path", "M5 19V9 M12 19V5 M19 19v-7"]],
   gear: [
     ["circle", 12, 12, 3],
     [
@@ -25,11 +24,11 @@ const NAV_ICONS: Record<string, Shape[]> = {
   ],
 };
 
-function NavIcon({ name, size }: { name: string; size: number }) {
+function NavIcon({ name }: { name: string }) {
   return (
     <svg
-      width={size}
-      height={size}
+      width={21}
+      height={21}
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -49,7 +48,6 @@ function NavIcon({ name, size }: { name: string; size: number }) {
 const TABS = [
   { href: "/", icon: "home", label: "Inicio" },
   { href: "/gastos", icon: "list", label: "Gastos" },
-  { href: "/agregar", icon: "plus", label: "Agregar" },
   { href: "/analisis", icon: "chart", label: "Análisis" },
   { href: "/ajustes", icon: "gear", label: "Ajustes" },
 ];
@@ -58,31 +56,38 @@ export function TabBar() {
   const pathname = usePathname();
 
   return (
-    <nav
-      className="fixed bottom-[18px] left-1/2 z-40 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-ink px-3 py-2 shadow-[0_16px_36px_-10px_rgba(0,0,0,0.45)]"
+    <div
+      className="fixed bottom-4 left-1/2 z-40 flex w-full max-w-lg -translate-x-1/2 items-center gap-2.5 px-[22px]"
       style={{ marginBottom: "env(safe-area-inset-bottom)" }}
     >
-      {TABS.map((tab) => {
-        const active =
-          tab.href === "/" ? pathname === "/" : pathname.startsWith(tab.href);
-        const isAdd = tab.icon === "plus";
-        return (
-          <Link
-            key={tab.href}
-            href={tab.href}
-            aria-label={tab.label}
-            className={`flex h-[46px] w-[46px] items-center justify-center rounded-full transition-colors ${
-              isAdd
-                ? "bg-coral text-white"
-                : active
-                ? "bg-crema text-ink dark:bg-white/10 dark:text-[#ede7c9]"
-                : "bg-transparent text-[#9A9384] dark:text-[#7a7060]"
-            }`}
-          >
-            <NavIcon name={tab.icon} size={isAdd ? 23 : 21} />
-          </Link>
-        );
-      })}
-    </nav>
+      <nav className="flex flex-1 items-center justify-around rounded-full bg-ink/90 px-4 py-2.5 backdrop-blur-md">
+        {TABS.map((tab) => {
+          const active =
+            tab.href === "/" ? pathname === "/" : pathname.startsWith(tab.href);
+          return (
+            <Link
+              key={tab.href}
+              href={tab.href}
+              aria-label={tab.label}
+              className={`flex h-[42px] w-[42px] items-center justify-center rounded-full transition-colors ${
+                active ? "text-crema" : "text-[#ada493]/70"
+              }`}
+            >
+              <NavIcon name={tab.icon} />
+            </Link>
+          );
+        })}
+      </nav>
+      <Link
+        href="/agregar"
+        aria-label="Agregar gasto"
+        className="press flex h-[54px] w-[54px] shrink-0 items-center justify-center rounded-full bg-coral shadow-[0_8px_20px_-6px_rgba(242,100,30,0.6)]"
+        style={{ animation: "floaty 5s ease-in-out infinite" }}
+      >
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="2.6" strokeLinecap="round">
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+      </Link>
+    </div>
   );
 }

@@ -1,11 +1,11 @@
 {
-  "name": "Gastos",
-  "short_name": "Gastos",
+  "name": "COCO — gasta con cabeza",
+  "short_name": "COCO",
   "description": "Tracking de gastos automático con Apple Pay y Siri",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#F3EAC9",
-  "theme_color": "#F3EAC9",
+  "background_color": "#C8C1B2",
+  "theme_color": "#C8C1B2",
   "icons": [
     {
       "src": "/icons/icon-192.png",

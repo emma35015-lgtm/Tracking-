@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -65,12 +66,21 @@ export default function LoginPage() {
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-sm flex-col justify-center px-6 pb-24">
-      <div className="mb-8 text-center">
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-[22px] bg-coral text-3xl font-extrabold text-white">
-          $
-        </div>
-        <h1 className="text-[32px] font-extrabold tracking-tight">Gastos</h1>
-        <p className="mt-1 text-sm font-medium text-muted">
+      <div className="mb-8 flex flex-col items-center text-center">
+        <Image
+          src="/brand/coco-logo.png"
+          alt="COCO"
+          width={96}
+          height={96}
+          priority
+          className="mb-2 h-24 w-24 object-contain"
+          style={{ animation: "floaty 6s ease-in-out infinite" }}
+        />
+        <h1 className="text-[40px] font-extrabold leading-[0.9] tracking-[-0.05em]">COCO</h1>
+        <p className="mt-2 text-[11px] font-bold uppercase tracking-[0.2em] text-muted">
+          gasta con cabeza
+        </p>
+        <p className="mt-3 text-sm font-medium text-muted">
           Tus gastos, registrados solos con Apple Pay y Siri.
         </p>
       </div>

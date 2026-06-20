@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { addExpense } from "@/app/(app)/actions";
-import { CategoryIcon, categoryColor } from "@/lib/category-style";
+import { categoryColor } from "@/lib/category-style";
 
 const KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", "⌫"];
 
@@ -32,47 +32,42 @@ export function ExpenseForm({
       <input type="hidden" name="category_id" value={categoryId} />
 
       {/* Monto */}
-      <div className="mt-[18px] rounded-[26px] bg-white px-5 py-[26px] text-center">
-        <div className="text-xs font-bold uppercase tracking-[0.08em] text-muted">Monto</div>
-        <div className="mt-2 text-[60px] font-extrabold leading-none tracking-[-0.04em] tabular-nums">
+      <div className="mt-[22px]">
+        <div className="text-[13px] font-semibold text-muted">Monto</div>
+        <div className="mt-0.5 text-[64px] font-extrabold leading-none tracking-[-0.05em] tabular-nums">
           $<span>{amount === "" ? "0" : amount}</span>
         </div>
       </div>
 
       {/* Comercio */}
-      <div className="mt-4">
-        <div className="mb-2 text-[13px] font-bold text-muted-2">Comercio</div>
+      <div className="mt-[18px]">
         <input
           name="merchant"
-          placeholder="Opcional: OXXO, tacos de la esquina…"
-          className="w-full rounded-2xl border-[1.6px] border-input-border bg-input px-4 py-3.5 text-[15px] font-medium text-ink outline-none focus:border-coral"
+          placeholder="Comercio (OXXO, tacos…)"
+          className="w-full border-0 border-b-[1.6px] border-input-border bg-transparent py-3 text-[17px] font-semibold text-ink outline-none placeholder:text-muted focus:border-coral"
         />
       </div>
 
       {/* Categoría */}
-      <div className="mt-[18px]">
-        <div className="mb-2.5 text-[13px] font-bold text-muted-2">Categoría</div>
-        <div className="flex flex-wrap gap-[9px]">
-          {categories.map((c) => {
-            const selected = categoryId === c.id;
-            const pastel = categoryColor(c.name);
-            return (
-              <button
-                key={c.id}
-                type="button"
-                onClick={() => setCategoryId(selected ? "" : c.id)}
-                className="inline-flex items-center gap-[7px] rounded-full px-3.5 py-[9px] text-sm font-semibold text-ink transition-all"
-                style={{
-                  border: `1.6px solid ${selected ? pastel : "#E2D8B6"}`,
-                  background: selected ? pastel : "#FBF6E6",
-                }}
-              >
-                <CategoryIcon name={c.name} emoji={c.icon} color="#15140F" size={18} />
-                <span>{c.name}</span>
-              </button>
-            );
-          })}
-        </div>
+      <div className="mt-[18px] flex flex-wrap gap-2">
+        {categories.map((c) => {
+          const selected = categoryId === c.id;
+          const color = categoryColor(c.name);
+          return (
+            <button
+              key={c.id}
+              type="button"
+              onClick={() => setCategoryId(selected ? "" : c.id)}
+              className="rounded-full px-[15px] py-[9px] text-sm font-bold text-ink transition-all"
+              style={{
+                border: `1.5px solid ${selected ? "transparent" : "var(--color-input-border)"}`,
+                background: selected ? color : "transparent",
+              }}
+            >
+              {c.name}
+            </button>
+          );
+        })}
       </div>
 
       {/* Teclado */}
@@ -82,7 +77,7 @@ export function ExpenseForm({
             key={k}
             type="button"
             onClick={() => press(k)}
-            className="h-[52px] rounded-2xl bg-white text-2xl font-bold text-ink active:bg-sand"
+            className="press h-[52px] rounded-[14px] border border-input-border bg-white text-2xl font-bold text-ink"
           >
             {k}
           </button>
@@ -92,9 +87,9 @@ export function ExpenseForm({
       <button
         type="submit"
         disabled={saving || !(parseFloat(amount) > 0)}
-        className="mt-4 h-[58px] rounded-[18px] bg-coral text-lg font-extrabold tracking-tight text-white disabled:opacity-40"
+        className="mt-4 h-[58px] rounded-[16px] bg-ink text-lg font-extrabold tracking-tight text-crema disabled:opacity-40"
       >
-        {saving ? "Guardando…" : "Guardar gasto"}
+        {saving ? "Guardando…" : "Guardar gasto →"}
       </button>
     </form>
   );

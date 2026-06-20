@@ -145,7 +145,6 @@ export default async function AnalisisPage({
 
   const currency = current[0]?.currency ?? previous[0]?.currency ?? "MXN";
   const total = sum(current);
-  const prevTotal = sum(previous);
 
   const daysInMonth = new Date(year, month, 0).getDate();
   const now = new Date();
@@ -153,23 +152,22 @@ export default async function AnalisisPage({
   const daysElapsed = isCurrentMonth ? now.getDate() : daysInMonth;
   const dailyAvg = daysElapsed > 0 ? total / daysElapsed : 0;
 
-  // Gasto por día (para la gráfica de barras)
-  const byDay = new Array(daysInMonth).fill(0);
-  for (const e of current) {
-    const day = new Date(e.occurred_at).getUTCDate();
-    byDay[day - 1] += Number(e.amount);
-  }
-  const maxDay = Math.max(...byDay, 1);
-  const peakIndex = byDay.indexOf(Math.max(...byDay));
-
   const byCat = groupByCategory(current);
-  const byCatPrev = groupByCategory(previous);
   const catRows = [...byCat.entries()].sort((a, b) => b[1].total - a[1].total);
 
   const tips = buildTips(current, previous, currency, daysElapsed, daysInMonth);
 
+  const topCat = catRows[0] ? { name: catRows[0][0], total: catRows[0][1].total } : { name: "—", total: 0 };
+  const topPct = total > 0 ? Math.round((topCat.total / total) * 100) : 0;
+  const maxExpense = current.reduce((m, e) => Math.max(m, Number(e.amount)), 0);
+
+  // Dona: r=78, circunferencia ≈ 490 (coincide con la animación donut-draw)
+  const R = 78;
+  const C = 2 * Math.PI * R;
+  const dash = C * (topPct / 100);
+
   return (
-    <div className="screen-in">
+    <div className="screen-in px-1 pt-2">
       <MonthHeader base="/analisis" subtitle="Análisis" year={year} month={month} prev={prev} next={next} />
 
       {current.length === 0 ? (
@@ -177,116 +175,85 @@ export default async function AnalisisPage({
           Sin gastos este mes. Cuando haya datos, aquí verás tus gráficas y tips.
         </div>
       ) : (
-        <div className="mt-5 flex flex-col gap-3">
-          {/* Stat cards */}
+        <div className="mt-5 flex flex-col gap-5">
+          {/* Dona */}
+          <div className="pop-in flex justify-center">
+            <svg width="200" height="200" viewBox="0 0 200 200">
+              <circle cx="100" cy="100" r={R} fill="none" stroke="var(--color-track)" strokeWidth="14" />
+              <circle
+                cx="100"
+                cy="100"
+                r={R}
+                fill="none"
+                stroke="#FF6518"
+                strokeWidth="14"
+                strokeLinecap="round"
+                strokeDasharray={`${dash} ${C}`}
+                transform="rotate(-90 100 100)"
+                style={{ animation: "donut-draw 1.1s cubic-bezier(.3,.9,.3,1) both" }}
+              />
+              <text x="100" y="90" textAnchor="middle" fontSize="13" fontWeight="600" fill="var(--color-muted)">
+                {topCat.name}
+              </text>
+              <text x="100" y="126" textAnchor="middle" fontSize="40" fontWeight="800" letterSpacing="-0.03em" fill="var(--color-ink)">
+                {topPct}%
+              </text>
+            </svg>
+          </div>
+
+          {/* Dos mosaicos */}
           <div className="flex gap-[11px]">
-            <div className="flex-1 rounded-[22px] bg-white p-[18px]">
-              <div className="text-xs font-semibold text-muted">Este mes</div>
-              <div className="mt-2 text-3xl font-extrabold leading-none tracking-[-0.03em] tabular-nums">
-                {formatMoneyShort(total, currency)}
-              </div>
-              {prevTotal > 0 && (
-                <div
-                  className="mt-1 text-[11px] font-bold"
-                  style={{ color: total <= prevTotal ? "#1E4435" : "#C9533A" }}
-                >
-                  {total <= prevTotal ? "▼" : "▲"}{" "}
-                  {Math.abs(Math.round(((total - prevTotal) / prevTotal) * 100))}% vs mes pasado
-                </div>
-              )}
-            </div>
-            <div className="flex-1 rounded-[22px] bg-ink p-[18px] text-white">
-              <div className="text-xs font-semibold opacity-70">Promedio diario</div>
-              <div className="mt-2 text-3xl font-extrabold leading-none tracking-[-0.03em] tabular-nums">
+            <div className="pop-in flex-1 rounded-[18px] border border-input-border p-4" style={{ background: "#A7D9BF" }}>
+              <div className="text-xs font-semibold leading-tight text-black/60">Promedio<br />diario</div>
+              <div className="my-2.5 h-0.5 w-6 bg-black" />
+              <div className="text-[28px] font-extrabold leading-none tracking-[-0.03em] text-[#111] tabular-nums">
                 {formatMoneyShort(dailyAvg, currency)}
               </div>
-              <div className="mt-1 text-[11px] opacity-60">
-                en {daysElapsed} {daysElapsed === 1 ? "día" : "días"}
+            </div>
+            <div className="pop-in flex-1 rounded-[18px] border border-input-border p-4" style={{ background: "#F4CF12" }}>
+              <div className="text-xs font-semibold leading-tight text-black/60">Mayor<br />gasto</div>
+              <div className="my-2.5 h-0.5 w-6 bg-black" />
+              <div className="text-[28px] font-extrabold leading-none tracking-[-0.03em] text-[#111] tabular-nums">
+                {formatMoneyShort(maxExpense, currency)}
               </div>
             </div>
           </div>
 
-          {/* Gasto por día */}
-          <section className="rounded-[24px] bg-sand px-4 pb-4 pt-5">
-            <h2 className="mb-3 px-1 text-base font-extrabold tracking-tight">Gasto por día</h2>
-            <div className="flex h-32 items-end gap-[2px]">
-              {byDay.map((amount, i) => {
-                const peak = i === peakIndex && amount > 0;
-                return (
-                  <div
-                    key={i}
-                    className="flex-1 rounded-t"
-                    style={{
-                      height: amount > 0 ? `${Math.max(5, (amount / maxDay) * 100)}%` : "3px",
-                      background: peak ? "#E07C55" : "#15140F",
-                      opacity: amount > 0 ? 1 : 0.18,
-                    }}
-                    title={`Día ${i + 1}: ${formatMoney(amount, currency)}`}
-                  />
-                );
-              })}
-            </div>
-            <div className="mt-1.5 flex justify-between text-[10px] font-semibold text-muted-3">
-              <span>1</span>
-              <span>{Math.round(daysInMonth / 2)}</span>
-              <span>{daysInMonth}</span>
-            </div>
-          </section>
-
-          {/* Por categoría */}
-          <section className="rounded-[24px] bg-white p-5">
-            <h2 className="mb-4 text-base font-extrabold tracking-tight">Por categoría</h2>
-            <div className="flex flex-col gap-[15px]">
-              {catRows.map(([name, { total: catTotal }]) => {
-                const before = byCatPrev.get(name)?.total ?? 0;
-                const pct = total > 0 ? Math.round((catTotal / total) * 100) : 0;
-                return (
-                  <div key={name}>
-                    <div className="mb-[7px] flex items-baseline justify-between">
-                      <span className="text-sm font-bold">
-                        {name} <span className="font-semibold text-muted-3">{pct}%</span>
-                        {before > 0 && (
-                          <span
-                            className="ml-1.5 text-xs"
-                            style={{ color: catTotal <= before ? "#1E4435" : "#C9533A" }}
-                          >
-                            {catTotal <= before ? "▼" : "▲"}
-                          </span>
-                        )}
-                      </span>
-                      <span className="text-sm font-extrabold tabular-nums">
-                        {formatMoneyShort(catTotal, currency)}
-                      </span>
-                    </div>
-                    <div className="h-2.5 overflow-hidden rounded-full bg-track">
-                      <div
-                        className="h-full rounded-full"
-                        style={{
-                          width: `${Math.max(4, pct)}%`,
-                          background: categoryColor(name) === "#ECE1BC" ? "#E07C55" : categoryColor(name),
-                        }}
-                      />
-                    </div>
+          {/* Ranking por categoría */}
+          <div>
+            {catRows.slice(0, 6).map(([name, { total: catTotal }], i) => {
+              const pct = total > 0 ? Math.round((catTotal / total) * 100) : 0;
+              return (
+                <div
+                  key={name}
+                  className="flex items-center gap-3.5 border-t border-crema py-3.5"
+                  style={{ animation: `slide-r .5s ${(0.1 + i * 0.07).toFixed(2)}s both` }}
+                >
+                  <div className="h-[15px] w-[15px] flex-none rounded-[5px]" style={{ background: categoryColor(name) }} />
+                  <div className="flex-1">
+                    <div className="text-[15px] font-bold tracking-[-0.01em]">{name}</div>
+                    <div className="text-xs font-medium text-muted">{formatMoneyShort(catTotal, currency)}</div>
                   </div>
-                );
-              })}
-            </div>
-          </section>
+                  <div
+                    className="text-[36px] font-extrabold leading-none tracking-[-0.03em]"
+                    style={{ color: i === 0 ? "#FF6518" : "var(--color-ink)" }}
+                  >
+                    {pct}
+                    <span className="text-lg">%</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
 
           {/* Tips */}
           {tips.length > 0 && (
-            <section className="rounded-[24px] bg-mint px-5 py-[18px]">
-              <div className="mb-3 flex items-center gap-2">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-mint-ink">
-                  <path d="M12 2a7 7 0 0 1 7 7c0 3-1.8 5.4-4.3 6.5L14 17H10l-.7-1.5C6.8 14.4 5 12 5 9a7 7 0 0 1 7-7Z" />
-                  <path d="M10 21h4M12 17v4" />
-                </svg>
-                <span className="text-sm font-extrabold tracking-tight text-mint-ink">Según tus datos</span>
-              </div>
+            <section className="rounded-[20px] px-5 py-[18px]" style={{ background: "#A7D9BF" }}>
+              <div className="mb-3 text-sm font-extrabold tracking-tight text-mint-ink">Según tus datos</div>
               <div className="flex flex-col gap-3">
                 {tips.map((tip, i) => (
                   <div key={i} className="text-sm font-medium leading-relaxed text-mint-ink">
-                    {i > 0 && <div className="mb-3 border-t border-mint-ink/20" />}
+                    {i > 0 && <div className="mb-3 border-t border-black/15" />}
                     {tip}
                   </div>
                 ))}
