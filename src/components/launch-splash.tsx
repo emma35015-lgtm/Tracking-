@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useState } from "react";
 
 // Pantalla de bienvenida de COCO. Se muestra una sola vez por sesión
@@ -41,12 +40,10 @@ export function LaunchSplash() {
         ))}
       </div>
 
-      <Image
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
         src="/brand/coco-logo.png"
         alt="COCO"
-        width={188}
-        height={188}
-        priority
         style={{ width: 240, height: "auto", animation: "splash-logo 1s cubic-bezier(.2,.9,.3,1.2) both" }}
       />
       <div

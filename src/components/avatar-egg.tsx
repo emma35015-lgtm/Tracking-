@@ -1,12 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 // Avatar con la inicial del usuario. Easter egg: 6 toques abren el panel
 // del creador. La versión sirve para saber qué build está corriendo.
-const VERSION = "2.6.1";
-const BUILD = "COCO-261";
+const VERSION = "2.7.0";
+const BUILD = "COCO-270";
 
 export function AvatarEgg({ initial }: { initial: string }) {
   const [taps, setTaps] = useState(0);
@@ -54,11 +53,10 @@ export function AvatarEgg({ initial }: { initial: string }) {
             style={{ animation: "pop-in .4s cubic-bezier(.2,.9,.3,1.15) both" }}
             onClick={(e) => e.stopPropagation()}
           >
-            <Image
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src="/brand/coco-logo.png"
               alt="COCO"
-              width={72}
-              height={72}
               className="mx-auto h-[72px] w-[72px] object-contain"
               style={{ animation: "floaty 6s ease-in-out infinite" }}
             />

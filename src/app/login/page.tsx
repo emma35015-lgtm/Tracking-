@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -71,14 +70,8 @@ export default function LoginPage() {
           className="mb-4 flex h-28 w-28 items-center justify-center rounded-[32px] bg-coral shadow-[0_16px_36px_-12px_rgba(224,83,43,0.6)]"
           style={{ animation: "floaty 6s ease-in-out infinite" }}
         >
-          <Image
-            src="/brand/coco-logo.png"
-            alt="COCO"
-            width={96}
-            height={96}
-            priority
-            className="h-20 w-20 object-contain"
-          />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/coco-logo.png" alt="COCO" className="h-20 w-20 object-contain" />
         </div>
         <h1 className="text-[44px] font-extrabold leading-[0.9] tracking-[-0.05em]">COCO</h1>
         <p className="mt-2 text-[11px] font-bold uppercase tracking-[0.2em] text-muted">

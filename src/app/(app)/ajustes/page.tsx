@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import {
   addCategory,
@@ -54,11 +53,10 @@ export default async function AjustesPage() {
   return (
     <div className="screen-in px-1 pt-2">
       <div className="flex items-center gap-3.5">
-        <Image
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
           src="/brand/coco-logo.png"
           alt="COCO"
-          width={54}
-          height={54}
           className="h-[54px] w-[54px] object-contain"
           style={{ animation: "floaty 6s ease-in-out infinite" }}
         />
