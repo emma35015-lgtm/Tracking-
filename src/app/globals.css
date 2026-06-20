@@ -118,6 +118,14 @@ textarea {
   100% { transform: scale(1); opacity: 1; }
 }
 
+/* Rebote elástico del número de "Gastos del mes" (carga y al tocar) */
+@keyframes amount-pop {
+  0% { transform: scale(0.92); opacity: 0.45; }
+  55% { transform: scale(1.045); opacity: 1; }
+  78% { transform: scale(0.99); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
 /* Banda de categoría a todo lo ancho: al pasar/tocar se expande un poco */
 .band-row {
   transition: padding-left 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.2s;

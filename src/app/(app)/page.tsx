@@ -5,6 +5,7 @@ import { formatMonth, formatMoneyShort, dayKey } from "@/lib/format";
 import { categoryColor } from "@/lib/category-style";
 import { AvatarEgg } from "@/components/avatar-egg";
 import { MonthlyRecap } from "@/components/monthly-recap";
+import { MonthlyTotal } from "@/components/monthly-total";
 import {
   isActiveNow,
   daysUntilDay,
@@ -180,9 +181,7 @@ export default async function InicioPage() {
         </div>
 
         <div className="mt-6">
-          <div className="count-up text-[96px] font-light leading-[0.92] tracking-[-0.04em] tabular-nums">
-            {formatMoneyShort(total, currency)}
-          </div>
+          <MonthlyTotal value={formatMoneyShort(total, currency)} />
           <div className="mt-2 text-[12px] font-bold uppercase tracking-[0.16em] text-muted">
             Gastos del mes
           </div>
