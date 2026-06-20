@@ -1,8 +1,7 @@
-import type { ReactNode } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { formatMonth, formatMoneyShort, dayKey } from "@/lib/format";
-import { CategoryIcon, categoryColor } from "@/lib/category-style";
+import { categoryColor } from "@/lib/category-style";
 import { AvatarEgg } from "@/components/avatar-egg";
 import { MonthlyRecap } from "@/components/monthly-recap";
 import {
@@ -321,35 +320,34 @@ export default async function InicioPage() {
         </div>
       )}
 
-      {/* Fichas de categoría */}
+      {/* Bandas de categoría */}
       {cats.length > 0 && (
         <div className="mt-7">
           <div className="px-1 pb-3 text-xs font-bold uppercase tracking-[0.08em] text-muted">Por categoría</div>
-          <div className="flex flex-col gap-2.5">
-            {cats.map(([catName, { total: catTotal, count, icon }], i) => {
+          <div className="overflow-hidden rounded-[20px]">
+            {cats.map(([catName, { total: catTotal, count }], i) => {
               const pct = total > 0 ? Math.round((catTotal / total) * 100) : 0;
               return (
                 <Link
                   key={catName}
                   href="/gastos"
-                  className="flex items-center gap-3.5 rounded-[22px] bg-white px-[17px] py-[15px]"
-                  style={{ animation: `slide-r .5s ${(0.06 + i * 0.06).toFixed(2)}s both` }}
+                  className="band-row flex items-center gap-3.5"
+                  style={{ background: colorOfCat(catName), padding: "17px 22px", animation: `slide-r .5s ${(0.06 + i * 0.06).toFixed(2)}s both` }}
                 >
-                  <div
-                    className="flex h-11 w-11 flex-none items-center justify-center rounded-[14px]"
-                    style={{ background: colorOfCat(catName) }}
-                  >
-                    <CategoryIcon name={catName} emoji={icon} color="#111111" size={22} />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-base font-bold tracking-tight">{catName}</div>
-                    <div className="text-xs font-medium text-muted">
+                  <span className="flex h-[27px] w-[27px] flex-none items-center justify-center rounded-full border-[1.6px] border-black/50 text-xs font-extrabold text-[#111]">
+                    {i + 1}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-[25px] font-extrabold leading-none tracking-[-0.03em] text-[#111]">
+                      {catName}
+                    </span>
+                    <span className="mt-1.5 block text-xs font-semibold text-black/55">
                       {count} {count === 1 ? "gasto" : "gastos"} · {pct}%
-                    </div>
-                  </div>
-                  <div className="text-lg font-extrabold tracking-tight tabular-nums">
+                    </span>
+                  </span>
+                  <span className="flex-none text-[19px] font-extrabold tracking-[-0.02em] text-[#111]">
                     {formatMoneyShort(catTotal, currency)}
-                  </div>
+                  </span>
                 </Link>
               );
             })}
@@ -401,90 +399,54 @@ export default async function InicioPage() {
         </div>
       </div>
 
-      {/* Accesos: dividir, viajes, fijos, conectar iPhone */}
-      <div className="mt-7 flex flex-col gap-2">
+      {/* Accesos como bandas */}
+      <div className="mt-7">
         {!token && (
-          <Link href="/ajustes/atajos" className="flex items-center justify-between rounded-[18px] bg-ink px-[18px] py-4 text-crema">
-            <div>
-              <div className="text-[15px] font-bold">Conecta tu iPhone</div>
-              <div className="text-xs font-medium opacity-70">Que tus gastos se registren solos</div>
-            </div>
-            <span className="text-lg font-extrabold text-coral">→</span>
+          <Link
+            href="/ajustes/atajos"
+            className="band-row mb-2.5 flex items-center gap-3.5 rounded-[20px] bg-ink px-[22px] py-[18px] text-crema"
+          >
+            <span className="min-w-0 flex-1">
+              <span className="block text-[22px] font-extrabold leading-none tracking-[-0.02em]">Conecta tu iPhone</span>
+              <span className="mt-1.5 block text-xs font-semibold opacity-70">Que tus gastos se registren solos</span>
+            </span>
+            <span className="flex-none text-xl font-extrabold text-coral">→</span>
           </Link>
         )}
-        <HomeLink
-          i={0}
-          href="/dividir"
-          title="Dividir cuenta"
-          sub="Foto del ticket y calculamos tu parte"
-          color="#A7D9BF"
-          icon={<path d="M6 3h12v18l-2-1.5L14 21l-2-1.5L10 21l-2-1.5L6 21V3Z M9 8h6 M9 12h6" />}
-        />
-        <HomeLink
-          i={1}
-          href="/viajes"
-          title="Viajes"
-          sub="El bote compartido: cuánto queda y quién debe"
-          color="#9EC8E0"
-          icon={
-            <>
-              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-              <circle cx="9" cy="7" r="4" />
-              <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-            </>
-          }
-        />
-        <HomeLink
-          i={2}
-          href="/fijos"
-          title="Pagos fijos"
-          sub="Suscripciones, meses y tu tarjeta"
-          color="#C9B8E8"
-          icon={
-            <>
-              <rect x="3" y="5" width="18" height="14" rx="2.6" />
-              <path d="M3 9.5h18" />
-            </>
-          }
-        />
+        <div className="overflow-hidden rounded-[20px]">
+          <HomeBand i={0} href="/dividir" title="Dividir cuenta" sub="Foto del ticket y calculamos tu parte" color="#A7D9BF" />
+          <HomeBand i={1} href="/viajes" title="Viajes" sub="El bote compartido: cuánto queda y quién debe" color="#9EC8E0" />
+          <HomeBand i={2} href="/fijos" title="Pagos fijos" sub="Suscripciones, meses y tu tarjeta" color="#C9B8E8" />
+        </div>
       </div>
     </div>
   );
 }
 
-function HomeLink({
+function HomeBand({
   href,
   title,
   sub,
   i,
   color,
-  icon,
 }: {
   href: string;
   title: string;
   sub: string;
   i: number;
   color: string;
-  icon: ReactNode;
 }) {
   return (
     <Link
       href={href}
-      className="press flex items-center gap-3.5 rounded-[22px] bg-white px-[17px] py-[15px]"
-      style={{ animation: `slide-r .5s ${(0.06 + i * 0.07).toFixed(2)}s both` }}
+      className="band-row flex items-center gap-3.5 text-[#111]"
+      style={{ background: color, padding: "18px 22px", animation: `slide-r .5s ${(0.06 + i * 0.07).toFixed(2)}s both` }}
     >
-      <div className="flex h-11 w-11 flex-none items-center justify-center rounded-[14px]" style={{ background: color }}>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-          {icon}
-        </svg>
-      </div>
-      <div className="min-w-0 flex-1">
-        <div className="text-[15px] font-bold tracking-tight">{title}</div>
-        <div className="text-xs font-medium text-muted">{sub}</div>
-      </div>
-      <svg width="9" height="15" viewBox="0 0 9 15" fill="none" stroke="#8A8167" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M1.5 1.5 7.5 7.5l-6 6" />
-      </svg>
+      <span className="min-w-0 flex-1">
+        <span className="block text-[22px] font-extrabold leading-none tracking-[-0.02em]">{title}</span>
+        <span className="mt-1.5 block text-xs font-semibold text-black/55">{sub}</span>
+      </span>
+      <span className="flex-none text-xl font-extrabold">→</span>
     </Link>
   );
 }
