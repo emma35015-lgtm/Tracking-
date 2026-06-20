@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { formatMonth, formatMoneyShort, dayKey } from "@/lib/format";
@@ -337,30 +338,38 @@ export default async function InicioPage() {
       {cats.length > 0 && (
         <div className="mt-7">
           <div className="px-1 pb-3 text-xs font-bold uppercase tracking-[0.08em] text-muted">Por categoría</div>
-          <div className="-mx-[22px]">
+          <div className="-mx-[14px]">
             {cats.map(([catName, { total: catTotal, count }], i) => {
               const pct = total > 0 ? Math.round((catTotal / total) * 100) : 0;
               return (
                 <Link
                   key={catName}
                   href="/gastos"
-                  className="band-row flex items-center gap-3.5"
-                  style={{ background: colorOfCat(catName), padding: "17px 22px", animation: `slide-r .5s ${(0.06 + i * 0.06).toFixed(2)}s both` }}
+                  className="relative block rounded-[28px] px-6 pb-5 pt-5"
+                  style={{
+                    background: colorOfCat(catName),
+                    marginTop: i === 0 ? 0 : -22,
+                    zIndex: i + 1,
+                    boxShadow: "0 -10px 24px -12px rgba(0,0,0,0.28)",
+                    animation: `slide-r .5s ${(0.06 + i * 0.06).toFixed(2)}s both`,
+                  }}
                 >
-                  <span className="flex h-[27px] w-[27px] flex-none items-center justify-center rounded-full border-[1.6px] border-black/50 text-xs font-extrabold text-[#111]">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-black/10 text-[18px] font-extrabold text-[#111]">
                     {i + 1}
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[25px] font-extrabold leading-none tracking-[-0.03em] text-[#111]">
-                      {catName}
-                    </span>
-                    <span className="mt-1.5 block text-xs font-semibold text-black/55">
-                      {count} {count === 1 ? "gasto" : "gastos"} · {pct}%
-                    </span>
-                  </span>
-                  <span className="flex-none text-[19px] font-extrabold tracking-[-0.02em] text-[#111]">
-                    {formatMoneyShort(catTotal, currency)}
-                  </span>
+                  </div>
+                  <div className="mt-6 flex items-end justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="text-[13px] font-semibold text-black/45">
+                        {count} {count === 1 ? "gasto" : "gastos"} · {pct}%
+                      </div>
+                      <div className="truncate text-[24px] font-extrabold tracking-[-0.02em] text-[#111]">
+                        {catName}
+                      </div>
+                    </div>
+                    <div className="flex-none text-[22px] font-extrabold tabular-nums text-[#111]">
+                      {formatMoneyShort(catTotal, currency)}
+                    </div>
+                  </div>
                 </Link>
               );
             })}
@@ -412,52 +421,111 @@ export default async function InicioPage() {
         </div>
       </div>
 
-      {/* Accesos como bandas (de borde a borde) */}
-      <div className="mt-7 -mx-[22px]">
+      {/* Accesos como fichas encimadas */}
+      <div className="mt-7 -mx-[14px]">
         {!token && (
-          <Link
+          <HomeCard
+            i={0}
             href="/ajustes/atajos"
-            className="band-row flex items-center gap-3.5 bg-ink px-[22px] py-[18px] text-crema"
-          >
-            <span className="min-w-0 flex-1">
-              <span className="block text-[22px] font-extrabold leading-none tracking-[-0.02em]">Conecta tu iPhone</span>
-              <span className="mt-1.5 block text-xs font-semibold opacity-70">Que tus gastos se registren solos</span>
-            </span>
-            <span className="flex-none text-xl font-extrabold text-coral">→</span>
-          </Link>
+            title="Conecta tu iPhone"
+            sub="Que tus gastos se registren solos"
+            color="var(--color-ink)"
+            dark
+            icon={
+              <>
+                <rect x="6" y="2.5" width="12" height="19" rx="3" />
+                <path d="M11 18.5h2" />
+              </>
+            }
+          />
         )}
-        <HomeBand i={0} href="/dividir" title="Dividir cuenta" sub="Foto del ticket y calculamos tu parte" color="#A7D9BF" />
-        <HomeBand i={1} href="/viajes" title="Viajes" sub="El bote compartido: cuánto queda y quién debe" color="#9EC8E0" />
-        <HomeBand i={2} href="/fijos" title="Pagos fijos" sub="Suscripciones, meses y tu tarjeta" color="#C9B8E8" />
+        <HomeCard
+          i={token ? 0 : 1}
+          href="/dividir"
+          title="Dividir cuenta"
+          sub="Foto del ticket y calculamos tu parte"
+          color="#A7D9BF"
+          icon={<path d="M6 3h12v18l-2-1.5L14 21l-2-1.5L10 21l-2-1.5L6 21V3Z M9 8h6 M9 12h6" />}
+        />
+        <HomeCard
+          i={token ? 1 : 2}
+          href="/viajes"
+          title="Viajes"
+          sub="El bote compartido: cuánto queda y quién debe"
+          color="#9EC8E0"
+          icon={
+            <>
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+            </>
+          }
+        />
+        <HomeCard
+          i={token ? 2 : 3}
+          href="/fijos"
+          title="Pagos fijos"
+          sub="Suscripciones, meses y tu tarjeta"
+          color="#C9B8E8"
+          icon={
+            <>
+              <rect x="3" y="5" width="18" height="14" rx="2.6" />
+              <path d="M3 9.5h18" />
+            </>
+          }
+        />
       </div>
     </div>
   );
 }
 
-function HomeBand({
+function HomeCard({
   href,
   title,
   sub,
   i,
   color,
+  icon,
+  dark = false,
 }: {
   href: string;
   title: string;
   sub: string;
   i: number;
   color: string;
+  icon: ReactNode;
+  dark?: boolean;
 }) {
   return (
     <Link
       href={href}
-      className="band-row flex items-center gap-3.5 text-[#111]"
-      style={{ background: color, padding: "18px 22px", animation: `slide-r .5s ${(0.06 + i * 0.07).toFixed(2)}s both` }}
+      className="relative block rounded-[28px] px-6 pb-5 pt-5"
+      style={{
+        background: color,
+        color: dark ? "var(--color-crema)" : "#111",
+        marginTop: i === 0 ? 0 : -22,
+        zIndex: i + 1,
+        boxShadow: "0 -10px 24px -12px rgba(0,0,0,0.28)",
+        animation: `slide-r .5s ${(0.06 + i * 0.07).toFixed(2)}s both`,
+      }}
     >
-      <span className="min-w-0 flex-1">
-        <span className="block text-[22px] font-extrabold leading-none tracking-[-0.02em]">{title}</span>
-        <span className="mt-1.5 block text-xs font-semibold text-black/55">{sub}</span>
-      </span>
-      <span className="flex-none text-xl font-extrabold">→</span>
+      <div
+        className="flex h-12 w-12 items-center justify-center rounded-full"
+        style={{ background: dark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.1)" }}
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={dark ? "currentColor" : "#111111"} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+          {icon}
+        </svg>
+      </div>
+      <div className="mt-6 flex items-end justify-between gap-3">
+        <div className="min-w-0">
+          <div className="text-[24px] font-extrabold tracking-[-0.02em]">{title}</div>
+          <div className="text-[13px] font-semibold" style={{ color: dark ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.5)" }}>
+            {sub}
+          </div>
+        </div>
+        <span className="flex-none text-2xl font-extrabold">→</span>
+      </div>
     </Link>
   );
 }
