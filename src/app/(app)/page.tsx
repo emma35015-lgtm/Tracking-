@@ -179,15 +179,25 @@ export default async function InicioPage() {
         <AvatarEgg initial={initial} />
       </div>
 
-      {/* HERO — gastos del mes */}
-      <div className="mt-[30px]">
-        <div className="text-[13px] font-semibold text-muted">
-          Gastos del mes — {formatMonth(year, month)}
+      {/* HERO — statement */}
+      <div className="mt-7">
+        <div className="text-[15px] font-semibold text-muted">
+          {name ? `Buenas, ${name}` : "Buenas"}
         </div>
-        <div className="count-up mt-1.5 text-[72px] font-extrabold leading-[0.95] tracking-[-0.05em] tabular-nums">
-          {formatMoneyShort(total, currency)}
+        <div className="mt-1 text-[27px] font-extrabold leading-[1.05] tracking-[-0.03em]">
+          Esto llevas en {formatMonth(year, month)}
         </div>
-        <div className="mt-3.5 flex flex-wrap gap-2">
+
+        <div className="mt-6">
+          <div className="count-up text-[76px] font-extrabold leading-[0.9] tracking-[-0.05em] tabular-nums">
+            {formatMoneyShort(total, currency)}
+          </div>
+          <div className="mt-1.5 text-[12px] font-bold uppercase tracking-[0.16em] text-muted">
+            Gastos del mes
+          </div>
+        </div>
+
+        <div className="mt-4 flex flex-wrap gap-2">
           {streak >= 2 && (
             <span className="whitespace-nowrap rounded-full bg-coral px-3 py-1.5 text-xs font-bold text-ink">
               🔥 {streak} días seguidos
@@ -204,6 +214,39 @@ export default async function InicioPage() {
         </div>
       </div>
 
+      {/* Banda oscura: restante del presupuesto */}
+      {monthlyBudget && monthlyBudget > 0 ? (
+        <Link href="/ajustes" className="pop-in mt-5 block rounded-[26px] bg-ink p-5 text-crema">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-crema/55">
+              Restante del presupuesto
+            </span>
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M7 17 17 7M9 7h8v8" />
+              </svg>
+            </span>
+          </div>
+          <div className="mt-3.5 h-2.5 overflow-hidden rounded-full bg-white/15">
+            <div className="h-full rounded-full bg-coral" style={{ width: `${budgetPct}%` }} />
+          </div>
+          <div className="mt-3.5 flex items-baseline justify-between">
+            <span className="text-[44px] font-extrabold leading-none tracking-[-0.04em] tabular-nums">
+              {formatMoneyShort(budgetAvail, currency)}
+            </span>
+            <span className="text-xs font-semibold text-crema/55">de {formatMoneyShort(monthlyBudget, currency)}</span>
+          </div>
+        </Link>
+      ) : (
+        <Link
+          href="/ajustes"
+          className="mt-5 flex items-center justify-between rounded-[26px] bg-ink p-5 text-crema"
+        >
+          <span className="text-[15px] font-bold">Ponte un presupuesto mensual</span>
+          <span className="text-xl font-extrabold text-coral">→</span>
+        </Link>
+      )}
+
       {prevTotal > 0 && (
         <MonthlyRecap
           monthName={prevMonthName}
@@ -212,36 +255,6 @@ export default async function InicioPage() {
           topColor={prevTopColor}
           count={prevExpenses.length}
         />
-      )}
-
-      {/* Presupuesto */}
-      {monthlyBudget && monthlyBudget > 0 ? (
-        <div className="pop-in mt-[22px] rounded-[22px] border border-input-border bg-white px-[18px] py-5">
-          <div className="flex items-baseline justify-between">
-            <span className="text-[13px] font-bold">Presupuesto de {formatMonth(year, month).split(" ")[0].toLowerCase()}</span>
-            <span className="text-[13px] font-extrabold text-coral">{budgetPct}%</span>
-          </div>
-          <div className="mt-3 h-3.5 overflow-hidden rounded-full bg-track">
-            <div className="h-full rounded-full bg-coral" style={{ width: `${budgetPct}%` }} />
-          </div>
-          <div className="mt-3 flex items-baseline justify-between">
-            <span className="text-xs font-semibold text-muted">
-              {formatMoneyShort(total, currency)} de {formatMoneyShort(monthlyBudget, currency)}
-            </span>
-            <span className="text-[15px] font-extrabold tracking-tight">
-              {formatMoneyShort(budgetAvail, currency)}{" "}
-              <span className="text-[11px] font-semibold text-muted">disponible</span>
-            </span>
-          </div>
-        </div>
-      ) : (
-        <Link
-          href="/ajustes"
-          className="mt-[22px] flex items-center justify-between rounded-[22px] border border-input-border bg-white px-[18px] py-4"
-        >
-          <span className="text-[15px] font-bold">Ponte un presupuesto mensual</span>
-          <span className="text-xl font-extrabold text-coral">→</span>
-        </Link>
       )}
 
       {/* Disponible + salud financiera */}

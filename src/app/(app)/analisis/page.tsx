@@ -264,27 +264,33 @@ export default async function AnalisisPage({
             })}
           </div>
 
-          {/* Tips — cada uno en su tarjeta con ícono y color */}
+          {/* Tips — fichas de color encimadas */}
           {tips.length > 0 && (
             <section>
-              <div className="mb-3 px-1 text-[18px] font-extrabold tracking-tight">
+              <div className="mb-3 px-1 text-[19px] font-extrabold tracking-tight">
                 Según tus datos
               </div>
-              <div className="flex flex-col gap-2.5">
+              <div className="-mx-[14px]">
                 {tips.map((tip, i) => {
                   const tipColor = TIP_COLORS[i % TIP_COLORS.length];
                   return (
                     <div
                       key={i}
-                      className="flex items-start gap-3 rounded-[18px] p-4"
-                      style={{ background: tipColor, animation: `slide-r .5s ${(0.06 + i * 0.07).toFixed(2)}s both` }}
+                      className="relative rounded-[26px] px-6 pb-5 pt-5"
+                      style={{
+                        background: tipColor,
+                        marginTop: i === 0 ? 0 : -20,
+                        zIndex: i + 1,
+                        boxShadow: "0 -10px 24px -12px rgba(0,0,0,0.28)",
+                        animation: `slide-r .5s ${(0.06 + i * 0.07).toFixed(2)}s both`,
+                      }}
                     >
-                      <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-black/15">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-black/12">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M9 18h6M10 21h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.2 1 2h6c0-.8.4-1.5 1-2A7 7 0 0 0 12 2Z" />
                         </svg>
                       </div>
-                      <div className="text-[13px] font-semibold leading-relaxed text-[#111]">{tip}</div>
+                      <div className="mt-3 text-[15px] font-semibold leading-relaxed text-[#111]">{tip}</div>
                     </div>
                   );
                 })}

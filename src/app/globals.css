@@ -24,6 +24,8 @@
 
 html {
   -webkit-tap-highlight-color: transparent;
+  /* Sube el tamaño base: agranda todo el texto/espaciado de la app */
+  font-size: 17.5px;
 }
 
 body {
