@@ -213,7 +213,7 @@ export default async function AnalisisPage({
               <text x="100" y="90" textAnchor="middle" fontSize="13" fontWeight="600" fill="var(--color-muted)">
                 {topCat.name}
               </text>
-              <text x="100" y="128" textAnchor="middle" fontSize="46" fontWeight="800" letterSpacing="-0.02em" fill="var(--color-ink)" style={{ fontFamily: "var(--font-display)" }}>
+              <text x="100" y="126" textAnchor="middle" fontSize="40" fontWeight="800" letterSpacing="-0.03em" fill="var(--color-ink)">
                 {topPct}%
               </text>
             </svg>
@@ -253,7 +253,7 @@ export default async function AnalisisPage({
                     <div className="text-xs font-medium text-muted">{formatMoneyShort(catTotal, currency)}</div>
                   </div>
                   <div
-                    className="font-display text-[38px] font-black leading-none tracking-[-0.02em]"
+                    className="text-[36px] font-extrabold leading-none tracking-[-0.03em]"
                     style={{ color: i === 0 ? "#FF6518" : "var(--color-ink)" }}
                   >
                     {pct}
@@ -267,7 +267,7 @@ export default async function AnalisisPage({
           {/* Tips — cada uno en su tarjeta con ícono y color */}
           {tips.length > 0 && (
             <section>
-              <div className="font-display mb-3 px-1 text-[22px] font-black tracking-[-0.02em]">
+              <div className="mb-3 px-1 text-[18px] font-extrabold tracking-tight">
                 Según tus datos
               </div>
               <div className="flex flex-col gap-2.5">

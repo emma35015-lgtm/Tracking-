@@ -55,7 +55,7 @@ export function MonthlyRecap({
           ×
         </button>
       </div>
-      <div className="font-display mt-2 text-[44px] font-black leading-none tracking-[-0.03em] tabular-nums">
+      <div className="mt-2 text-[40px] font-extrabold leading-none tracking-[-0.03em] tabular-nums">
         {total}
       </div>
       <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[13px] font-semibold">

@@ -177,7 +177,7 @@ export default async function InicioPage() {
       {/* Wordmark */}
       <div className="flex items-center justify-between">
         <div>
-          <div className="font-display text-[34px] font-black leading-[0.85] tracking-[-0.02em]">COCO</div>
+          <div className="text-[26px] font-extrabold leading-[0.85] tracking-[-0.05em]">COCO</div>
           <div className="mt-1 text-[8.5px] font-bold uppercase tracking-[0.2em] text-muted">
             gasta con cabeza
           </div>
@@ -190,7 +190,7 @@ export default async function InicioPage() {
         <div className="text-[13px] font-semibold text-muted">
           Gastos del mes — {formatMonth(year, month)}
         </div>
-        <div className="count-up font-display mt-1.5 text-[78px] font-black leading-[0.92] tracking-[-0.03em] tabular-nums">
+        <div className="count-up mt-1.5 text-[72px] font-extrabold leading-[0.95] tracking-[-0.05em] tabular-nums">
           {formatMoneyShort(total, currency)}
         </div>
         <div className="mt-3.5 flex flex-wrap gap-2">
@@ -258,7 +258,7 @@ export default async function InicioPage() {
             <span className="text-xs font-semibold text-muted">de {formatMoneyShort(monthlyIncome!, currency)}</span>
           </div>
           <div
-            className="font-display mt-1 text-[40px] font-black leading-none tracking-[-0.03em] tabular-nums"
+            className="mt-1 text-[34px] font-extrabold leading-none tracking-[-0.04em] tabular-nums"
             style={{ color: STATUS_COLOR[status.level] }}
           >
             {formatMoneyShort(status.available, currency)}
@@ -344,7 +344,7 @@ export default async function InicioPage() {
                     {i + 1}
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="font-display block truncate text-[26px] font-black leading-none tracking-[-0.02em] text-[#111]">
+                    <span className="block truncate text-[25px] font-extrabold leading-none tracking-[-0.03em] text-[#111]">
                       {catName}
                     </span>
                     <span className="mt-1.5 block text-xs font-semibold text-black/55">
