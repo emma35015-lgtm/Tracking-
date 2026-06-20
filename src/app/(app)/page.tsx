@@ -181,7 +181,7 @@ export default async function InicioPage() {
       </div>
 
       {/* HERO — statement */}
-      <div className="mt-7">
+      <div className="mt-9">
         <div className="text-[15px] font-semibold text-muted">
           {name ? `Buenas, ${name}` : "Buenas"}
         </div>
@@ -215,34 +215,29 @@ export default async function InicioPage() {
         </div>
       </div>
 
-      {/* Banda oscura: restante del presupuesto */}
+      {/* Restante del presupuesto — bloque abierto */}
       {monthlyBudget && monthlyBudget > 0 ? (
-        <Link href="/ajustes" className="pop-in mt-5 block rounded-[26px] bg-[#15140f] p-5 text-[#efe7d2] dark:bg-[#2c2820]">
+        <Link href="/ajustes" className="mt-10 block">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#efe7d2]/55">
+            <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-muted">
               Restante del presupuesto
             </span>
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M7 17 17 7M9 7h8v8" />
-              </svg>
-            </span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" className="text-muted">
+              <path d="M7 17 17 7M9 7h8v8" />
+            </svg>
           </div>
-          <div className="mt-3.5 h-2.5 overflow-hidden rounded-full bg-white/15">
+          <div className="mt-2 text-[48px] font-extrabold leading-none tracking-[-0.04em] tabular-nums">
+            {formatMoneyShort(budgetAvail, currency)}
+          </div>
+          <div className="mt-3.5 h-2 overflow-hidden rounded-full bg-track">
             <div className="h-full rounded-full bg-coral" style={{ width: `${budgetPct}%` }} />
           </div>
-          <div className="mt-3.5 flex items-baseline justify-between">
-            <span className="text-[44px] font-extrabold leading-none tracking-[-0.04em] tabular-nums">
-              {formatMoneyShort(budgetAvail, currency)}
-            </span>
-            <span className="text-xs font-semibold text-[#efe7d2]/55">de {formatMoneyShort(monthlyBudget, currency)}</span>
+          <div className="mt-2 text-xs font-semibold text-muted">
+            {formatMoneyShort(total, currency)} de {formatMoneyShort(monthlyBudget, currency)}
           </div>
         </Link>
       ) : (
-        <Link
-          href="/ajustes"
-          className="mt-5 flex items-center justify-between rounded-[26px] bg-[#15140f] p-5 text-[#efe7d2] dark:bg-[#2c2820]"
-        >
+        <Link href="/ajustes" className="mt-10 flex items-center justify-between">
           <span className="text-[15px] font-bold">Ponte un presupuesto mensual</span>
           <span className="text-xl font-extrabold text-coral">→</span>
         </Link>
@@ -258,20 +253,20 @@ export default async function InicioPage() {
         />
       )}
 
-      {/* Disponible + salud financiera */}
+      {/* Disponible — bloque abierto */}
       {status && (
-        <div className="pop-in mt-3 rounded-[22px] border border-input-border bg-white px-[18px] py-5">
+        <div className="mt-10">
           <div className="flex items-baseline justify-between">
-            <span className="text-[13px] font-bold">Disponible este mes</span>
+            <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-muted">Disponible este mes</span>
             <span className="text-xs font-semibold text-muted">de {formatMoneyShort(monthlyIncome!, currency)}</span>
           </div>
           <div
-            className="mt-1 text-[34px] font-extrabold leading-none tracking-[-0.04em] tabular-nums"
+            className="mt-2 text-[48px] font-extrabold leading-none tracking-[-0.04em] tabular-nums"
             style={{ color: STATUS_COLOR[status.level] }}
           >
             {formatMoneyShort(status.available, currency)}
           </div>
-          <div className="mt-3.5 h-2.5 overflow-hidden rounded-full bg-track">
+          <div className="mt-3.5 h-2 overflow-hidden rounded-full bg-track">
             <div
               className="h-full rounded-full"
               style={{ width: `${Math.min(Math.round(status.pct * 100), 100)}%`, background: STATUS_COLOR[status.level] }}
@@ -284,21 +279,21 @@ export default async function InicioPage() {
         </div>
       )}
 
-      {/* Próximos pagos */}
+      {/* Próximos pagos — abierto */}
       {upcoming.length > 0 && (
-        <div className="mt-6">
-          <div className="mb-2.5 flex items-center justify-between px-1">
-            <span className="text-xs font-bold uppercase tracking-[0.08em] text-muted">Próximos pagos</span>
+        <div className="mt-10">
+          <div className="mb-1 flex items-center justify-between">
+            <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-muted">Próximos pagos</span>
             <Link href="/fijos" className="text-[13px] font-bold text-coral-link">Administrar</Link>
           </div>
           {cardSoon && (
-            <div className="mb-2.5 rounded-[16px] bg-coral px-4 py-3 text-[13px] font-bold leading-snug text-ink">
+            <div className="border-b border-crema py-3 text-[13px] font-bold leading-snug text-coral-dark">
               💳 {cardSoon.p.name} se paga{" "}
               {cardSoon.days === 0 ? "hoy" : cardSoon.days === 1 ? "mañana" : `en ${cardSoon.days} días`}
               {cardSoon.p.amount ? ` · ${formatMoneyShort(Number(cardSoon.p.amount), currency)}` : ""}.
             </div>
           )}
-          <div className="flex flex-col divide-y divide-crema rounded-[20px] bg-white px-[18px]">
+          <div className="flex flex-col divide-y divide-crema">
             {upcoming.map(({ p, days }, i) => {
               const catColor = p.category_id ? catColorById.get(p.category_id) : undefined;
               const badgeBg = p.kind === "card" ? "#FF6518" : catColor ?? "var(--color-sand)";
@@ -336,7 +331,7 @@ export default async function InicioPage() {
 
       {/* Bandas de categoría */}
       {cats.length > 0 && (
-        <div className="mt-7">
+        <div className="mt-12">
           <div className="px-1 pb-3 text-xs font-bold uppercase tracking-[0.08em] text-muted">Por categoría</div>
           <div className="-mx-[14px]">
             {cats.map(([catName, { total: catTotal, count }], i) => {
@@ -378,7 +373,7 @@ export default async function InicioPage() {
       )}
 
       {/* Esta semana */}
-      <div className="mt-7 flex items-end justify-between px-1">
+      <div className="mt-12 flex items-end justify-between px-1">
         <div>
           <div className="text-xs font-semibold text-muted">Tendencia</div>
           <div className="mt-0.5 text-2xl font-extrabold leading-none tracking-[-0.03em]">Esta semana</div>
@@ -422,7 +417,7 @@ export default async function InicioPage() {
       </div>
 
       {/* Accesos como fichas encimadas */}
-      <div className="mt-7 -mx-[14px]">
+      <div className="mt-12 -mx-[14px]">
         {!token && (
           <HomeCard
             i={0}

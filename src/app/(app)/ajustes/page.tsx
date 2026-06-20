@@ -69,7 +69,7 @@ export default async function AjustesPage() {
       </div>
 
       {/* Perfil */}
-      <form action={updateProfile} className="mt-[18px] rounded-[24px] bg-white p-5">
+      <form action={updateProfile} className="mt-8">
         <div className="text-[13px] font-medium text-muted">{user?.email}</div>
         <div className="mb-2 mt-4 text-[13px] font-bold text-muted-2">Tu nombre</div>
         <input
@@ -122,9 +122,9 @@ export default async function AjustesPage() {
       <SectionLabel>Pagos fijos</SectionLabel>
       <Link
         href="/fijos"
-        className="flex items-center gap-3.5 rounded-[24px] bg-white px-[18px] py-4"
+        className="flex items-center gap-3.5 border-y border-crema py-4"
       >
-        <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[#E2B5DA]">
+        <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[#C9B8E8]">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15140F" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
             <rect x="3" y="5" width="18" height="14" rx="2.6" />
             <path d="M3 9.5h18" />
@@ -143,7 +143,7 @@ export default async function AjustesPage() {
 
       {/* Automatización */}
       <SectionLabel>Automatización del iPhone</SectionLabel>
-      <div className="rounded-[24px] bg-white px-5 py-[18px]">
+      <div>
         {token ? (
           <>
             <div className="flex items-center gap-[9px] text-sm font-semibold">
@@ -193,19 +193,15 @@ export default async function AjustesPage() {
 
       {/* Apariencia */}
       <SectionLabel>Apariencia</SectionLabel>
-      <div className="rounded-[24px] bg-white p-3">
-        <DarkModeToggle />
-      </div>
+      <DarkModeToggle />
 
       {/* Categorías */}
       <SectionLabel>Categorías</SectionLabel>
-      <div className="overflow-hidden rounded-[24px] bg-white">
-        {(categories ?? []).map((c, i, arr) => (
+      <div className="border-t border-crema">
+        {(categories ?? []).map((c, i) => (
           <div
             key={c.id}
-            className={`flex items-center gap-[13px] px-[18px] py-3.5 ${
-              i < arr.length - 1 ? "border-b border-crema" : ""
-            }`}
+            className="flex items-center gap-[13px] border-b border-crema py-3.5"
             style={{ animation: `slide-r .45s ${(0.04 + i * 0.04).toFixed(2)}s both` }}
           >
             <div
@@ -224,7 +220,7 @@ export default async function AjustesPage() {
           </div>
         ))}
       </div>
-      <form action={addCategory} className="mt-3 rounded-[18px] bg-white p-4">
+      <form action={addCategory} className="mt-5">
         <div className="flex gap-2">
           <input
             name="icon"
