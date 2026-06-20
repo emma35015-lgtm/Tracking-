@@ -324,7 +324,7 @@ export default async function InicioPage() {
       {cats.length > 0 && (
         <div className="mt-7">
           <div className="px-1 pb-3 text-xs font-bold uppercase tracking-[0.08em] text-muted">Por categoría</div>
-          <div className="overflow-hidden rounded-[20px]">
+          <div className="-mx-[22px]">
             {cats.map(([catName, { total: catTotal, count }], i) => {
               const pct = total > 0 ? Math.round((catTotal / total) * 100) : 0;
               return (
@@ -399,12 +399,12 @@ export default async function InicioPage() {
         </div>
       </div>
 
-      {/* Accesos como bandas */}
-      <div className="mt-7">
+      {/* Accesos como bandas (de borde a borde) */}
+      <div className="mt-7 -mx-[22px]">
         {!token && (
           <Link
             href="/ajustes/atajos"
-            className="band-row mb-2.5 flex items-center gap-3.5 rounded-[20px] bg-ink px-[22px] py-[18px] text-crema"
+            className="band-row flex items-center gap-3.5 bg-ink px-[22px] py-[18px] text-crema"
           >
             <span className="min-w-0 flex-1">
               <span className="block text-[22px] font-extrabold leading-none tracking-[-0.02em]">Conecta tu iPhone</span>
@@ -413,11 +413,9 @@ export default async function InicioPage() {
             <span className="flex-none text-xl font-extrabold text-coral">→</span>
           </Link>
         )}
-        <div className="overflow-hidden rounded-[20px]">
-          <HomeBand i={0} href="/dividir" title="Dividir cuenta" sub="Foto del ticket y calculamos tu parte" color="#A7D9BF" />
-          <HomeBand i={1} href="/viajes" title="Viajes" sub="El bote compartido: cuánto queda y quién debe" color="#9EC8E0" />
-          <HomeBand i={2} href="/fijos" title="Pagos fijos" sub="Suscripciones, meses y tu tarjeta" color="#C9B8E8" />
-        </div>
+        <HomeBand i={0} href="/dividir" title="Dividir cuenta" sub="Foto del ticket y calculamos tu parte" color="#A7D9BF" />
+        <HomeBand i={1} href="/viajes" title="Viajes" sub="El bote compartido: cuánto queda y quién debe" color="#9EC8E0" />
+        <HomeBand i={2} href="/fijos" title="Pagos fijos" sub="Suscripciones, meses y tu tarjeta" color="#C9B8E8" />
       </div>
     </div>
   );
