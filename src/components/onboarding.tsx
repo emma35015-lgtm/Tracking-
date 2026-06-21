@@ -67,11 +67,16 @@ export function Onboarding() {
     const ink = s.light ? "#ece4d2" : "#1a1714";
     const last = slide === SLIDES.length - 1;
     return (
-      <div className="fixed inset-0 z-[210] flex flex-col px-7 pb-10 pt-24" style={{ background: s.bg, color: ink }}>
+      <div className="fixed inset-0 z-[210]" style={{ background: "var(--color-crema)" }}>
+       {/* El color arranca debajo del notch: el área segura queda en crema. */}
+       <div
+         className="absolute inset-x-0 bottom-0 flex flex-col px-7 pb-10 pt-16"
+         style={{ top: "env(safe-area-inset-top)", background: s.bg, color: ink }}
+       >
         <button
           type="button"
           onClick={finish}
-          className="absolute right-6 top-12 text-[13px] font-bold"
+          className="absolute right-6 top-6 text-[13px] font-bold"
           style={{ color: ink, opacity: 0.6 }}
         >
           Saltar
@@ -103,6 +108,7 @@ export function Onboarding() {
             {last ? "Empezar" : "Siguiente"}
           </button>
         </div>
+       </div>
       </div>
     );
   }
