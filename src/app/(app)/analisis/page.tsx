@@ -1,11 +1,21 @@
 import { createClient } from "@/lib/supabase/server";
-import { formatMoney, formatMoneyShort } from "@/lib/format";
+import { formatMoneyShort } from "@/lib/format";
 import { resolveMonth } from "@/lib/months";
 import { MonthHeader } from "@/components/month-header";
 import { categoryColor } from "@/lib/category-style";
 
-// Colores rotativos para las tarjetas de tips ("Según tus datos").
-const TIP_COLORS = ["#A7D9BF", "#9EC8E0", "#F2B79F", "#C9B8E8", "#F4CF12"];
+// Bandas de color para "Según tus datos" (estilo year-in-review).
+// light = texto claro (banda oscura); si no, texto tinta.
+const BANDS: { bg: string; light?: boolean }[] = [
+  { bg: "#F4CF12" },
+  { bg: "#e0532b", light: true },
+  { bg: "#1E4435", light: true },
+  { bg: "#C9B8E8" },
+  { bg: "#9EC8E0" },
+  { bg: "#F2B79F" },
+];
+
+type Insight = { eyebrow: string; value: string; detail: string };
 
 type ExpenseRow = {
   amount: number;
@@ -33,17 +43,18 @@ function groupByCategory(list: ExpenseRow[]) {
   return map;
 }
 
-// Tips de ahorro calculados sobre los datos reales del mes.
-function buildTips(
+// Insights calculados sobre los datos reales del mes: etiqueta + valor + detalle.
+function buildInsights(
   current: ExpenseRow[],
   previous: ExpenseRow[],
   currency: string,
   daysElapsed: number,
   daysInMonth: number
-): string[] {
-  const tips: string[] = [];
+): Insight[] {
+  const out: Insight[] = [];
   const total = sum(current);
-  if (total === 0) return tips;
+  if (total === 0) return out;
+  const m = (n: number) => formatMoneyShort(n, currency);
 
   const byCat = groupByCategory(current);
   const byCatPrev = groupByCategory(previous);
@@ -51,9 +62,11 @@ function buildTips(
   // Proyección de cierre de mes
   if (daysElapsed >= 5 && daysElapsed < daysInMonth) {
     const projected = (total / daysElapsed) * daysInMonth;
-    tips.push(
-      `Llevas ${formatMoneyShort(total, currency)} en ${daysElapsed} días. A este ritmo, cerrarás el mes en ~${formatMoneyShort(projected, currency)}.`
-    );
+    out.push({
+      eyebrow: "Proyección del mes",
+      value: m(projected),
+      detail: `A este ritmo cierras el mes (llevas ${m(total)} en ${daysElapsed} días)`,
+    });
   }
 
   // Categoría que más creció vs el mes pasado
@@ -66,26 +79,32 @@ function buildTips(
     }
   }
   if (worstCat) {
-    tips.push(
-      `Ojo: ${worstCat.name} creció ${Math.round(worstCat.growth)}% vs el mes pasado (${formatMoneyShort(worstCat.now, currency)}). Es el primer lugar donde buscar recortes.`
-    );
+    out.push({
+      eyebrow: `${worstCat.name} subió`,
+      value: `+${Math.round(worstCat.growth)}%`,
+      detail: `vs el mes pasado · ${m(worstCat.now)} este mes`,
+    });
   }
 
-  // Gasto hormiga: muchos gastos chicos que suman
+  // Gasto hormiga
   const small = current.filter((e) => Number(e.amount) <= 100);
   const smallTotal = sum(small);
   if (small.length >= 8 && smallTotal > total * 0.15) {
-    tips.push(
-      `Gasto hormiga: ${small.length} compras de ${formatMoney(100, currency)} o menos suman ${formatMoneyShort(smallTotal, currency)} (${Math.round((smallTotal / total) * 100)}% de tu mes). Son las que menos se sienten y más pesan.`
-    );
+    out.push({
+      eyebrow: "Gasto hormiga",
+      value: m(smallTotal),
+      detail: `${small.length} compras chicas · ${Math.round((smallTotal / total) * 100)}% de tu mes`,
+    });
   }
 
   // Suscripciones anualizadas
   const subs = byCat.get("Suscripciones");
   if (subs && subs.total > 0) {
-    tips.push(
-      `Tus suscripciones cuestan ${formatMoneyShort(subs.total, currency)} al mes — ${formatMoneyShort(subs.total * 12, currency)} al año. ¿Las usas todas?`
-    );
+    out.push({
+      eyebrow: "Suscripciones al año",
+      value: m(subs.total * 12),
+      detail: `${m(subs.total)} al mes · ¿las usas todas?`,
+    });
   }
 
   // Comercio más frecuente
@@ -99,28 +118,36 @@ function buildTips(
   }
   const topMerchant = [...byMerchant.entries()].sort((a, b) => b[1].count - a[1].count)[0];
   if (topMerchant && topMerchant[1].count >= 4) {
-    tips.push(
-      `Tu lugar más frecuente: ${topMerchant[0]} (${topMerchant[1].count} veces, ${formatMoneyShort(topMerchant[1].total, currency)}). Pequeños cambios ahí tienen el mayor impacto.`
-    );
+    out.push({
+      eyebrow: topMerchant[0],
+      value: `${topMerchant[1].count}×`,
+      detail: `tu lugar favorito · ${m(topMerchant[1].total)} este mes`,
+    });
   }
 
-  // Comparación general con el mes anterior
+  // Ahorro vs el mes anterior (mes cerrado)
   const prevTotal = sum(previous);
   if (prevTotal > 0 && daysElapsed >= daysInMonth) {
     const diff = total - prevTotal;
     if (diff < 0) {
-      tips.push(`Gastaste ${formatMoneyShort(Math.abs(diff), currency)} menos que el mes pasado. ¡Sigue así!`);
+      out.push({
+        eyebrow: "Ahorraste",
+        value: m(Math.abs(diff)),
+        detail: "menos que el mes pasado · ¡sigue así!",
+      });
     }
   }
 
-  // Regla general si hay pocos tips
-  if (tips.length < 2) {
-    tips.push(
-      "Regla 50/30/20: intenta que lo esencial sea ~50% de tu ingreso, gustos ~30% y ahorro ~20%. Compara con tu desglose de arriba."
-    );
+  // Regla general si hay pocos datos
+  if (out.length < 2) {
+    out.push({
+      eyebrow: "Regla 50/30/20",
+      value: "20%",
+      detail: "intenta apartar a ahorro cada mes",
+    });
   }
 
-  return tips;
+  return out;
 }
 
 export default async function AnalisisPage({
@@ -158,7 +185,7 @@ export default async function AnalisisPage({
   const byCat = groupByCategory(current);
   const catRows = [...byCat.entries()].sort((a, b) => b[1].total - a[1].total);
 
-  const tips = buildTips(current, previous, currency, daysElapsed, daysInMonth);
+  const insights = buildInsights(current, previous, currency, daysElapsed, daysInMonth);
 
   const maxExpense = current.reduce((m, e) => Math.max(m, Number(e.amount)), 0);
 
@@ -233,33 +260,31 @@ export default async function AnalisisPage({
             </div>
           </div>
 
-          {/* Tips — fichas de color encimadas */}
-          {tips.length > 0 && (
+          {/* Según tus datos — bandas de color a todo lo ancho */}
+          {insights.length > 0 && (
             <section>
               <div className="mb-3 px-1 text-[19px] font-extrabold tracking-tight">
                 Según tus datos
               </div>
-              <div className="-mx-[14px]">
-                {tips.map((tip, i) => {
-                  const tipColor = TIP_COLORS[i % TIP_COLORS.length];
+              <div className="-mx-[22px] overflow-hidden">
+                {insights.map((it, i) => {
+                  const band = BANDS[i % BANDS.length];
+                  const ink = band.light ? "#ece4d2" : "#111111";
                   return (
                     <div
                       key={i}
-                      className="relative rounded-[26px] px-6 pb-5 pt-5"
-                      style={{
-                        background: tipColor,
-                        marginTop: i === 0 ? 0 : -20,
-                        zIndex: i + 1,
-                        boxShadow: "0 -10px 24px -12px rgba(0,0,0,0.28)",
-                        animation: `slide-r .5s ${(0.06 + i * 0.07).toFixed(2)}s both`,
-                      }}
+                      className="px-[22px] py-7"
+                      style={{ background: band.bg, color: ink, animation: `ed-in .5s ${(0.05 + i * 0.07).toFixed(2)}s both` }}
                     >
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-black/12">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M9 18h6M10 21h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.2 1 2h6c0-.8.4-1.5 1-2A7 7 0 0 0 12 2Z" />
-                        </svg>
+                      <div className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: ink, opacity: 0.6 }}>
+                        {it.eyebrow}
                       </div>
-                      <div className="mt-3 text-[15px] font-semibold leading-relaxed text-[#111]">{tip}</div>
+                      <div className="mt-2 text-[54px] font-light leading-[0.95] tracking-[-0.04em] tabular-nums">
+                        {it.value}
+                      </div>
+                      <div className="mt-1.5 text-[13px] font-semibold" style={{ color: ink, opacity: 0.7 }}>
+                        {it.detail}
+                      </div>
                     </div>
                   );
                 })}
