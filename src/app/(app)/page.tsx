@@ -34,6 +34,24 @@ const STATUS_COLOR: Record<string, string> = {
   over: "#D8402A",
 };
 
+// Curva suave (Catmull-Rom → Bézier) para el sparkline de la semana.
+function smoothPath(pts: { x: number; y: number }[]): string {
+  if (pts.length < 2) return "";
+  let d = `M ${pts[0].x} ${pts[0].y}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i - 1] ?? pts[i];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[i + 2] ?? p2;
+    const c1x = p1.x + (p2.x - p0.x) / 6;
+    const c1y = p1.y + (p2.y - p0.y) / 6;
+    const c2x = p2.x - (p3.x - p1.x) / 6;
+    const c2y = p2.y - (p3.y - p1.y) / 6;
+    d += ` C ${c1x.toFixed(1)} ${c1y.toFixed(1)} ${c2x.toFixed(1)} ${c2y.toFixed(1)} ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`;
+  }
+  return d;
+}
+
 export default async function InicioPage() {
   const now = new Date();
   const year = now.getFullYear();
@@ -88,6 +106,12 @@ export default async function InicioPage() {
 
   const name = profile?.display_name?.trim() || null;
   const initial = (name ?? "C").charAt(0).toUpperCase();
+  // Saludo según la hora (zona MX).
+  const hourMx = parseInt(
+    new Intl.DateTimeFormat("es-MX", { timeZone: "America/Mexico_City", hour: "numeric", hour12: false }).format(now),
+    10
+  );
+  const greet = hourMx < 12 ? "Buenos días" : hourMx < 19 ? "Buenas tardes" : "Buenas noches";
 
   // Pagos fijos que aún no se cobran este mes.
   const today = now.getDate();
@@ -114,30 +138,32 @@ export default async function InicioPage() {
   }
   const cats = [...byCategory.entries()].sort((a, b) => b[1].total - a[1].total);
 
-  // Esta semana: últimos 7 días, con la categoría dominante de cada día.
-  const week: { label: string; key: string; total: number; cats: Map<string, number> }[] = [];
+  // Esta semana: últimos 7 días (para el sparkline).
+  const week: { label: string; key: string; total: number }[] = [];
   for (let i = 6; i >= 0; i--) {
     const d = new Date(Date.now() - i * 86_400_000);
-    week.push({ label: WEEKDAY[d.getDay()], key: dayKey(d), total: 0, cats: new Map() });
+    week.push({ label: WEEKDAY[d.getDay()], key: dayKey(d), total: 0 });
   }
   for (const e of all) {
     const key = dayKey(new Date(e.occurred_at));
     const slot = week.find((w) => w.key === key);
-    if (slot) {
-      const amt = Number(e.amount);
-      slot.total += amt;
-      const cn = e.categories?.name ?? "Otros";
-      slot.cats.set(cn, (slot.cats.get(cn) ?? 0) + amt);
-    }
+    if (slot) slot.total += Number(e.amount);
   }
-  const weekTopColor = (w: { cats: Map<string, number> }) => {
-    let best: string | null = null;
-    let max = 0;
-    for (const [n, v] of w.cats) if (v > max) { max = v; best = n; }
-    return colorOfCat(best);
-  };
   const maxWeek = Math.max(...week.map((w) => w.total), 1);
   const todayKey = dayKey(new Date());
+  const weekTotal = week.reduce((s, w) => s + w.total, 0);
+
+  // Puntos del sparkline en un lienzo 320×110 (escala uniforme al ancho).
+  const SPK_W = 320, topY = 16, botY = 88, areaBottom = 102, padX = 8;
+  const sparkPts = week.map((w, i) => ({
+    x: padX + (i * (SPK_W - 2 * padX)) / (week.length - 1),
+    y: botY - (w.total / maxWeek) * (botY - topY),
+    today: w.key === todayKey,
+  }));
+  const sparkLine = smoothPath(sparkPts);
+  const lastPt = sparkPts[sparkPts.length - 1];
+  const sparkArea = `${sparkLine} L ${lastPt.x.toFixed(1)} ${areaBottom} L ${sparkPts[0].x.toFixed(1)} ${areaBottom} Z`;
+  const todayPt = sparkPts.find((p) => p.today);
 
   const prevMonthName = formatMonth(month === 1 ? year - 1 : year, month === 1 ? 12 : month - 1)
     .split(" ")[0]
@@ -172,15 +198,15 @@ export default async function InicioPage() {
       </div>
 
       {/* HERO — statement */}
-      <div className="mt-9">
+      <div className="mt-12">
         <div className="text-[15px] font-semibold text-muted">
-          {name ? `Buenas, ${name}` : "Buenas"}
+          {greet}{name ? `, ${name}` : ""}
         </div>
-        <div className="mt-1 text-[30px] font-extrabold leading-[1.04] tracking-[-0.03em]">
+        <div className="mt-1.5 text-[30px] font-extrabold leading-[1.04] tracking-[-0.03em]">
           Esto llevas en {formatMonth(year, month)}
         </div>
 
-        <div className="mt-6">
+        <div className="mt-8">
           <MonthlyTotal value={formatMoneyShort(total, currency)} />
           <div className="mt-2 text-[12px] font-bold uppercase tracking-[0.16em] text-muted">
             Gastos del mes
@@ -210,7 +236,7 @@ export default async function InicioPage() {
               <path d="M7 17 17 7M9 7h8v8" />
             </svg>
           </div>
-          <div className="mt-2 text-[48px] font-extrabold leading-none tracking-[-0.04em] tabular-nums">
+          <div className="mt-2 text-[52px] font-light leading-none tracking-[-0.03em] tabular-nums">
             {formatMoneyShort(budgetAvail, currency)}
           </div>
           <div className="mt-3.5 h-2 overflow-hidden rounded-full bg-track">
@@ -245,7 +271,7 @@ export default async function InicioPage() {
             <span className="text-xs font-semibold text-muted">de {formatMoneyShort(monthlyIncome!, currency)}</span>
           </div>
           <div
-            className="mt-2 text-[48px] font-extrabold leading-none tracking-[-0.04em] tabular-nums"
+            className="mt-2 text-[52px] font-light leading-none tracking-[-0.03em] tabular-nums"
             style={{ color: STATUS_COLOR[status.level] }}
           >
             {formatMoneyShort(status.available, currency)}
@@ -356,47 +382,46 @@ export default async function InicioPage() {
         </div>
       )}
 
-      {/* Esta semana */}
+      {/* Esta semana — sparkline */}
       <div className="mt-12 flex items-end justify-between px-1">
         <div>
           <div className="text-xs font-semibold text-muted">Tendencia</div>
           <div className="mt-0.5 text-[26px] font-extrabold leading-none tracking-[-0.03em]">Esta semana</div>
         </div>
+        <div className="text-right">
+          <div className="text-[22px] font-light leading-none tracking-[-0.03em] tabular-nums">
+            {formatMoneyShort(weekTotal, currency)}
+          </div>
+          <div className="mt-1 text-[10px] font-bold uppercase tracking-[0.12em] text-muted">7 días</div>
+        </div>
       </div>
-      <div className="mt-4 px-1">
-        <div className="flex items-end justify-between gap-2" style={{ height: 130 }}>
-          {week.map((w, i) => {
-            const peak = w.total === maxWeek && w.total > 0;
-            const isToday = w.key === todayKey;
-            const barColor = w.total > 0 ? weekTopColor(w) : "var(--color-ink)";
-            return (
-              <div key={i} className="flex flex-1 flex-col items-center gap-2">
-                <span
-                  className="text-[10px] font-bold tabular-nums"
-                  style={{ color: w.total > 0 ? barColor : "var(--color-muted)" }}
-                >
-                  ${Math.round(w.total).toLocaleString("es-MX")}
-                </span>
-                <div
-                  className="rounded"
-                  style={{
-                    width: peak ? 14 : 11,
-                    height: Math.max(8, (w.total / maxWeek) * 90),
-                    background: barColor,
-                    opacity: w.total > 0 ? 1 : 0.25,
-                    transformOrigin: "bottom",
-                    animation: `bar-rise .6s cubic-bezier(.2,.8,.2,1) ${(0.1 + i * 0.06).toFixed(2)}s both`,
-                  }}
-                />
-                <span
-                  className="text-[11px]"
-                  style={{ fontWeight: isToday ? 800 : 600, color: isToday ? "var(--color-ink)" : "var(--color-muted)" }}
-                >
-                  {w.label}
-                </span>
-              </div>
-            );
-          })}
+      <div className="mt-5">
+        <svg viewBox="0 0 320 110" className="block w-full" style={{ height: "auto", animation: "ed-in .5s ease both" }}>
+          <defs>
+            <linearGradient id="spk" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#e0532b" stopOpacity="0.20" />
+              <stop offset="100%" stopColor="#e0532b" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          <path d={sparkArea} fill="url(#spk)" />
+          <path d={sparkLine} fill="none" stroke="#e0532b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          {todayPt && (
+            <circle cx={todayPt.x} cy={todayPt.y} r="4.5" fill="#e0532b" stroke="var(--color-crema)" strokeWidth="2.5" />
+          )}
+        </svg>
+        <div className="mt-2 flex justify-between px-1">
+          {week.map((w, i) => (
+            <span
+              key={i}
+              className="text-[11px]"
+              style={{
+                fontWeight: w.key === todayKey ? 800 : 600,
+                color: w.key === todayKey ? "var(--color-ink)" : "var(--color-muted)",
+              }}
+            >
+              {w.label}
+            </span>
+          ))}
         </div>
       </div>
 
