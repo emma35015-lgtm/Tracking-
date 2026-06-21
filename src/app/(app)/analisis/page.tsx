@@ -160,27 +160,21 @@ export default async function AnalisisPage({
 
   const tips = buildTips(current, previous, currency, daysElapsed, daysInMonth);
 
-  const topCat = catRows[0] ? { name: catRows[0][0], total: catRows[0][1].total } : { name: "—", total: 0 };
-  const topPct = total > 0 ? Math.round((topCat.total / total) * 100) : 0;
   const maxExpense = current.reduce((m, e) => Math.max(m, Number(e.amount)), 0);
 
-  // Dona multicolor: un arco por categoría, en su color, apilados por fracción.
-  // r=78, circunferencia ≈ 490 (coincide con la animación donut-draw).
-  const R = 78;
-  const C = 2 * Math.PI * R;
-  let donutAcc = 0;
-  const donutSegments = catRows.map(([name, { total: catTotal, color }], i) => {
-    const frac = total > 0 ? catTotal / total : 0;
-    const seg = {
+  // Mosaico de categorías: cada ficha de su color, alto según su % del mes.
+  const mosaic = catRows.map(([name, { total: catTotal, count, color }], i) => {
+    const pct = total > 0 ? Math.round((catTotal / total) * 100) : 0;
+    return {
       name,
       color: categoryColor(name, color),
-      len: C * frac,
-      rotation: -90 + donutAcc * 360,
-      delay: (0.1 + i * 0.08).toFixed(2),
+      pct,
+      amount: formatMoneyShort(catTotal, currency),
+      count,
+      delay: (0.05 + i * 0.05).toFixed(2),
     };
-    donutAcc += frac;
-    return seg;
   });
+  const maxPct = mosaic.length ? Math.max(...mosaic.map((m) => m.pct), 1) : 1;
 
   return (
     <div className="screen-in px-1 pt-2">
@@ -191,76 +185,52 @@ export default async function AnalisisPage({
           Sin gastos este mes. Cuando haya datos, aquí verás tus gráficas y tips.
         </div>
       ) : (
-        <div className="mt-5 flex flex-col gap-5">
-          {/* Dona multicolor */}
-          <div className="pop-in flex justify-center">
-            <svg width="200" height="200" viewBox="0 0 200 200">
-              <circle cx="100" cy="100" r={R} fill="none" stroke="var(--color-track)" strokeWidth="14" />
-              {donutSegments.map((seg) => (
-                <circle
-                  key={seg.name}
-                  cx="100"
-                  cy="100"
-                  r={R}
-                  fill="none"
-                  stroke={seg.color}
-                  strokeWidth="14"
-                  strokeDasharray={`${seg.len} ${C}`}
-                  transform={`rotate(${seg.rotation} 100 100)`}
-                  style={{ animation: `donut-draw 1.1s cubic-bezier(.3,.9,.3,1) ${seg.delay}s both` }}
-                />
-              ))}
-              <text x="100" y="90" textAnchor="middle" fontSize="13" fontWeight="600" fill="var(--color-muted)">
-                {topCat.name}
-              </text>
-              <text x="100" y="126" textAnchor="middle" fontSize="40" fontWeight="800" letterSpacing="-0.03em" fill="var(--color-ink)">
-                {topPct}%
-              </text>
-            </svg>
-          </div>
-
+        <div className="mt-6 flex flex-col gap-8">
           {/* Stats abiertos sobre el crema */}
           <div className="flex">
             <div className="flex-1">
               <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">Promedio diario</div>
-              <div className="mt-2 text-[32px] font-extrabold leading-none tracking-[-0.03em] tabular-nums" style={{ color: "#1E8C63" }}>
+              <div className="mt-2 text-[32px] font-light leading-none tracking-[-0.03em] tabular-nums" style={{ color: "#1E8C63" }}>
                 {formatMoneyShort(dailyAvg, currency)}
               </div>
             </div>
             <div className="w-px self-stretch bg-track" />
             <div className="flex-1 pl-5">
               <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">Mayor gasto</div>
-              <div className="mt-2 text-[32px] font-extrabold leading-none tracking-[-0.03em] tabular-nums" style={{ color: "#C99700" }}>
+              <div className="mt-2 text-[32px] font-light leading-none tracking-[-0.03em] tabular-nums" style={{ color: "#C99700" }}>
                 {formatMoneyShort(maxExpense, currency)}
               </div>
             </div>
           </div>
 
-          {/* Ranking por categoría */}
+          {/* Mosaico de categorías */}
           <div>
-            {catRows.slice(0, 6).map(([name, { total: catTotal, color }], i) => {
-              const pct = total > 0 ? Math.round((catTotal / total) * 100) : 0;
-              return (
+            <div className="mb-3 px-1 text-[11px] font-bold uppercase tracking-[0.14em] text-muted">Por categoría</div>
+            <div className="-mx-[14px]" style={{ columns: 2, columnGap: "10px" }}>
+              {mosaic.map((m) => (
                 <div
-                  key={name}
-                  className="flex items-center gap-3.5 border-t border-crema py-3.5"
-                  style={{ animation: `slide-r .5s ${(0.1 + i * 0.07).toFixed(2)}s both` }}
+                  key={m.name}
+                  className="mb-2.5 flex flex-col justify-between rounded-[24px] p-5 text-[#111]"
+                  style={{
+                    background: m.color,
+                    minHeight: 128 + Math.round((m.pct / maxPct) * 150),
+                    breakInside: "avoid",
+                    animation: `pop-in .5s ${m.delay}s both`,
+                  }}
                 >
-                  <div className="h-[15px] w-[15px] flex-none rounded-[5px]" style={{ background: categoryColor(name, color) }} />
-                  <div className="flex-1">
-                    <div className="text-[15px] font-bold tracking-[-0.01em]">{name}</div>
-                    <div className="text-xs font-medium text-muted">{formatMoneyShort(catTotal, currency)}</div>
+                  <div>
+                    <div className="text-[15px] font-extrabold leading-tight tracking-[-0.01em]">{m.name}</div>
+                    <div className="mt-0.5 text-[12px] font-semibold text-black/55">
+                      {m.amount} · {m.count} {m.count === 1 ? "gasto" : "gastos"}
+                    </div>
                   </div>
-                  <div
-                    className="text-[36px] font-extrabold leading-none tracking-[-0.03em]"
-                    style={{ color: i === 0 ? "#FF6518" : "var(--color-ink)" }}
-                  >
-                    {pct}
-                    <span className="text-lg">%</span>
+                  <div className="mt-6 text-[46px] font-light leading-none tracking-[-0.03em] tabular-nums">
+                    {m.pct}
+                    <span className="text-[24px]">%</span>
                   </div>
                 </div>
-              );
-            })}
+              ))}
+            </div>
           </div>
 
           {/* Tips — fichas de color encimadas */}
