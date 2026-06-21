@@ -26,6 +26,10 @@ html {
   -webkit-tap-highlight-color: transparent;
   /* Sube el tamaño base: agranda todo el texto/espaciado de la app */
   font-size: 17.5px;
+  /* Fondo propio + sin rebote: evita que el área segura muestre color viejo */
+  background: var(--color-crema);
+  min-height: 100%;
+  overscroll-behavior: none;
 }
 
 body {

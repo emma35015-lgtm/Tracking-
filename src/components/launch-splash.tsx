@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 // (igual que el prototipo de diseño: bandera en sessionStorage).
 export function LaunchSplash() {
   const [show, setShow] = useState(false);
+  const [closing, setClosing] = useState(false);
 
   useEffect(() => {
     let seen = true;
@@ -20,8 +21,9 @@ export function LaunchSplash() {
       try {
         sessionStorage.setItem("coco_seen", "1");
       } catch {}
-      setShow(false);
-    }, 2100);
+      // Se desvanece pero NO se desmonta: evita la "franja" fantasma de iOS.
+      setClosing(true);
+    }, 1900);
     return () => clearTimeout(t);
   }, []);
 
@@ -30,8 +32,15 @@ export function LaunchSplash() {
   const squares = ["#ece4d2", "#ffd84d", "#A7D9BF", "#9EC8E0", "#C9B8E8"];
   return (
     <div
-      style={{ animation: "splash-out 2.1s ease forwards", background: "#e0532b" }}
+      style={{
+        background: "#e0532b",
+        opacity: closing ? 0 : 1,
+        pointerEvents: closing ? "none" : "auto",
+        transition: "opacity .5s ease",
+        transform: "translateZ(0)",
+      }}
       className="fixed inset-0 z-[200] flex flex-col items-center justify-center"
+      aria-hidden={closing}
     >
       {/* Barrita de colores estilo póster */}
       <div className="absolute left-7 top-16 flex gap-1.5" style={{ animation: "splash-word 1s ease both" }}>
