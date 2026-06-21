@@ -42,7 +42,6 @@ export function Onboarding() {
   const [stage, setStage] = useState<"hidden" | "welcome" | "coach">("hidden");
   const [slide, setSlide] = useState(0);
   const [coach, setCoach] = useState(0);
-  const [closing, setClosing] = useState(false);
 
   useEffect(() => {
     let done = true;
@@ -58,25 +57,17 @@ export function Onboarding() {
     try {
       localStorage.setItem(KEY, "1");
     } catch {}
-    // Se desvanece pero NO se desmonta: evita la "franja" fantasma de iOS.
-    setClosing(true);
+    setStage("hidden");
   }
 
   if (stage === "hidden") return null;
-
-  const fade = {
-    opacity: closing ? 0 : 1,
-    pointerEvents: (closing ? "none" : "auto") as "none" | "auto",
-    transition: "opacity .45s ease",
-    transform: "translateZ(0)",
-  };
 
   if (stage === "welcome") {
     const s = SLIDES[slide];
     const ink = s.light ? "#ece4d2" : "#1a1714";
     const last = slide === SLIDES.length - 1;
     return (
-      <div className="fixed inset-0 z-[210] flex flex-col px-7 pb-10 pt-24" style={{ background: s.bg, color: ink, ...fade }}>
+      <div className="fixed inset-0 z-[210] flex flex-col px-7 pb-10 pt-24" style={{ background: s.bg, color: ink }}>
         <button
           type="button"
           onClick={finish}
@@ -120,7 +111,7 @@ export function Onboarding() {
   const c = COACH[coach];
   const lastCoach = coach === COACH.length - 1;
   return (
-    <div className="fixed inset-0 z-[210] bg-black/55" style={fade} onClick={() => (lastCoach ? finish() : setCoach((v) => v + 1))}>
+    <div className="fixed inset-0 z-[210] bg-black/55" onClick={() => (lastCoach ? finish() : setCoach((v) => v + 1))}>
       <div
         className="absolute"
         style={{ bottom: 104, left: c.align === "left" ? 18 : undefined, right: c.align === "right" ? 18 : undefined, maxWidth: 250 }}
