@@ -6,6 +6,7 @@ import { categoryColor } from "@/lib/category-style";
 import { AvatarEgg } from "@/components/avatar-egg";
 import { MonthlyRecap } from "@/components/monthly-recap";
 import { MonthlyTotal } from "@/components/monthly-total";
+import { InfoButton } from "@/components/info-button";
 import {
   isActiveNow,
   daysUntilDay,
@@ -267,7 +268,13 @@ export default async function InicioPage() {
       {status && (
         <div className="mt-10">
           <div className="flex items-baseline justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-muted">Disponible este mes</span>
+            <span className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-muted">
+              Disponible este mes
+              <InfoButton
+                title="Disponible este mes"
+                text="Es lo que te queda de tu ingreso después de tus gastos y los pagos fijos que aún no se cobran. El color te dice si vas bien (verde) o muy justo (rojo)."
+              />
+            </span>
             <span className="text-xs font-semibold text-muted">de {formatMoneyShort(monthlyIncome!, currency)}</span>
           </div>
           <div
@@ -425,15 +432,14 @@ export default async function InicioPage() {
         </div>
       </div>
 
-      {/* Accesos como fichas encimadas */}
-      <div className="mt-12 -mx-[14px]">
+      {/* Accesos como bandas a todo lo ancho */}
+      <div className="mt-12 -mx-[22px] overflow-hidden">
         {!token && (
-          <HomeCard
+          <HomeBand
             i={0}
             href="/ajustes/atajos"
             title="Conecta tu iPhone"
             sub="Que tus gastos se registren solos"
-            color="var(--color-ink)"
             dark
             icon={
               <>
@@ -443,7 +449,7 @@ export default async function InicioPage() {
             }
           />
         )}
-        <HomeCard
+        <HomeBand
           i={token ? 0 : 1}
           href="/dividir"
           title="Dividir cuenta"
@@ -451,7 +457,7 @@ export default async function InicioPage() {
           color="#A7D9BF"
           icon={<path d="M6 3h12v18l-2-1.5L14 21l-2-1.5L10 21l-2-1.5L6 21V3Z M9 8h6 M9 12h6" />}
         />
-        <HomeCard
+        <HomeBand
           i={token ? 1 : 2}
           href="/viajes"
           title="Viajes"
@@ -465,7 +471,7 @@ export default async function InicioPage() {
             </>
           }
         />
-        <HomeCard
+        <HomeBand
           i={token ? 2 : 3}
           href="/fijos"
           title="Pagos fijos"
@@ -483,7 +489,7 @@ export default async function InicioPage() {
   );
 }
 
-function HomeCard({
+function HomeBand({
   href,
   title,
   sub,
@@ -496,42 +502,26 @@ function HomeCard({
   title: string;
   sub: string;
   i: number;
-  color: string;
+  color?: string;
   icon: ReactNode;
   dark?: boolean;
 }) {
   return (
     <Link
       href={href}
-      className={`relative block rounded-[28px] px-6 pb-5 pt-5 ${
-        dark ? "bg-[#15140f] text-[#efe7d2] dark:bg-[#2c2820]" : ""
-      }`}
-      style={{
-        background: dark ? undefined : color,
-        color: dark ? undefined : "#111",
-        marginTop: i === 0 ? 0 : -22,
-        zIndex: i + 1,
-        boxShadow: "0 -10px 24px -12px rgba(0,0,0,0.28)",
-        animation: `slide-r .5s ${(0.06 + i * 0.07).toFixed(2)}s both`,
-      }}
+      className={`flex items-center gap-4 px-[22px] py-6 ${dark ? "bg-[#15140f] text-[#efe7d2] dark:bg-[#2c2820]" : "text-[#111]"}`}
+      style={{ background: dark ? undefined : color, animation: `ed-in .5s ${(0.05 + i * 0.07).toFixed(2)}s both` }}
     >
-      <div
-        className="flex h-12 w-12 items-center justify-center rounded-full"
-        style={{ background: dark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.1)" }}
-      >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={dark ? "currentColor" : "#111111"} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-          {icon}
-        </svg>
-      </div>
-      <div className="mt-6 flex items-end justify-between gap-3">
-        <div className="min-w-0">
-          <div className="text-[24px] font-extrabold tracking-[-0.02em]">{title}</div>
-          <div className="text-[13px] font-semibold" style={{ color: dark ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.5)" }}>
-            {sub}
-          </div>
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" className="flex-none">
+        {icon}
+      </svg>
+      <div className="min-w-0 flex-1">
+        <div className="text-[24px] font-extrabold leading-none tracking-[-0.02em]">{title}</div>
+        <div className="mt-1.5 text-[13px] font-semibold" style={{ opacity: dark ? 0.6 : 0.55 }}>
+          {sub}
         </div>
-        <span className="flex-none text-2xl font-extrabold">→</span>
       </div>
+      <span className="flex-none text-2xl font-extrabold">→</span>
     </Link>
   );
 }

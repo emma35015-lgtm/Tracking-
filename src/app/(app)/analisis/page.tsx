@@ -125,6 +125,43 @@ function buildInsights(
     });
   }
 
+  // Promedio por gasto
+  if (current.length >= 4) {
+    out.push({
+      eyebrow: "Promedio por gasto",
+      value: m(total / current.length),
+      detail: `${current.length} gastos este mes`,
+    });
+  }
+
+  // Día más caro del mes
+  const byDay = new Map<string, number>();
+  for (const e of current) {
+    const k = new Date(e.occurred_at).toISOString().slice(0, 10);
+    byDay.set(k, (byDay.get(k) ?? 0) + Number(e.amount));
+  }
+  const topDay = [...byDay.entries()].sort((a, b) => b[1] - a[1])[0];
+  if (topDay && byDay.size >= 3) {
+    const label = new Intl.DateTimeFormat("es-MX", { weekday: "long", day: "numeric", timeZone: "UTC" }).format(
+      new Date(topDay[0] + "T12:00:00Z")
+    );
+    out.push({ eyebrow: "Tu día más caro", value: m(topDay[1]), detail: label });
+  }
+
+  // Fin de semana vs entre semana
+  let weekend = 0;
+  for (const e of current) {
+    const wd = new Date(e.occurred_at).getUTCDay();
+    if (wd === 0 || wd === 6) weekend += Number(e.amount);
+  }
+  if (weekend > 0 && total > 0) {
+    out.push({
+      eyebrow: "En fines de semana",
+      value: `${Math.round((weekend / total) * 100)}%`,
+      detail: `${m(weekend)} de tu gasto del mes`,
+    });
+  }
+
   // Ahorro vs el mes anterior (mes cerrado)
   const prevTotal = sum(previous);
   if (prevTotal > 0 && daysElapsed >= daysInMonth) {

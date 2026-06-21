@@ -9,6 +9,7 @@ import {
   type RecurringPayment,
 } from "@/lib/finance";
 import { ColorSwatches } from "@/components/color-swatches";
+import { InfoButton } from "@/components/info-button";
 import { addRecurringPayment, deleteRecurringPayment } from "../actions";
 
 const inputClass =
@@ -37,7 +38,13 @@ export default async function FijosPage() {
       <Link href="/" className="text-sm font-bold text-coral-link">
         ← Inicio
       </Link>
-      <h1 className="mt-1 text-[34px] font-extrabold leading-[0.95] tracking-[-0.03em]">Pagos fijos</h1>
+      <div className="mt-1 flex items-center gap-2">
+        <h1 className="text-[34px] font-extrabold leading-[0.95] tracking-[-0.03em]">Pagos fijos</h1>
+        <InfoButton
+          title="Pagos fijos"
+          text="Son las cosas que se repiten cada mes: suscripciones (como Netflix), compras a meses (MSI) y el recordatorio de cuándo pagar tu tarjeta. La app te avisa antes de cada cobro."
+        />
+      </div>
       <p className="mt-2 text-sm font-medium text-muted">
         Suscripciones, compras a meses y el recordatorio del pago de tu tarjeta.
       </p>

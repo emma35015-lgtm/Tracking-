@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { SplitFlow } from "@/components/split/split-flow";
+import { InfoButton } from "@/components/info-button";
 
 export default async function DividirPage() {
   const supabase = await createClient();
@@ -13,7 +14,13 @@ export default async function DividirPage() {
 
   return (
     <div className="screen-in px-1 pt-2">
-      <h1 className="text-[34px] font-extrabold leading-[0.95] tracking-[-0.03em]">Dividir cuenta</h1>
+      <div className="flex items-center gap-2">
+        <h1 className="text-[34px] font-extrabold leading-[0.95] tracking-[-0.03em]">Dividir cuenta</h1>
+        <InfoButton
+          title="Dividir cuenta"
+          text="Tómale foto al ticket (o escríbelo), marca lo que pediste tú y la app calcula cuánto te toca pagar, incluida la propina. Puedes guardarlo como gasto."
+        />
+      </div>
       <p className="mt-2 text-sm font-medium text-muted">
         Foto del ticket, marca lo tuyo y calculamos cuánto te toca.
       </p>

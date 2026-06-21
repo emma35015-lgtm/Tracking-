@@ -10,6 +10,7 @@ import {
 import { CategoryIcon, categoryColor } from "@/lib/category-style";
 import { DarkModeToggle } from "@/components/dark-mode-toggle";
 import { ColorSwatches } from "@/components/color-swatches";
+import { ReplayTutorial } from "@/components/replay-tutorial";
 
 const CURRENCIES: [string, string][] = [
   ["MXN", "Peso mexicano"],
@@ -192,6 +193,10 @@ export default async function AjustesPage() {
       {/* Apariencia */}
       <SectionLabel>Apariencia</SectionLabel>
       <DarkModeToggle />
+
+      {/* Ayuda */}
+      <SectionLabel>Ayuda</SectionLabel>
+      <ReplayTutorial />
 
       {/* Categorías */}
       <SectionLabel>Categorías</SectionLabel>

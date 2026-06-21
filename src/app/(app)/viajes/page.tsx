@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { InfoButton } from "@/components/info-button";
 import { createTrip } from "./actions";
 
 const inputClass =
@@ -22,7 +23,13 @@ export default async function ViajesPage() {
 
   return (
     <div className="screen-in px-1 pt-2">
-      <h1 className="text-[34px] font-extrabold leading-[0.95] tracking-[-0.03em]">Viajes</h1>
+      <div className="flex items-center gap-2">
+        <h1 className="text-[34px] font-extrabold leading-[0.95] tracking-[-0.03em]">Viajes</h1>
+        <InfoButton
+          title="Viajes (bote compartido)"
+          text="Un viaje es un bote entre amigos: cada quien anota lo que pone y lo que se gasta, y la app saca cuánto le toca a cada quien. Comparte el link para que se unan y todos anoten."
+        />
+      </div>
       <p className="mt-2 text-sm font-medium text-muted">
         El bote compartido: cuánto entró, cuánto se gastó y quién queda a mano.
       </p>

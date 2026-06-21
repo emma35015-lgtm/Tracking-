@@ -60,7 +60,13 @@ export function TabBar() {
       className="fixed bottom-4 left-1/2 z-40 flex w-full max-w-lg -translate-x-1/2 items-center gap-2.5 px-[22px]"
       style={{ marginBottom: "env(safe-area-inset-bottom)" }}
     >
-      <nav className="flex flex-1 items-center justify-around rounded-full bg-ink/90 px-4 py-2.5 backdrop-blur-md">
+      <nav
+        className="flex flex-1 items-center justify-around rounded-full px-4 py-2.5 ring-1 ring-white/15 backdrop-blur-xl backdrop-saturate-150"
+        style={{
+          background: "rgba(26,23,20,0.72)",
+          boxShadow: "0 14px 34px -10px rgba(20,18,14,0.5), inset 0 1px 0 rgba(255,255,255,0.14)",
+        }}
+      >
         {TABS.map((tab) => {
           const active =
             tab.href === "/" ? pathname === "/" : pathname.startsWith(tab.href);
@@ -70,7 +76,7 @@ export function TabBar() {
               href={tab.href}
               aria-label={tab.label}
               className={`flex h-[42px] w-[42px] items-center justify-center rounded-full transition-colors ${
-                active ? "text-crema" : "text-[#ada493]/70"
+                active ? "bg-white/10 text-crema" : "text-[#ada493]/70"
               }`}
             >
               <NavIcon name={tab.icon} />
