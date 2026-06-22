@@ -47,7 +47,7 @@ export function ArchiveList({ children, className }: { children: ReactNode; clas
   }, []);
 
   return (
-    <div ref={ref} className={className}>
+    <div ref={ref} className={className} style={{ isolation: "isolate" }}>
       {children}
     </div>
   );

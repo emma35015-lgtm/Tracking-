@@ -57,7 +57,7 @@ export function TabBar() {
 
   return (
     <div
-      className="fixed bottom-4 left-1/2 z-40 flex w-full max-w-lg items-center gap-2.5 px-[22px]"
+      className="fixed bottom-4 left-1/2 z-50 flex w-full max-w-lg items-center gap-2.5 px-[22px]"
       style={{ marginBottom: "env(safe-area-inset-bottom)", transform: "translateX(-50%) translateZ(0)" }}
     >
       <nav
