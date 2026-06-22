@@ -7,6 +7,7 @@ import { AvatarEgg } from "@/components/avatar-egg";
 import { MonthlyRecap } from "@/components/monthly-recap";
 import { MonthlyTotal } from "@/components/monthly-total";
 import { InfoButton } from "@/components/info-button";
+import { Reveal } from "@/components/reveal";
 import {
   isActiveNow,
   daysUntilDay,
@@ -348,7 +349,7 @@ export default async function InicioPage() {
 
       {/* Bandas de categoría */}
       {cats.length > 0 && (
-        <div className="mt-12">
+        <Reveal className="mt-12 block">
           <div className="px-1 pb-3 text-xs font-bold uppercase tracking-[0.08em] text-muted">Por categoría</div>
           <div className="-mx-[14px]">
             {cats.map(([catName, { total: catTotal, count }], i) => {
@@ -386,7 +387,7 @@ export default async function InicioPage() {
               );
             })}
           </div>
-        </div>
+        </Reveal>
       )}
 
       {/* Esta semana — sparkline */}
@@ -433,7 +434,7 @@ export default async function InicioPage() {
       </div>
 
       {/* Accesos como bandas a todo lo ancho */}
-      <div className="mt-12 -mx-[22px] overflow-hidden">
+      <Reveal className="mt-12 -mx-[22px] block overflow-hidden">
         {!token && (
           <HomeBand
             i={0}
@@ -454,7 +455,7 @@ export default async function InicioPage() {
           href="/dividir"
           title="Dividir cuenta"
           sub="Foto del ticket y calculamos tu parte"
-          color="#A7D9BF"
+          color="#F4CF12"
           icon={<path d="M6 3h12v18l-2-1.5L14 21l-2-1.5L10 21l-2-1.5L6 21V3Z M9 8h6 M9 12h6" />}
         />
         <HomeBand
@@ -462,7 +463,7 @@ export default async function InicioPage() {
           href="/viajes"
           title="Viajes"
           sub="El bote compartido: cuánto queda y quién debe"
-          color="#9EC8E0"
+          color="#A7D9BF"
           icon={
             <>
               <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
@@ -476,7 +477,7 @@ export default async function InicioPage() {
           href="/fijos"
           title="Pagos fijos"
           sub="Suscripciones, meses y tu tarjeta"
-          color="#C9B8E8"
+          color="#D995AF"
           icon={
             <>
               <rect x="3" y="5" width="18" height="14" rx="2.6" />
@@ -484,7 +485,7 @@ export default async function InicioPage() {
             </>
           }
         />
-      </div>
+      </Reveal>
     </div>
   );
 }

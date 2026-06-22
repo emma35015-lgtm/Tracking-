@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { formatMoneyShort } from "@/lib/format";
+import { Reveal } from "@/components/reveal";
 
 export type GastoItem = {
   id: string;
@@ -86,35 +87,35 @@ export function GastosPeriodView({ items }: { items: GastoItem[] }) {
       ) : (
         <div className="-mx-[14px] mt-4">
           {filtered.map((it, i) => (
-            <Link
-              key={it.id}
-              href={`/gastos/${it.id}`}
-              className="relative block rounded-[28px] px-6 pb-5 pt-5"
-              style={{
-                background: it.color,
-                marginTop: i === 0 ? 0 : -22,
-                zIndex: i + 1,
-                boxShadow: "0 -10px 24px -12px rgba(0,0,0,0.28)",
-                animation: `slide-r .45s ${(0.04 + i * 0.04).toFixed(2)}s both`,
-              }}
-            >
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-black/10 text-[19px] font-extrabold text-[#111]">
-                {it.mono}
-              </div>
-              <div className="mt-6 flex items-end justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="text-[13px] font-semibold text-black/45">
-                    {it.dayLabel} · {it.category}
+            <div key={it.id} style={{ position: "relative", marginTop: i === 0 ? 0 : -22, zIndex: i + 1 }}>
+              <Reveal>
+                <Link
+                  href={`/gastos/${it.id}`}
+                  className="relative block rounded-[28px] px-6 pb-5 pt-5"
+                  style={{
+                    background: it.color,
+                    boxShadow: "0 -10px 24px -12px rgba(0,0,0,0.28)",
+                  }}
+                >
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-black/10 text-[19px] font-extrabold text-[#111]">
+                    {it.mono}
                   </div>
-                  <div className="truncate text-[22px] font-extrabold tracking-[-0.02em] text-[#111]">
-                    {it.title}
+                  <div className="mt-6 flex items-end justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="text-[13px] font-semibold text-black/45">
+                        {it.dayLabel} · {it.category}
+                      </div>
+                      <div className="truncate text-[22px] font-extrabold tracking-[-0.02em] text-[#111]">
+                        {it.title}
+                      </div>
+                    </div>
+                    <div className="flex-none text-[22px] font-extrabold tabular-nums text-[#111]">
+                      -{formatMoneyShort(it.amount, it.currency)}
+                    </div>
                   </div>
-                </div>
-                <div className="flex-none text-[22px] font-extrabold tabular-nums text-[#111]">
-                  -{formatMoneyShort(it.amount, it.currency)}
-                </div>
-              </div>
-            </Link>
+                </Link>
+              </Reveal>
+            </div>
           ))}
         </div>
       )}

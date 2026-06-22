@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { InfoButton } from "@/components/info-button";
+import { ViajesIntro } from "@/components/viajes-intro";
 import { createTrip } from "./actions";
 
 const inputClass =
@@ -23,6 +24,7 @@ export default async function ViajesPage() {
 
   return (
     <div className="screen-in px-1 pt-2">
+      <ViajesIntro />
       <div className="flex items-center gap-2">
         <h1 className="text-[34px] font-extrabold leading-[0.95] tracking-[-0.03em]">Viajes</h1>
         <InfoButton

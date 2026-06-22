@@ -10,6 +10,7 @@ const inputClass =
 export default function LoginPage() {
   const router = useRouter();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -39,7 +40,11 @@ export default function LoginPage() {
         return;
       }
     } else {
-      const { data, error } = await supabase.auth.signUp(credentials);
+      const cleanName = name.trim();
+      const { data, error } = await supabase.auth.signUp({
+        ...credentials,
+        options: { data: { display_name: cleanName } },
+      });
       setLoading(false);
       if (error) {
         if (error.message.includes("already registered")) {
@@ -56,6 +61,10 @@ export default function LoginPage() {
         setInfo("Te mandamos un correo de confirmación: ábrelo y luego entra aquí con tu contraseña.");
         setMode("signin");
         return;
+      }
+      // Con sesión inmediata: guarda el nombre en el perfil.
+      if (cleanName) {
+        await supabase.from("profiles").update({ display_name: cleanName }).eq("id", data.user!.id);
       }
     }
 
@@ -106,6 +115,24 @@ export default function LoginPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+        {mode === "signup" && (
+          <>
+            <label className="text-[13px] font-bold text-muted-2" htmlFor="name">
+              Tu nombre
+            </label>
+            <input
+              id="name"
+              type="text"
+              required
+              maxLength={40}
+              autoComplete="given-name"
+              placeholder="¿Cómo te llamas?"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className={inputClass}
+            />
+          </>
+        )}
         <label className="text-[13px] font-bold text-muted-2" htmlFor="email">
           Tu correo
         </label>

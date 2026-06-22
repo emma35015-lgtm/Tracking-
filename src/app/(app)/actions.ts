@@ -112,6 +112,15 @@ export async function deleteExpense(formData: FormData) {
   redirect("/gastos");
 }
 
+// Guarda solo el nombre (para el aviso "¿Cómo te llamas?" y el alta).
+export async function setDisplayName(formData: FormData) {
+  const { supabase, user } = await requireUser();
+  const name = String(formData.get("display_name") ?? "").trim();
+  if (!name) return;
+  await supabase.from("profiles").update({ display_name: name }).eq("id", user.id);
+  revalidatePath("/", "layout");
+}
+
 export async function updateProfile(formData: FormData) {
   const { supabase, user } = await requireUser();
   const displayName = String(formData.get("display_name") ?? "").trim() || null;
