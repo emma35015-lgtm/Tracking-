@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { formatMoneyShort } from "@/lib/format";
-import { Reveal } from "@/components/reveal";
+import { ArchiveList } from "@/components/archive-list";
 
 export type GastoItem = {
   id: string;
@@ -85,39 +85,37 @@ export function GastosPeriodView({ items }: { items: GastoItem[] }) {
           Sin gastos en este periodo.
         </div>
       ) : (
-        <div className="-mx-[14px] mt-4">
+        <ArchiveList className="-mx-[14px] mt-4">
           {filtered.map((it, i) => (
             <div key={it.id} style={{ position: "relative", marginTop: i === 0 ? 0 : -22, zIndex: i + 1 }}>
-              <Reveal>
-                <Link
-                  href={`/gastos/${it.id}`}
-                  className="relative block rounded-[28px] px-6 pb-5 pt-5"
-                  style={{
-                    background: it.color,
-                    boxShadow: "0 -10px 24px -12px rgba(0,0,0,0.28)",
-                  }}
-                >
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-black/10 text-[19px] font-extrabold text-[#111]">
-                    {it.mono}
-                  </div>
-                  <div className="mt-6 flex items-end justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="text-[13px] font-semibold text-black/45">
-                        {it.dayLabel} · {it.category}
-                      </div>
-                      <div className="truncate text-[22px] font-extrabold tracking-[-0.02em] text-[#111]">
-                        {it.title}
-                      </div>
+              <Link
+                href={`/gastos/${it.id}`}
+                className="relative block rounded-[28px] px-6 pb-5 pt-5"
+                style={{
+                  background: it.color,
+                  boxShadow: "0 -10px 24px -12px rgba(0,0,0,0.28)",
+                }}
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-black/10 text-[19px] font-extrabold text-[#111]">
+                  {it.mono}
+                </div>
+                <div className="mt-6 flex items-end justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="text-[13px] font-semibold text-black/45">
+                      {it.dayLabel} · {it.category}
                     </div>
-                    <div className="flex-none text-[22px] font-extrabold tabular-nums text-[#111]">
-                      -{formatMoneyShort(it.amount, it.currency)}
+                    <div className="truncate text-[22px] font-extrabold tracking-[-0.02em] text-[#111]">
+                      {it.title}
                     </div>
                   </div>
-                </Link>
-              </Reveal>
+                  <div className="flex-none text-[22px] font-extrabold tabular-nums text-[#111]">
+                    -{formatMoneyShort(it.amount, it.currency)}
+                  </div>
+                </div>
+              </Link>
             </div>
           ))}
-        </div>
+        </ArchiveList>
       )}
     </div>
   );

@@ -10,7 +10,7 @@ import {
 } from "@/lib/finance";
 import { ColorSwatches } from "@/components/color-swatches";
 import { InfoButton } from "@/components/info-button";
-import { Reveal } from "@/components/reveal";
+import { ArchiveList } from "@/components/archive-list";
 import { addRecurringPayment, deleteRecurringPayment } from "../actions";
 
 const inputClass =
@@ -52,7 +52,7 @@ export default async function FijosPage() {
 
       {/* Lista actual — fichas de color encimadas */}
       {list.length > 0 && (
-        <div className="mt-7 -mx-[14px]">
+        <ArchiveList className="mt-7 -mx-[14px]">
           {list.map((p, i) => {
             const prog = installmentProgress(p);
             const vigente = isActiveNow(p);
@@ -65,7 +65,6 @@ export default async function FijosPage() {
                 key={p.id}
                 style={{ position: "relative", marginTop: i === 0 ? 0 : -22, zIndex: i + 1, opacity: vigente ? 1 : 0.6 }}
               >
-              <Reveal>
               <div
                 className="relative rounded-[28px] px-6 pb-5 pt-5 text-[#111]"
                 style={{
@@ -105,11 +104,10 @@ export default async function FijosPage() {
                   </div>
                 </div>
               </div>
-              </Reveal>
               </div>
             );
           })}
-        </div>
+        </ArchiveList>
       )}
 
       {/* Nueva suscripción */}

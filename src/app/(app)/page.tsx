@@ -7,7 +7,7 @@ import { AvatarEgg } from "@/components/avatar-egg";
 import { MonthlyRecap } from "@/components/monthly-recap";
 import { MonthlyTotal } from "@/components/monthly-total";
 import { InfoButton } from "@/components/info-button";
-import { Reveal } from "@/components/reveal";
+import { ArchiveList } from "@/components/archive-list";
 import {
   isActiveNow,
   daysUntilDay,
@@ -351,42 +351,40 @@ export default async function InicioPage() {
       {cats.length > 0 && (
         <div className="mt-12">
           <div className="px-1 pb-3 text-xs font-bold uppercase tracking-[0.08em] text-muted">Por categoría</div>
-          <div className="-mx-[14px]">
+          <ArchiveList className="-mx-[14px]">
             {cats.map(([catName, { total: catTotal, count }], i) => {
               const pct = total > 0 ? Math.round((catTotal / total) * 100) : 0;
               return (
                 <div key={catName} style={{ position: "relative", marginTop: i === 0 ? 0 : -22, zIndex: i + 1 }}>
-                  <Reveal>
-                    <Link
-                      href="/gastos"
-                      className="relative block rounded-[28px] px-6 pb-5 pt-5"
-                      style={{
-                        background: colorOfCat(catName),
-                        boxShadow: "0 -10px 24px -12px rgba(0,0,0,0.28)",
-                      }}
-                    >
-                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-black/10 text-[18px] font-extrabold text-[#111]">
-                        {i + 1}
-                      </div>
-                      <div className="mt-6 flex items-end justify-between gap-3">
-                        <div className="min-w-0">
-                          <div className="text-[13px] font-semibold text-black/45">
-                            {count} {count === 1 ? "gasto" : "gastos"} · {pct}%
-                          </div>
-                          <div className="truncate text-[24px] font-extrabold tracking-[-0.02em] text-[#111]">
-                            {catName}
-                          </div>
+                  <Link
+                    href="/gastos"
+                    className="relative block rounded-[28px] px-6 pb-5 pt-5"
+                    style={{
+                      background: colorOfCat(catName),
+                      boxShadow: "0 -10px 24px -12px rgba(0,0,0,0.28)",
+                    }}
+                  >
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-black/10 text-[18px] font-extrabold text-[#111]">
+                      {i + 1}
+                    </div>
+                    <div className="mt-6 flex items-end justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="text-[13px] font-semibold text-black/45">
+                          {count} {count === 1 ? "gasto" : "gastos"} · {pct}%
                         </div>
-                        <div className="flex-none text-[22px] font-extrabold tabular-nums text-[#111]">
-                          {formatMoneyShort(catTotal, currency)}
+                        <div className="truncate text-[24px] font-extrabold tracking-[-0.02em] text-[#111]">
+                          {catName}
                         </div>
                       </div>
-                    </Link>
-                  </Reveal>
+                      <div className="flex-none text-[22px] font-extrabold tabular-nums text-[#111]">
+                        {formatMoneyShort(catTotal, currency)}
+                      </div>
+                    </div>
+                  </Link>
                 </div>
               );
             })}
-          </div>
+          </ArchiveList>
         </div>
       )}
 
@@ -434,7 +432,7 @@ export default async function InicioPage() {
       </div>
 
       {/* Accesos como bandas a todo lo ancho */}
-      <Reveal className="mt-12 -mx-[22px] block overflow-hidden">
+      <div className="mt-12 -mx-[22px] overflow-hidden">
         {!token && (
           <HomeBand
             i={0}
@@ -485,7 +483,7 @@ export default async function InicioPage() {
             </>
           }
         />
-      </Reveal>
+      </div>
     </div>
   );
 }

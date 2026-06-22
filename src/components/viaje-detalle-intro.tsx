@@ -8,32 +8,37 @@ const STEPS = [
   {
     bg: "#e0532b",
     light: true,
-    title: "Este es tu viaje",
-    text: "Aquí arriba ves el saldo del bote: cuánto se juntó, cuánto se ha gastado y cuánto queda.",
+    eyebrow: "Cómo funciona un viaje",
+    title: "El bote compartido",
+    text: "Arriba ves el saldo del bote: cuánto se juntó, cuánto se ha gastado y cuánto queda. Te llevo paso a paso.",
   },
   {
     bg: "#A7D9BF",
     light: false,
-    title: "1. Gastos del bote",
-    text: "Anota lo que se va gastando del bote (cena, gasolina, hotel…). Cada gasto baja el saldo.",
+    eyebrow: "Paso 1",
+    title: "Agrega a las personas",
+    text: "En la sección Personas anota a quién va en el viaje. Con eso COCO repartirá el gasto en partes iguales.",
   },
   {
     bg: "#9EC8E0",
     light: false,
-    title: "2. Aportaciones",
-    text: "Registra lo que cada quien pone al bote. Eso es lo que sube el saldo disponible.",
+    eyebrow: "Paso 2",
+    title: "Registra las aportaciones",
+    text: "En Aportaciones anota lo que cada quien pone al bote. Eso sube el saldo disponible del viaje.",
   },
   {
     bg: "#C9B8E8",
     light: false,
-    title: "3. Personas",
-    text: "Agrega a quién va en el viaje. Con eso COCO reparte el gasto en partes iguales.",
+    eyebrow: "Paso 3",
+    title: "Anota los gastos del bote",
+    text: "En Gastos del bote registra lo que se va gastando (cena, gasolina, hotel…). Cada gasto baja el saldo.",
   },
   {
     bg: "#D995AF",
     light: false,
-    title: "4. Invita y listo",
-    text: "Usa el botón de compartir (arriba) para mandar el link. Quien tenga COCO se une y anota lo suyo; al final ves a quién le toca poner o recibir.",
+    eyebrow: "Paso 4",
+    title: "Comparte e invita",
+    text: "Usa el botón de compartir (arriba) para mandar el link. Quien tenga COCO se une y anota lo suyo; al final COCO saca las cuentas: a quién le toca poner o recibir.",
   },
 ];
 
@@ -80,7 +85,10 @@ export function ViajeDetalleIntro() {
         </button>
 
         <div key={step} className="flex flex-1 flex-col justify-center" style={{ animation: "ed-in .4s ease both" }}>
-          <div className="text-[34px] font-extrabold leading-[1.05] tracking-[-0.03em]">{s.title}</div>
+          <div className="text-[12px] font-bold uppercase tracking-[0.18em]" style={{ opacity: 0.65 }}>
+            {s.eyebrow}
+          </div>
+          <div className="mt-2 text-[34px] font-extrabold leading-[1.05] tracking-[-0.03em]">{s.title}</div>
           <p className="mt-4 max-w-[20rem] text-[17px] font-medium leading-relaxed" style={{ opacity: 0.82 }}>
             {s.text}
           </p>

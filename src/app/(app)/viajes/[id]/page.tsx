@@ -100,7 +100,7 @@ export default async function ViajeDetailPage({
 
       {/* Gastos del bote */}
       <div className="border-t border-crema pt-5">
-        <h2 className="mb-3 text-[19px] font-extrabold tracking-tight">Gastos del bote</h2>
+        <h2 className="mb-3 text-[25px] font-extrabold leading-none tracking-[-0.02em]">Gastos del bote</h2>
         {expensesList.length > 0 && (
           <div className="mb-3 flex flex-col divide-y divide-crema">
             {expensesList.map((e) => {
@@ -151,7 +151,7 @@ export default async function ViajeDetailPage({
 
       {/* Aportaciones */}
       <div className="border-t border-crema pt-5">
-        <h2 className="mb-3 text-[19px] font-extrabold tracking-tight">Aportaciones</h2>
+        <h2 className="mb-3 text-[25px] font-extrabold leading-none tracking-[-0.02em]">Aportaciones</h2>
         {contributionsList.length > 0 && (
           <div className="mb-3 flex flex-col divide-y divide-crema">
             {contributionsList.map((c) => {
@@ -202,7 +202,7 @@ export default async function ViajeDetailPage({
 
       {/* Personas */}
       <div className="border-t border-crema pt-5">
-        <h2 className="mb-3 text-[19px] font-extrabold tracking-tight">Personas</h2>
+        <h2 className="mb-3 text-[25px] font-extrabold leading-none tracking-[-0.02em]">Personas</h2>
         {peopleList.length > 0 && (
           <div className="mb-3 flex flex-wrap gap-2">
             {peopleList.map((p) => (

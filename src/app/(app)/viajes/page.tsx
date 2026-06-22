@@ -2,7 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { InfoButton } from "@/components/info-button";
 import { ViajesIntro } from "@/components/viajes-intro";
-import { Reveal } from "@/components/reveal";
+import { ArchiveList } from "@/components/archive-list";
 import { createTrip } from "./actions";
 
 const inputClass =
@@ -38,10 +38,9 @@ export default async function ViajesPage() {
       </p>
 
       {list.length > 0 && (
-        <div className="mt-7 -mx-[14px]">
+        <ArchiveList className="mt-7 -mx-[14px]">
           {list.map((t, i) => (
             <div key={t.id} style={{ position: "relative", marginTop: i === 0 ? 0 : -22, zIndex: i + 1 }}>
-            <Reveal>
             <Link
               href={`/viajes/${t.id}`}
               className="relative block rounded-[28px] px-6 pb-5 pt-5 text-[#111]"
@@ -74,10 +73,9 @@ export default async function ViajesPage() {
                 <span className="flex-none text-2xl font-extrabold">→</span>
               </div>
             </Link>
-            </Reveal>
             </div>
           ))}
-        </div>
+        </ArchiveList>
       )}
 
       {/* Nuevo viaje — abierto */}

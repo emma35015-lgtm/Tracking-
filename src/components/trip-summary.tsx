@@ -51,7 +51,7 @@ export function TripSummary({
       {/* Cuentas finales */}
       {people.length > 0 && (
         <div className="border-t border-crema pt-5">
-          <h2 className="text-[19px] font-extrabold tracking-tight">Cuentas finales</h2>
+          <h2 className="text-[25px] font-extrabold leading-none tracking-[-0.02em]">Cuentas finales</h2>
           <p className="mb-3 mt-0.5 text-xs font-medium text-muted">
             A cada quien le toca {fmt(balances[0]?.shareCents ?? 0)} del gasto.
           </p>
