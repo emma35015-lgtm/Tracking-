@@ -273,20 +273,14 @@ export default async function AnalisisPage({
         </div>
       ) : (
         <div className="mt-2 flex flex-col gap-9">
-          {/* HERO: figura de color + total gigante */}
-          <div className="relative overflow-hidden pt-4">
-            <div
-              className="pointer-events-none absolute -right-12 -top-10 h-44 w-44 rounded-full"
-              style={{ background: "#e0532b", opacity: 0.9 }}
-            />
-            <div className="relative">
-              <div className="text-[15px] font-semibold text-muted">{mood}</div>
-              <div className="count-up mt-1 text-[80px] font-light leading-[0.88] tracking-[-0.04em] tabular-nums">
-                {formatMoneyShort(total, currency)}
-              </div>
-              <div className="mt-2 text-[13px] font-semibold text-muted">
-                Gastaste en {monthName} · {year}
-              </div>
+          {/* HERO: total gigante */}
+          <div className="pt-4">
+            <div className="text-[15px] font-semibold text-muted">{mood}</div>
+            <div className="count-up mt-1 text-[80px] font-light leading-[0.88] tracking-[-0.04em] tabular-nums">
+              {formatMoneyShort(total, currency)}
+            </div>
+            <div className="mt-2 text-[13px] font-semibold text-muted">
+              Gastaste en {monthName} · {year}
             </div>
           </div>
 

@@ -31,28 +31,28 @@ export function TripSummary({
     <div className="flex flex-col gap-3">
       {/* Saldo del bote */}
       <div className="rounded-[26px] bg-coral p-6 text-white">
-        <div className="text-sm font-semibold opacity-90">
+        <div className="text-[11px] font-bold uppercase tracking-[0.16em] opacity-90">
           {over ? "Bote en rojo" : "Queda en el bote"}
         </div>
-        <div className="mt-1 text-[44px] font-extrabold leading-none tracking-[-0.04em] tabular-nums">
+        <div className="mt-1 text-[52px] font-light leading-none tracking-[-0.04em] tabular-nums">
           {fmt(remainingCents)}
         </div>
-        <div className="mt-2 text-[13px] font-semibold opacity-90">
-          {fmt(totalSpentCents)} gastado de {fmt(totalContributedCents)}
-        </div>
-        <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-white/30">
+        <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/30">
           <div
             className="h-full rounded-full bg-white"
             style={{ width: `${Math.max(3, Math.round(pctSpent * 100))}%` }}
           />
         </div>
+        <div className="mt-2 text-[13px] font-semibold opacity-90">
+          {fmt(totalSpentCents)} gastado de {fmt(totalContributedCents)}
+        </div>
       </div>
 
       {/* Cuentas finales */}
       {people.length > 0 && (
-        <div className="rounded-[24px] bg-white p-5">
-          <h2 className="mb-1 text-base font-extrabold tracking-tight">Cuentas finales</h2>
-          <p className="mb-3 text-xs font-medium text-muted">
+        <div className="border-t border-crema pt-5">
+          <h2 className="text-[19px] font-extrabold tracking-tight">Cuentas finales</h2>
+          <p className="mb-3 mt-0.5 text-xs font-medium text-muted">
             A cada quien le toca {fmt(balances[0]?.shareCents ?? 0)} del gasto.
           </p>
           <div className="flex flex-col divide-y divide-crema">

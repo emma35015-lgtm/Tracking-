@@ -349,45 +349,45 @@ export default async function InicioPage() {
 
       {/* Bandas de categoría */}
       {cats.length > 0 && (
-        <Reveal className="mt-12 block">
+        <div className="mt-12">
           <div className="px-1 pb-3 text-xs font-bold uppercase tracking-[0.08em] text-muted">Por categoría</div>
           <div className="-mx-[14px]">
             {cats.map(([catName, { total: catTotal, count }], i) => {
               const pct = total > 0 ? Math.round((catTotal / total) * 100) : 0;
               return (
-                <Link
-                  key={catName}
-                  href="/gastos"
-                  className="relative block rounded-[28px] px-6 pb-5 pt-5"
-                  style={{
-                    background: colorOfCat(catName),
-                    marginTop: i === 0 ? 0 : -22,
-                    zIndex: i + 1,
-                    boxShadow: "0 -10px 24px -12px rgba(0,0,0,0.28)",
-                    animation: `slide-r .5s ${(0.06 + i * 0.06).toFixed(2)}s both`,
-                  }}
-                >
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-black/10 text-[18px] font-extrabold text-[#111]">
-                    {i + 1}
-                  </div>
-                  <div className="mt-6 flex items-end justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="text-[13px] font-semibold text-black/45">
-                        {count} {count === 1 ? "gasto" : "gastos"} · {pct}%
+                <div key={catName} style={{ position: "relative", marginTop: i === 0 ? 0 : -22, zIndex: i + 1 }}>
+                  <Reveal>
+                    <Link
+                      href="/gastos"
+                      className="relative block rounded-[28px] px-6 pb-5 pt-5"
+                      style={{
+                        background: colorOfCat(catName),
+                        boxShadow: "0 -10px 24px -12px rgba(0,0,0,0.28)",
+                      }}
+                    >
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-black/10 text-[18px] font-extrabold text-[#111]">
+                        {i + 1}
                       </div>
-                      <div className="truncate text-[24px] font-extrabold tracking-[-0.02em] text-[#111]">
-                        {catName}
+                      <div className="mt-6 flex items-end justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="text-[13px] font-semibold text-black/45">
+                            {count} {count === 1 ? "gasto" : "gastos"} · {pct}%
+                          </div>
+                          <div className="truncate text-[24px] font-extrabold tracking-[-0.02em] text-[#111]">
+                            {catName}
+                          </div>
+                        </div>
+                        <div className="flex-none text-[22px] font-extrabold tabular-nums text-[#111]">
+                          {formatMoneyShort(catTotal, currency)}
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex-none text-[22px] font-extrabold tabular-nums text-[#111]">
-                      {formatMoneyShort(catTotal, currency)}
-                    </div>
-                  </div>
-                </Link>
+                    </Link>
+                  </Reveal>
+                </div>
               );
             })}
           </div>
-        </Reveal>
+        </div>
       )}
 
       {/* Esta semana — sparkline */}

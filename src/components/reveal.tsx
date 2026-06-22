@@ -52,9 +52,9 @@ export function Reveal({
       ref={ref}
       className={className}
       style={{
-        opacity: shown ? 1 : 0.35,
-        transform: shown ? "none" : "scale(0.95) translateY(12px)",
-        transition: `opacity .55s ease ${delay}s, transform .6s cubic-bezier(.2,.8,.2,1) ${delay}s`,
+        opacity: shown ? 1 : 0.15,
+        transform: shown ? "none" : "scale(0.86) translateY(34px)",
+        transition: `opacity .5s ease ${delay}s, transform .65s cubic-bezier(.2,.85,.25,1) ${delay}s`,
         willChange: "opacity, transform",
       }}
     >

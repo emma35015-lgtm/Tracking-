@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { InfoButton } from "@/components/info-button";
 import { ViajesIntro } from "@/components/viajes-intro";
+import { Reveal } from "@/components/reveal";
 import { createTrip } from "./actions";
 
 const inputClass =
@@ -39,16 +40,14 @@ export default async function ViajesPage() {
       {list.length > 0 && (
         <div className="mt-7 -mx-[14px]">
           {list.map((t, i) => (
+            <div key={t.id} style={{ position: "relative", marginTop: i === 0 ? 0 : -22, zIndex: i + 1 }}>
+            <Reveal>
             <Link
-              key={t.id}
               href={`/viajes/${t.id}`}
               className="relative block rounded-[28px] px-6 pb-5 pt-5 text-[#111]"
               style={{
                 background: TRIP_COLORS[i % TRIP_COLORS.length],
-                marginTop: i === 0 ? 0 : -22,
-                zIndex: i + 1,
                 boxShadow: "0 -10px 24px -12px rgba(0,0,0,0.28)",
-                animation: `slide-r .5s ${(0.05 + i * 0.06).toFixed(2)}s both`,
               }}
             >
               <div className="flex items-center justify-between">
@@ -75,6 +74,8 @@ export default async function ViajesPage() {
                 <span className="flex-none text-2xl font-extrabold">→</span>
               </div>
             </Link>
+            </Reveal>
+            </div>
           ))}
         </div>
       )}

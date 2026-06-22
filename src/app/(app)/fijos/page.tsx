@@ -10,6 +10,7 @@ import {
 } from "@/lib/finance";
 import { ColorSwatches } from "@/components/color-swatches";
 import { InfoButton } from "@/components/info-button";
+import { Reveal } from "@/components/reveal";
 import { addRecurringPayment, deleteRecurringPayment } from "../actions";
 
 const inputClass =
@@ -62,14 +63,14 @@ export default async function FijosPage() {
             return (
               <div
                 key={p.id}
+                style={{ position: "relative", marginTop: i === 0 ? 0 : -22, zIndex: i + 1, opacity: vigente ? 1 : 0.6 }}
+              >
+              <Reveal>
+              <div
                 className="relative rounded-[28px] px-6 pb-5 pt-5 text-[#111]"
                 style={{
                   background: cardColor,
-                  opacity: vigente ? 1 : 0.6,
-                  marginTop: i === 0 ? 0 : -22,
-                  zIndex: i + 1,
                   boxShadow: "0 -10px 24px -12px rgba(0,0,0,0.28)",
-                  animation: `slide-r .5s ${(0.05 + i * 0.06).toFixed(2)}s both`,
                 }}
               >
                 <div className="flex items-center justify-between">
@@ -103,6 +104,8 @@ export default async function FijosPage() {
                     </form>
                   </div>
                 </div>
+              </div>
+              </Reveal>
               </div>
             );
           })}

@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { formatMoneyShort } from "@/lib/format";
 import { TripSummary } from "@/components/trip-summary";
 import { ShareTripButton } from "@/components/share-trip-button";
+import { ViajeDetalleIntro } from "@/components/viaje-detalle-intro";
 import {
   addContribution,
   addPerson,
@@ -74,6 +75,7 @@ export default async function ViajeDetailPage({
 
   return (
     <div className="screen-in flex flex-col gap-4">
+      <ViajeDetalleIntro />
       <div className="mt-1.5 flex items-start justify-between gap-2">
         <div>
           <Link href="/viajes" className="text-sm font-bold text-coral-link">
