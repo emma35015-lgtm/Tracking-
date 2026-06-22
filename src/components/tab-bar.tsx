@@ -57,13 +57,13 @@ export function TabBar() {
 
   return (
     <div
-      className="fixed bottom-4 left-1/2 z-40 flex w-full max-w-lg -translate-x-1/2 items-center gap-2.5 px-[22px]"
-      style={{ marginBottom: "env(safe-area-inset-bottom)" }}
+      className="fixed bottom-4 left-1/2 z-40 flex w-full max-w-lg items-center gap-2.5 px-[22px]"
+      style={{ marginBottom: "env(safe-area-inset-bottom)", transform: "translateX(-50%) translateZ(0)" }}
     >
       <nav
-        className="flex flex-1 items-center justify-around rounded-full px-4 py-2.5 ring-1 ring-white/15 backdrop-blur-xl backdrop-saturate-150"
+        className="flex flex-1 items-center justify-around rounded-full px-4 py-2.5 ring-1 ring-white/15"
         style={{
-          background: "rgba(26,23,20,0.72)",
+          background: "rgba(26,23,20,0.92)",
           boxShadow: "0 14px 34px -10px rgba(20,18,14,0.5), inset 0 1px 0 rgba(255,255,255,0.14)",
         }}
       >
