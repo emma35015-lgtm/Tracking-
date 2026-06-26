@@ -3,7 +3,16 @@
 import { useState } from "react";
 
 // Botón "i" que abre una explicación corta y simple. Reutilizable.
-export function InfoButton({ title, text }: { title: string; text: string }) {
+// tone="light" lo hace visible sobre fondos oscuros.
+export function InfoButton({
+  title,
+  text,
+  tone = "dark",
+}: {
+  title: string;
+  text: string;
+  tone?: "dark" | "light";
+}) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -16,7 +25,9 @@ export function InfoButton({ title, text }: { title: string; text: string }) {
           e.stopPropagation();
           setOpen(true);
         }}
-        className="press inline-flex h-[19px] w-[19px] shrink-0 items-center justify-center rounded-full border border-input-border text-[11px] font-bold leading-none text-muted"
+        className={`press inline-flex h-[19px] w-[19px] shrink-0 items-center justify-center rounded-full border text-[11px] font-bold leading-none ${
+          tone === "light" ? "border-crema/40 text-crema/70" : "border-input-border text-muted"
+        }`}
       >
         i
       </button>
