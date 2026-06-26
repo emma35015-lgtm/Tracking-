@@ -25,26 +25,23 @@ export default async function ViajesPage() {
   const myId = user?.id ?? "";
 
   return (
-    <>
-      <div className="fixed inset-0 -z-10" style={{ background: "#141210" }} aria-hidden />
-      <div className="screen-in px-1 pt-2 text-[#ece4d2]">
-        <ViajesIntro />
-        <Link href="/" className="inline-flex items-center gap-1 text-sm font-bold text-[#ece4d2]/70">
-          ← Inicio
-        </Link>
+    <div className="screen-in px-1 pt-2 text-ink">
+      <ViajesIntro />
+      <Link href="/" className="inline-flex items-center gap-1 text-sm font-bold text-coral-link">
+        ← Inicio
+      </Link>
 
-        {/* Título protagonista */}
-        <div className="mt-3 flex items-start gap-2">
-          <h1 className="text-[56px] font-extrabold leading-[0.86] tracking-[-0.04em] text-[#ece4d2]">Viajes</h1>
-          <InfoButton
-            tone="light"
-            title="Viajes (bote compartido)"
-            text="Un viaje es un bote entre amigos: cada quien anota lo que pone y lo que se gasta, y la app saca cuánto le toca a cada quien. Comparte el link para que se unan y todos anoten."
-          />
-        </div>
-        <p className="mt-3 text-[15px] font-medium text-[#ece4d2]/55">
-          El bote compartido: cuánto entró, cuánto se gastó y quién queda a mano.
-        </p>
+      {/* Título protagonista */}
+      <div className="mt-3 flex items-start gap-2">
+        <h1 className="text-[56px] font-extrabold leading-[0.86] tracking-[-0.04em] text-ink">Viajes</h1>
+        <InfoButton
+          title="Viajes (bote compartido)"
+          text="Un viaje es un bote entre amigos: cada quien anota lo que pone y lo que se gasta, y la app saca cuánto le toca a cada quien. Comparte el link para que se unan y todos anoten."
+        />
+      </div>
+      <p className="mt-3 text-[15px] font-medium text-muted">
+        El bote compartido: cuánto entró, cuánto se gastó y quién queda a mano.
+      </p>
 
         {list.length > 0 && (
           <ArchiveList className="mt-7 -mx-[14px]">
@@ -109,7 +106,6 @@ export default async function ViajesPage() {
             Crear viaje
           </button>
         </form>
-      </div>
-    </>
+    </div>
   );
 }

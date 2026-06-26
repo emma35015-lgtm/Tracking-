@@ -5,6 +5,7 @@ import { tripBalances, tripPace } from "@/lib/trip-settle";
 import { TripBoard } from "@/components/trip-board";
 import { TripSettlement } from "@/components/trip-settlement";
 import { SectionCard } from "@/components/section-card";
+import { ArchiveList } from "@/components/archive-list";
 import { ShareTripButton } from "@/components/share-trip-button";
 import { ViajeDetalleIntro } from "@/components/viaje-detalle-intro";
 import {
@@ -19,7 +20,7 @@ import {
   setTripStatus,
 } from "../actions";
 
-// Colores de cada sección (sobre fondo negro cálido)
+// Colores de cada sección (tarjetas pastel sobre el fondo crema)
 const C_CUENTAS = "#9EC8E0";
 const C_GASTOS = "#F4CF12";
 const C_APORTA = "#A7D9BF";
@@ -88,24 +89,24 @@ export default async function ViajeDetailPage({
   const canDelete = (addedBy: string | null) => isOwner || (!!addedBy && addedBy === myId);
 
   return (
-    <>
-      <div className="fixed inset-0 -z-10" style={{ background: "#141210" }} aria-hidden />
-      <div className="screen-in flex flex-col gap-3 text-[#ece4d2]">
-        <ViajeDetalleIntro />
+    <div className="screen-in flex flex-col gap-3 text-ink">
+      <ViajeDetalleIntro />
 
-        <TripBoard
-          tripName={trip.name}
-          statusLabel={statusLabel}
-          currency={currency}
-          summary={summary}
-          pace={pace}
-          peopleCount={peopleList.length}
-          backHref="/viajes"
-          topRight={<ShareTripButton token={trip.share_token} />}
-        />
+      <TripBoard
+        tripName={trip.name}
+        statusLabel={statusLabel}
+        currency={currency}
+        summary={summary}
+        pace={pace}
+        peopleCount={peopleList.length}
+        backHref="/viajes"
+        topRight={<ShareTripButton token={trip.share_token} />}
+      />
 
+      {/* Tarjetas de sección con animación "archivero" (como Inicio) */}
+      <ArchiveList className="flex flex-col gap-3">
         {/* Cuentas finales */}
-        {peopleList.length > 0 && (
+        {peopleList.length > 0 ? (
           <SectionCard color={C_CUENTAS} title="Cuentas finales">
             <TripSettlement
               people={peopleList}
@@ -114,7 +115,7 @@ export default async function ViajeDetailPage({
               currency={currency}
             />
           </SectionCard>
-        )}
+        ) : null}
 
         {/* Gastos del bote */}
         <SectionCard color={C_GASTOS} title="Gastos del bote">
@@ -244,39 +245,39 @@ export default async function ViajeDetailPage({
             </button>
           </form>
         </SectionCard>
+      </ArchiveList>
 
-        {/* Invitar amigos — pista discreta sobre el fondo */}
-        <div className="rounded-[22px] border border-white/15 px-5 py-4 text-[13px] font-medium leading-relaxed text-[#ece4d2]/70">
-          👋 Comparte el link (botón de arriba) con amigos que ya tengan la app. Al abrirlo podrán
-          unirse y agregar sus propios gastos al bote. Cada quien edita solo lo suyo.
-        </div>
+      {/* Invitar amigos — pista discreta sobre el fondo */}
+      <div className="rounded-[22px] border border-input-border px-5 py-4 text-[13px] font-medium leading-relaxed text-muted-2">
+        👋 Comparte el link (botón de arriba) con amigos que ya tengan la app. Al abrirlo podrán
+        unirse y agregar sus propios gastos al bote. Cada quien edita solo lo suyo.
+      </div>
 
-        {/* Acciones del viaje */}
-        {isOwner ? (
-          <>
-            <form action={setTripStatus}>
-              <input type="hidden" name="trip_id" value={trip.id} />
-              <input type="hidden" name="status" value={trip.status === "cerrado" ? "activo" : "cerrado"} />
-              <button type="submit" className="h-[48px] w-full rounded-[14px] bg-white/10 font-bold text-[#ece4d2]">
-                {trip.status === "cerrado" ? "Reabrir viaje" : "Cerrar viaje"}
-              </button>
-            </form>
-            <form action={deleteTrip}>
-              <input type="hidden" name="trip_id" value={trip.id} />
-              <button type="submit" className="h-[44px] w-full rounded-[14px] text-sm font-bold text-coral">
-                Eliminar viaje
-              </button>
-            </form>
-          </>
-        ) : (
-          <form action={leaveTrip}>
+      {/* Acciones del viaje */}
+      {isOwner ? (
+        <>
+          <form action={setTripStatus}>
             <input type="hidden" name="trip_id" value={trip.id} />
-            <button type="submit" className="h-[44px] w-full rounded-[14px] text-sm font-bold text-coral">
-              Salir del viaje
+            <input type="hidden" name="status" value={trip.status === "cerrado" ? "activo" : "cerrado"} />
+            <button type="submit" className="h-[48px] w-full rounded-[14px] bg-sand font-bold text-ink">
+              {trip.status === "cerrado" ? "Reabrir viaje" : "Cerrar viaje"}
             </button>
           </form>
-        )}
-      </div>
-    </>
+          <form action={deleteTrip}>
+            <input type="hidden" name="trip_id" value={trip.id} />
+            <button type="submit" className="h-[44px] w-full rounded-[14px] text-sm font-bold text-coral">
+              Eliminar viaje
+            </button>
+          </form>
+        </>
+      ) : (
+        <form action={leaveTrip}>
+          <input type="hidden" name="trip_id" value={trip.id} />
+          <button type="submit" className="h-[44px] w-full rounded-[14px] text-sm font-bold text-coral">
+            Salir del viaje
+          </button>
+        </form>
+      )}
+    </div>
   );
 }

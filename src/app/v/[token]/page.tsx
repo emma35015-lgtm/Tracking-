@@ -7,6 +7,7 @@ import { tripBalances, tripPace } from "@/lib/trip-settle";
 import { TripBoard } from "@/components/trip-board";
 import { TripSettlement } from "@/components/trip-settlement";
 import { SectionCard } from "@/components/section-card";
+import { ArchiveList } from "@/components/archive-list";
 import { joinTrip } from "@/app/(app)/viajes/actions";
 
 // Vista pública de solo lectura del bote (sin cuenta).
@@ -69,51 +70,51 @@ export default async function PublicTripPage({
   const statusLabel = trip.status === "cerrado" ? "Cerrado" : undefined;
 
   return (
-    <>
-      <div className="fixed inset-0 -z-10" style={{ background: "#141210" }} aria-hidden />
-      <main className="mx-auto flex min-h-screen w-full max-w-lg flex-col gap-3 px-[18px] pb-16 pt-4 text-[#ece4d2]">
-        <TripBoard
-          tripName={trip.name}
-          statusLabel={statusLabel}
-          currency={trip.currency}
-          summary={summary}
-          pace={pace}
-          peopleCount={peopleList.length}
-        />
+    <main className="mx-auto flex min-h-screen w-full max-w-lg flex-col gap-3 px-[18px] pb-16 pt-4 text-ink">
+      <TripBoard
+        tripName={trip.name}
+        statusLabel={statusLabel}
+        currency={trip.currency}
+        summary={summary}
+        pace={pace}
+        peopleCount={peopleList.length}
+      />
 
-        {/* Acción para usuarios con cuenta */}
-        {user ? (
-          membership ? (
-            <Link
-              href={`/viajes/${trip.id}`}
+      {/* Acción para usuarios con cuenta */}
+      {user ? (
+        membership ? (
+          <Link
+            href={`/viajes/${trip.id}`}
+            className="flex h-[52px] w-full items-center justify-center rounded-[16px] bg-coral text-base font-extrabold text-white"
+          >
+            Abrir en mis viajes
+          </Link>
+        ) : (
+          <form action={joinTrip}>
+            <input type="hidden" name="token" value={token} />
+            <button
+              type="submit"
               className="flex h-[52px] w-full items-center justify-center rounded-[16px] bg-coral text-base font-extrabold text-white"
             >
-              Abrir en mis viajes
-            </Link>
-          ) : (
-            <form action={joinTrip}>
-              <input type="hidden" name="token" value={token} />
-              <button
-                type="submit"
-                className="flex h-[52px] w-full items-center justify-center rounded-[16px] bg-coral text-base font-extrabold text-white"
-              >
-                Unirme a este viaje
-              </button>
-              <p className="mt-2 text-center text-xs font-medium text-[#ece4d2]/55">
-                Podrás agregar tus propios gastos al bote.
-              </p>
-            </form>
-          )
-        ) : (
-          <Link
-            href="/login"
-            className="flex h-[48px] w-full items-center justify-center rounded-[16px] bg-white/10 text-sm font-bold text-[#ece4d2]"
-          >
-            ¿Tienes la app? Inicia sesión para unirte
-          </Link>
-        )}
+              Unirme a este viaje
+            </button>
+            <p className="mt-2 text-center text-xs font-medium text-muted">
+              Podrás agregar tus propios gastos al bote.
+            </p>
+          </form>
+        )
+      ) : (
+        <Link
+          href="/login"
+          className="flex h-[48px] w-full items-center justify-center rounded-[16px] bg-sand text-sm font-bold text-ink"
+        >
+          ¿Tienes la app? Inicia sesión para unirte
+        </Link>
+      )}
 
-        {peopleList.length > 0 && (
+      {/* Tarjetas de sección con animación "archivero" */}
+      <ArchiveList className="flex flex-col gap-3">
+        {peopleList.length > 0 ? (
           <SectionCard color={C_CUENTAS} title="Cuentas finales">
             <TripSettlement
               people={peopleList}
@@ -122,9 +123,9 @@ export default async function PublicTripPage({
               currency={trip.currency}
             />
           </SectionCard>
-        )}
+        ) : null}
 
-        {expensesList.length > 0 && (
+        {expensesList.length > 0 ? (
           <SectionCard color={C_GASTOS} title="En qué se ha gastado">
             <div className="flex flex-col divide-y divide-black/10">
               {expensesList.map((e, i) => (
@@ -137,12 +138,12 @@ export default async function PublicTripPage({
               ))}
             </div>
           </SectionCard>
-        )}
+        ) : null}
+      </ArchiveList>
 
-        <p className="mt-2 text-center text-xs font-medium text-[#ece4d2]/50">
-          Vista de solo lectura · hecho con COCO
-        </p>
-      </main>
-    </>
+      <p className="mt-2 text-center text-xs font-medium text-muted">
+        Vista de solo lectura · hecho con COCO
+      </p>
+    </main>
   );
 }

@@ -59,7 +59,7 @@ export function TripBoard({
           <Link
             href={backHref}
             aria-label="Volver"
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-[#ece4d2]"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-sand text-ink"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
               <path d="M15 18l-6-6 6-6" />
@@ -73,18 +73,18 @@ export function TripBoard({
 
       {/* Nombre del viaje — el gran protagonista */}
       <div className="mt-1 mb-1">
-        <div className="flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.2em] text-[#ece4d2]/55">
+        <div className="flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.2em] text-muted">
           <span>Bote de viaje</span>
           {statusLabel && (
-            <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] tracking-wide text-[#ece4d2]/70">
+            <span className="rounded-full bg-sand px-2 py-0.5 text-[10px] tracking-wide text-muted-2">
               {statusLabel}
             </span>
           )}
         </div>
-        <h1 className="mt-2 text-[64px] font-extrabold leading-[0.86] tracking-[-0.045em] text-[#ece4d2]">
+        <h1 className="mt-2 text-[64px] font-extrabold leading-[0.86] tracking-[-0.045em] text-ink">
           {tripName}
         </h1>
-        <div className="mt-3 text-[14px] font-semibold text-[#ece4d2]/55">
+        <div className="mt-3 text-[14px] font-semibold text-muted">
           {peopleCount === 1 ? "1 persona" : `${peopleCount} personas`} en el bote
         </div>
       </div>
