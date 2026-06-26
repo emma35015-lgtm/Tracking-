@@ -6,12 +6,16 @@ import { formatMoneyShort } from "@/lib/format";
 import { tripBalances, tripPace } from "@/lib/trip-settle";
 import { TripBoard } from "@/components/trip-board";
 import { TripSettlement } from "@/components/trip-settlement";
+import { SectionCard } from "@/components/section-card";
 import { joinTrip } from "@/app/(app)/viajes/actions";
 
 // Vista pública de solo lectura del bote (sin cuenta).
 // El share_token actúa como secreto; se sirve con la service-role key.
 // Si quien la abre tiene sesión, puede unirse para agregar gastos.
 export const dynamic = "force-dynamic";
+
+const C_CUENTAS = "#9EC8E0";
+const C_GASTOS = "#F4CF12";
 
 export default async function PublicTripPage({
   params,
@@ -67,14 +71,14 @@ export default async function PublicTripPage({
   return (
     <>
       <div className="fixed inset-0 -z-10" style={{ background: "#141210" }} aria-hidden />
-      <main className="mx-auto flex min-h-screen w-full max-w-lg flex-col gap-4 px-[18px] pb-16 pt-4 text-crema">
+      <main className="mx-auto flex min-h-screen w-full max-w-lg flex-col gap-3 px-[18px] pb-16 pt-4 text-crema">
         <TripBoard
           tripName={trip.name}
           statusLabel={statusLabel}
           currency={trip.currency}
           summary={summary}
           pace={pace}
-          people={peopleList}
+          peopleCount={peopleList.length}
         />
 
         {/* Acción para usuarios con cuenta */}
@@ -109,29 +113,30 @@ export default async function PublicTripPage({
           </Link>
         )}
 
-        <TripSettlement
-          people={peopleList}
-          contributions={contributionsList}
-          expenses={expensesList}
-          currency={trip.currency}
-        />
+        {peopleList.length > 0 && (
+          <SectionCard color={C_CUENTAS} title="Cuentas finales">
+            <TripSettlement
+              people={peopleList}
+              contributions={contributionsList}
+              expenses={expensesList}
+              currency={trip.currency}
+            />
+          </SectionCard>
+        )}
 
         {expensesList.length > 0 && (
-          <div className="border-t border-white/10 pt-5">
-            <h2 className="mb-3 text-[25px] font-extrabold leading-none tracking-[-0.02em] text-crema">
-              En qué se ha gastado
-            </h2>
-            <div className="flex flex-col divide-y divide-white/10">
+          <SectionCard color={C_GASTOS} title="En qué se ha gastado">
+            <div className="flex flex-col divide-y divide-black/10">
               {expensesList.map((e, i) => (
                 <div key={i} className="flex items-center justify-between py-2.5">
-                  <div className="min-w-0 flex-1 truncate text-[15px] font-medium text-crema">
+                  <div className="min-w-0 flex-1 truncate text-[15px] font-medium">
                     {e.concept ?? "Gasto"}
                   </div>
-                  <div className="ml-2 text-[15px] font-extrabold tabular-nums text-crema">{fmt(Number(e.amount))}</div>
+                  <div className="ml-2 text-[15px] font-extrabold tabular-nums">{fmt(Number(e.amount))}</div>
                 </div>
               ))}
             </div>
-          </div>
+          </SectionCard>
         )}
 
         <p className="mt-2 text-center text-xs font-medium text-crema/50">

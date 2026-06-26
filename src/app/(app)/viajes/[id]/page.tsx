@@ -4,6 +4,7 @@ import { formatMoneyShort } from "@/lib/format";
 import { tripBalances, tripPace } from "@/lib/trip-settle";
 import { TripBoard } from "@/components/trip-board";
 import { TripSettlement } from "@/components/trip-settlement";
+import { SectionCard } from "@/components/section-card";
 import { ShareTripButton } from "@/components/share-trip-button";
 import { ViajeDetalleIntro } from "@/components/viaje-detalle-intro";
 import {
@@ -18,8 +19,16 @@ import {
   setTripStatus,
 } from "../actions";
 
+// Colores de cada sección (sobre fondo negro cálido)
+const C_CUENTAS = "#9EC8E0";
+const C_GASTOS = "#F4CF12";
+const C_APORTA = "#A7D9BF";
+const C_PERSONAS = "#C9B8E8";
+
+// Inputs claros, para vivir sobre las tarjetas pastel
 const inputClass =
-  "w-full rounded-xl border-[1.6px] border-white/15 bg-white/5 px-3 py-2.5 text-sm font-medium text-crema placeholder-crema/40 outline-none focus:border-coral";
+  "w-full rounded-xl border-[1.6px] border-black/10 bg-white/60 px-3 py-2.5 text-sm font-medium text-ink placeholder-black/35 outline-none focus:border-coral";
+const cardBtn = "rounded-xl bg-ink px-5 text-sm font-bold text-crema";
 
 export default async function ViajeDetailPage({
   params,
@@ -81,7 +90,7 @@ export default async function ViajeDetailPage({
   return (
     <>
       <div className="fixed inset-0 -z-10" style={{ background: "#141210" }} aria-hidden />
-      <div className="screen-in flex flex-col gap-4 text-crema">
+      <div className="screen-in flex flex-col gap-3 text-crema">
         <ViajeDetalleIntro />
 
         <TripBoard
@@ -90,39 +99,41 @@ export default async function ViajeDetailPage({
           currency={currency}
           summary={summary}
           pace={pace}
-          people={peopleList}
+          peopleCount={peopleList.length}
           backHref="/viajes"
           topRight={<ShareTripButton token={trip.share_token} />}
         />
 
-        <TripSettlement
-          people={peopleList}
-          contributions={contributionsList}
-          expenses={expensesList}
-          currency={currency}
-        />
+        {/* Cuentas finales */}
+        {peopleList.length > 0 && (
+          <SectionCard color={C_CUENTAS} title="Cuentas finales">
+            <TripSettlement
+              people={peopleList}
+              contributions={contributionsList}
+              expenses={expensesList}
+              currency={currency}
+            />
+          </SectionCard>
+        )}
 
         {/* Gastos del bote */}
-        <div className="border-t border-white/10 pt-5">
-          <h2 className="mb-3 text-[25px] font-extrabold leading-none tracking-[-0.02em] text-crema">
-            Gastos del bote
-          </h2>
+        <SectionCard color={C_GASTOS} title="Gastos del bote">
           {expensesList.length > 0 && (
-            <div className="mb-3 flex flex-col divide-y divide-white/10">
+            <div className="mb-3 flex flex-col divide-y divide-black/10">
               {expensesList.map((e) => {
                 const author = whoAdded(e.added_by);
                 return (
                   <div key={e.id} className="flex items-center justify-between py-2.5">
                     <div className="min-w-0 flex-1">
-                      <div className="truncate text-[15px] font-medium text-crema">{e.concept ?? "Gasto"}</div>
-                      {author && <div className="text-xs font-medium text-crema/45">agregó {author}</div>}
+                      <div className="truncate text-[15px] font-medium">{e.concept ?? "Gasto"}</div>
+                      {author && <div className="text-xs font-medium text-black/45">agregó {author}</div>}
                     </div>
-                    <div className="ml-2 text-[15px] font-extrabold tabular-nums text-crema">{fmt(Number(e.amount))}</div>
+                    <div className="ml-2 text-[15px] font-extrabold tabular-nums">{fmt(Number(e.amount))}</div>
                     {canDelete(e.added_by) && (
                       <form action={deleteTripExpense} className="ml-2">
                         <input type="hidden" name="trip_id" value={trip.id} />
                         <input type="hidden" name="id" value={e.id} />
-                        <button type="submit" aria-label="Eliminar" className="px-1 text-crema/40">
+                        <button type="submit" aria-label="Eliminar" className="px-1 text-black/40">
                           ×
                         </button>
                       </form>
@@ -148,36 +159,33 @@ export default async function ViajeDetailPage({
                 placeholder="$ Monto"
                 className={`${inputClass} flex-1`}
               />
-              <button type="submit" className="rounded-xl bg-coral px-5 text-sm font-bold text-white">
+              <button type="submit" className={cardBtn}>
                 Agregar
               </button>
             </div>
           </form>
-        </div>
+        </SectionCard>
 
         {/* Aportaciones */}
-        <div className="border-t border-white/10 pt-5">
-          <h2 className="mb-3 text-[25px] font-extrabold leading-none tracking-[-0.02em] text-crema">
-            Aportaciones
-          </h2>
+        <SectionCard color={C_APORTA} title="Aportaciones">
           {contributionsList.length > 0 && (
-            <div className="mb-3 flex flex-col divide-y divide-white/10">
+            <div className="mb-3 flex flex-col divide-y divide-black/10">
               {contributionsList.map((c) => {
                 const author = whoAdded(c.added_by);
                 return (
                   <div key={c.id} className="flex items-center justify-between py-2.5">
                     <div className="min-w-0 flex-1">
-                      <div className="truncate text-[15px] font-medium text-crema">
+                      <div className="truncate text-[15px] font-medium">
                         {c.person_id ? nameById.get(c.person_id) ?? "—" : "Sin asignar"}
                       </div>
-                      {author && <div className="text-xs font-medium text-crema/45">agregó {author}</div>}
+                      {author && <div className="text-xs font-medium text-black/45">agregó {author}</div>}
                     </div>
-                    <div className="ml-2 text-[15px] font-extrabold tabular-nums text-crema">{fmt(Number(c.amount))}</div>
+                    <div className="ml-2 text-[15px] font-extrabold tabular-nums">{fmt(Number(c.amount))}</div>
                     {canDelete(c.added_by) && (
                       <form action={deleteContribution} className="ml-2">
                         <input type="hidden" name="trip_id" value={trip.id} />
                         <input type="hidden" name="id" value={c.id} />
-                        <button type="submit" aria-label="Eliminar" className="px-1 text-crema/40">
+                        <button type="submit" aria-label="Eliminar" className="px-1 text-black/40">
                           ×
                         </button>
                       </form>
@@ -188,16 +196,11 @@ export default async function ViajeDetailPage({
             </div>
           )}
           {peopleList.length === 0 ? (
-            <p className="text-sm font-medium text-crema/55">Agrega personas abajo para registrar quién aporta.</p>
+            <p className="text-sm font-medium text-black/55">Agrega personas abajo para registrar quién aporta.</p>
           ) : (
             <form action={addContribution} className="flex gap-2">
               <input type="hidden" name="trip_id" value={trip.id} />
-              <select
-                name="person_id"
-                defaultValue={myPersonId}
-                className={`${inputClass} flex-1`}
-                style={{ colorScheme: "dark" }}
-              >
+              <select name="person_id" defaultValue={myPersonId} className={`${inputClass} flex-1`}>
                 {peopleList.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.name}
@@ -206,18 +209,15 @@ export default async function ViajeDetailPage({
                 ))}
               </select>
               <input name="amount" inputMode="decimal" placeholder="$" className={`${inputClass} w-24`} />
-              <button type="submit" className="rounded-xl bg-coral px-4 text-sm font-bold text-white">
+              <button type="submit" className="rounded-xl bg-ink px-4 text-sm font-bold text-crema">
                 +
               </button>
             </form>
           )}
-        </div>
+        </SectionCard>
 
         {/* Personas */}
-        <div className="border-t border-white/10 pt-5">
-          <h2 className="mb-3 text-[25px] font-extrabold leading-none tracking-[-0.02em] text-crema">
-            Personas
-          </h2>
+        <SectionCard color={C_PERSONAS} title="Personas">
           {peopleList.length > 0 && (
             <div className="mb-3 flex flex-wrap gap-2">
               {peopleList.map((p) => (
@@ -226,11 +226,11 @@ export default async function ViajeDetailPage({
                   <input type="hidden" name="id" value={p.id} />
                   <button
                     type="submit"
-                    className="flex items-center gap-1.5 rounded-full border-[1.6px] border-white/15 bg-white/5 px-3 py-1.5 text-sm font-semibold text-crema"
+                    className="flex items-center gap-1.5 rounded-full border-[1.6px] border-black/10 bg-white/50 px-3 py-1.5 text-sm font-semibold"
                   >
                     {p.name}
-                    {p.user_id === myId ? <span className="text-crema/45">(tú)</span> : null}{" "}
-                    <span className="text-crema/40">×</span>
+                    {p.user_id === myId ? <span className="text-black/45">(tú)</span> : null}{" "}
+                    <span className="text-black/40">×</span>
                   </button>
                 </form>
               ))}
@@ -239,14 +239,14 @@ export default async function ViajeDetailPage({
           <form action={addPerson} className="flex gap-2">
             <input type="hidden" name="trip_id" value={trip.id} />
             <input name="name" placeholder="Nombre" className={`${inputClass} flex-1`} />
-            <button type="submit" className="rounded-xl bg-crema px-4 text-sm font-bold text-ink">
+            <button type="submit" className="rounded-xl bg-ink px-4 text-sm font-bold text-crema">
               Añadir
             </button>
           </form>
-        </div>
+        </SectionCard>
 
-        {/* Invitar amigos */}
-        <div className="rounded-[22px] bg-mint px-5 py-4 text-[13px] font-medium leading-relaxed text-mint-ink">
+        {/* Invitar amigos — pista discreta sobre el fondo */}
+        <div className="rounded-[22px] border border-white/15 px-5 py-4 text-[13px] font-medium leading-relaxed text-crema/70">
           👋 Comparte el link (botón de arriba) con amigos que ya tengan la app. Al abrirlo podrán
           unirse y agregar sus propios gastos al bote. Cada quien edita solo lo suyo.
         </div>
