@@ -71,7 +71,7 @@ export default async function PublicTripPage({
   return (
     <>
       <div className="fixed inset-0 -z-10" style={{ background: "#141210" }} aria-hidden />
-      <main className="mx-auto flex min-h-screen w-full max-w-lg flex-col gap-3 px-[18px] pb-16 pt-4 text-crema">
+      <main className="mx-auto flex min-h-screen w-full max-w-lg flex-col gap-3 px-[18px] pb-16 pt-4 text-[#ece4d2]">
         <TripBoard
           tripName={trip.name}
           statusLabel={statusLabel}
@@ -99,7 +99,7 @@ export default async function PublicTripPage({
               >
                 Unirme a este viaje
               </button>
-              <p className="mt-2 text-center text-xs font-medium text-crema/55">
+              <p className="mt-2 text-center text-xs font-medium text-[#ece4d2]/55">
                 Podrás agregar tus propios gastos al bote.
               </p>
             </form>
@@ -107,7 +107,7 @@ export default async function PublicTripPage({
         ) : (
           <Link
             href="/login"
-            className="flex h-[48px] w-full items-center justify-center rounded-[16px] bg-white/10 text-sm font-bold text-crema"
+            className="flex h-[48px] w-full items-center justify-center rounded-[16px] bg-white/10 text-sm font-bold text-[#ece4d2]"
           >
             ¿Tienes la app? Inicia sesión para unirte
           </Link>
@@ -139,7 +139,7 @@ export default async function PublicTripPage({
           </SectionCard>
         )}
 
-        <p className="mt-2 text-center text-xs font-medium text-crema/50">
+        <p className="mt-2 text-center text-xs font-medium text-[#ece4d2]/50">
           Vista de solo lectura · hecho con COCO
         </p>
       </main>

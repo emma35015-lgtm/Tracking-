@@ -7,7 +7,7 @@ import { createTrip } from "./actions";
 
 // Inputs claros para vivir sobre la tarjeta de color "Nuevo viaje"
 const inputClass =
-  "w-full rounded-2xl border-[1.6px] border-black/10 bg-white/60 px-4 py-3 text-[15px] font-medium text-ink placeholder-black/35 outline-none focus:border-coral";
+  "w-full rounded-2xl border-[1.6px] border-black/10 bg-white/60 px-4 py-3 text-[15px] font-medium text-[#1a1714] placeholder-black/35 outline-none focus:border-coral";
 const TRIP_COLORS = ["#A7D9BF", "#9EC8E0", "#C9B8E8", "#F2B79F", "#F4CF12", "#D995AF"];
 
 export default async function ViajesPage() {
@@ -27,22 +27,22 @@ export default async function ViajesPage() {
   return (
     <>
       <div className="fixed inset-0 -z-10" style={{ background: "#141210" }} aria-hidden />
-      <div className="screen-in px-1 pt-2 text-crema">
+      <div className="screen-in px-1 pt-2 text-[#ece4d2]">
         <ViajesIntro />
-        <Link href="/" className="inline-flex items-center gap-1 text-sm font-bold text-crema/70">
+        <Link href="/" className="inline-flex items-center gap-1 text-sm font-bold text-[#ece4d2]/70">
           ← Inicio
         </Link>
 
         {/* Título protagonista */}
         <div className="mt-3 flex items-start gap-2">
-          <h1 className="text-[56px] font-extrabold leading-[0.86] tracking-[-0.04em] text-crema">Viajes</h1>
+          <h1 className="text-[56px] font-extrabold leading-[0.86] tracking-[-0.04em] text-[#ece4d2]">Viajes</h1>
           <InfoButton
             tone="light"
             title="Viajes (bote compartido)"
             text="Un viaje es un bote entre amigos: cada quien anota lo que pone y lo que se gasta, y la app saca cuánto le toca a cada quien. Comparte el link para que se unan y todos anoten."
           />
         </div>
-        <p className="mt-3 text-[15px] font-medium text-crema/55">
+        <p className="mt-3 text-[15px] font-medium text-[#ece4d2]/55">
           El bote compartido: cuánto entró, cuánto se gastó y quién queda a mano.
         </p>
 
@@ -88,7 +88,7 @@ export default async function ViajesPage() {
         )}
 
         {/* Nuevo viaje — tarjeta de color */}
-        <form action={createTrip} className="mt-10 rounded-[28px] p-6 text-ink" style={{ background: "#F2B79F" }}>
+        <form action={createTrip} className="mt-10 rounded-[28px] p-6 text-[#1a1714]" style={{ background: "#F2B79F" }}>
           <h2 className="text-[25px] font-extrabold tracking-[-0.02em]">Nuevo viaje</h2>
           <div className="mb-2 mt-4 text-[13px] font-bold text-black/55">Nombre</div>
           <input name="name" required placeholder="Playa con amigos" className={inputClass} />
@@ -104,7 +104,7 @@ export default async function ViajesPage() {
           <input type="hidden" name="currency" value="MXN" />
           <button
             type="submit"
-            className="mt-5 h-[52px] w-full rounded-[16px] bg-ink text-base font-extrabold text-crema"
+            className="mt-5 h-[52px] w-full rounded-[16px] bg-[#1a1714] text-base font-extrabold text-[#ece4d2]"
           >
             Crear viaje
           </button>

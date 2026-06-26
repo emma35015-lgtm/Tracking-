@@ -26,7 +26,7 @@ export function InfoButton({
           setOpen(true);
         }}
         className={`press inline-flex h-[19px] w-[19px] shrink-0 items-center justify-center rounded-full border text-[11px] font-bold leading-none ${
-          tone === "light" ? "border-crema/40 text-crema/70" : "border-input-border text-muted"
+          tone === "light" ? "border-[#ece4d2]/40 text-[#ece4d2]/70" : "border-input-border text-muted"
         }`}
       >
         i

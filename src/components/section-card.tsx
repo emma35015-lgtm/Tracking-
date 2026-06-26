@@ -14,7 +14,7 @@ export function SectionCard({
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-[28px] p-6 text-ink" style={{ background: color }}>
+    <section className="rounded-[28px] p-6 text-[#1a1714]" style={{ background: color }}>
       <h2 className="text-[25px] font-extrabold leading-none tracking-[-0.02em]">{title}</h2>
       {subtitle && <p className="mt-1 text-xs font-semibold text-black/45">{subtitle}</p>}
       <div className="mt-3.5">{children}</div>

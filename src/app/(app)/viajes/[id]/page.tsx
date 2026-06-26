@@ -27,8 +27,8 @@ const C_PERSONAS = "#C9B8E8";
 
 // Inputs claros, para vivir sobre las tarjetas pastel
 const inputClass =
-  "w-full rounded-xl border-[1.6px] border-black/10 bg-white/60 px-3 py-2.5 text-sm font-medium text-ink placeholder-black/35 outline-none focus:border-coral";
-const cardBtn = "rounded-xl bg-ink px-5 text-sm font-bold text-crema";
+  "w-full rounded-xl border-[1.6px] border-black/10 bg-white/60 px-3 py-2.5 text-sm font-medium text-[#1a1714] placeholder-black/35 outline-none focus:border-coral";
+const cardBtn = "rounded-xl bg-[#1a1714] px-5 text-sm font-bold text-[#ece4d2]";
 
 export default async function ViajeDetailPage({
   params,
@@ -90,7 +90,7 @@ export default async function ViajeDetailPage({
   return (
     <>
       <div className="fixed inset-0 -z-10" style={{ background: "#141210" }} aria-hidden />
-      <div className="screen-in flex flex-col gap-3 text-crema">
+      <div className="screen-in flex flex-col gap-3 text-[#ece4d2]">
         <ViajeDetalleIntro />
 
         <TripBoard
@@ -209,7 +209,7 @@ export default async function ViajeDetailPage({
                 ))}
               </select>
               <input name="amount" inputMode="decimal" placeholder="$" className={`${inputClass} w-24`} />
-              <button type="submit" className="rounded-xl bg-ink px-4 text-sm font-bold text-crema">
+              <button type="submit" className="rounded-xl bg-[#1a1714] px-4 text-sm font-bold text-[#ece4d2]">
                 +
               </button>
             </form>
@@ -239,14 +239,14 @@ export default async function ViajeDetailPage({
           <form action={addPerson} className="flex gap-2">
             <input type="hidden" name="trip_id" value={trip.id} />
             <input name="name" placeholder="Nombre" className={`${inputClass} flex-1`} />
-            <button type="submit" className="rounded-xl bg-ink px-4 text-sm font-bold text-crema">
+            <button type="submit" className="rounded-xl bg-[#1a1714] px-4 text-sm font-bold text-[#ece4d2]">
               Añadir
             </button>
           </form>
         </SectionCard>
 
         {/* Invitar amigos — pista discreta sobre el fondo */}
-        <div className="rounded-[22px] border border-white/15 px-5 py-4 text-[13px] font-medium leading-relaxed text-crema/70">
+        <div className="rounded-[22px] border border-white/15 px-5 py-4 text-[13px] font-medium leading-relaxed text-[#ece4d2]/70">
           👋 Comparte el link (botón de arriba) con amigos que ya tengan la app. Al abrirlo podrán
           unirse y agregar sus propios gastos al bote. Cada quien edita solo lo suyo.
         </div>
@@ -257,7 +257,7 @@ export default async function ViajeDetailPage({
             <form action={setTripStatus}>
               <input type="hidden" name="trip_id" value={trip.id} />
               <input type="hidden" name="status" value={trip.status === "cerrado" ? "activo" : "cerrado"} />
-              <button type="submit" className="h-[48px] w-full rounded-[14px] bg-white/10 font-bold text-crema">
+              <button type="submit" className="h-[48px] w-full rounded-[14px] bg-white/10 font-bold text-[#ece4d2]">
                 {trip.status === "cerrado" ? "Reabrir viaje" : "Cerrar viaje"}
               </button>
             </form>
