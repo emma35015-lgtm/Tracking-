@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { normalizeMerchant } from "@/lib/categorize";
 import { parseAmount } from "@/lib/format";
 import { generateToken, hashToken } from "@/lib/token";
@@ -33,6 +34,20 @@ async function learnRule(
       { user_id: userId, merchant_normalized: normalized, category_id: categoryId },
       { onConflict: "user_id,merchant_normalized" }
     );
+}
+
+// El nombre que se ve en los viajes se copia al unirte; si luego lo cambias
+// en la app hay que refrescarlo en todas tus filas de viaje (las tuyas como
+// persona y como miembro) para que los demás te vean con tu nombre nuevo.
+// Usa la service-role key: trip_members no tiene política de UPDATE y el
+// nombre debe quedar visible para el resto del bote.
+async function syncTripName(userId: string, name: string, email?: string | null) {
+  const effective = name.trim() || (email ?? "").split("@")[0]?.trim() || "Miembro";
+  const admin = createAdminClient();
+  await Promise.all([
+    admin.from("trip_people").update({ name: effective }).eq("user_id", userId),
+    admin.from("trip_members").update({ display_name: effective }).eq("user_id", userId),
+  ]);
 }
 
 export async function addExpense(formData: FormData) {
@@ -118,6 +133,7 @@ export async function setDisplayName(formData: FormData) {
   const name = String(formData.get("display_name") ?? "").trim();
   if (!name) return;
   await supabase.from("profiles").update({ display_name: name }).eq("id", user.id);
+  await syncTripName(user.id, name, user.email);
   revalidatePath("/", "layout");
 }
 
@@ -153,6 +169,7 @@ export async function updateProfile(formData: FormData) {
       .update({ display_name: displayName, default_currency: currency })
       .eq("id", user.id);
   }
+  await syncTripName(user.id, displayName ?? "", user.email);
   revalidatePath("/", "layout");
 }
 
