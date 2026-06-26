@@ -3,7 +3,9 @@ import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { formatMoneyShort } from "@/lib/format";
-import { TripSummary } from "@/components/trip-summary";
+import { tripBalances, tripPace } from "@/lib/trip-settle";
+import { TripBoard } from "@/components/trip-board";
+import { TripSettlement } from "@/components/trip-settlement";
 import { joinTrip } from "@/app/(app)/viajes/actions";
 
 // Vista pública de solo lectura del bote (sin cuenta).
@@ -53,79 +55,89 @@ export default async function PublicTripPage({
     membership = (m?.role as "owner" | "member" | undefined) ?? null;
   }
 
+  const peopleList = people ?? [];
+  const contributionsList = contributions ?? [];
   const expensesList = expenses ?? [];
   const fmt = (n: number) => formatMoneyShort(n, trip.currency);
 
-  return (
-    <main className="mx-auto w-full max-w-lg px-[18px] pb-16 pt-4">
-      <div className="mb-1 flex items-center justify-center gap-1.5 text-[13px] font-bold uppercase tracking-wider text-muted">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-          <circle cx="9" cy="7" r="4" />
-          <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-        </svg>
-        Bote de viaje
-      </div>
-      <h1 className="mb-4 text-center text-[26px] font-extrabold tracking-tight">{trip.name}</h1>
+  const summary = tripBalances(peopleList, contributionsList, expensesList);
+  const pace = tripPace(expensesList, summary.remainingCents);
+  const statusLabel = trip.status === "cerrado" ? "Cerrado" : undefined;
 
-      {/* Acción para usuarios con cuenta */}
-      {user ? (
-        membership ? (
-          <Link
-            href={`/viajes/${trip.id}`}
-            className="mb-4 flex h-[52px] w-full items-center justify-center rounded-[16px] bg-coral text-base font-extrabold text-white"
-          >
-            Abrir en mis viajes
-          </Link>
-        ) : (
-          <form action={joinTrip} className="mb-4">
-            <input type="hidden" name="token" value={token} />
-            <button
-              type="submit"
+  return (
+    <>
+      <div className="fixed inset-0 -z-10" style={{ background: "#141210" }} aria-hidden />
+      <main className="mx-auto flex min-h-screen w-full max-w-lg flex-col gap-4 px-[18px] pb-16 pt-4 text-crema">
+        <TripBoard
+          tripName={trip.name}
+          statusLabel={statusLabel}
+          currency={trip.currency}
+          summary={summary}
+          pace={pace}
+          people={peopleList}
+        />
+
+        {/* Acción para usuarios con cuenta */}
+        {user ? (
+          membership ? (
+            <Link
+              href={`/viajes/${trip.id}`}
               className="flex h-[52px] w-full items-center justify-center rounded-[16px] bg-coral text-base font-extrabold text-white"
             >
-              Unirme a este viaje
-            </button>
-            <p className="mt-2 text-center text-xs font-medium text-muted">
-              Podrás agregar tus propios gastos al bote.
-            </p>
-          </form>
-        )
-      ) : (
-        <Link
-          href="/login"
-          className="mb-4 flex h-[48px] w-full items-center justify-center rounded-[16px] bg-sand text-sm font-bold text-ink"
-        >
-          ¿Tienes la app? Inicia sesión para unirte
-        </Link>
-      )}
+              Abrir en mis viajes
+            </Link>
+          ) : (
+            <form action={joinTrip}>
+              <input type="hidden" name="token" value={token} />
+              <button
+                type="submit"
+                className="flex h-[52px] w-full items-center justify-center rounded-[16px] bg-coral text-base font-extrabold text-white"
+              >
+                Unirme a este viaje
+              </button>
+              <p className="mt-2 text-center text-xs font-medium text-crema/55">
+                Podrás agregar tus propios gastos al bote.
+              </p>
+            </form>
+          )
+        ) : (
+          <Link
+            href="/login"
+            className="flex h-[48px] w-full items-center justify-center rounded-[16px] bg-white/10 text-sm font-bold text-crema"
+          >
+            ¿Tienes la app? Inicia sesión para unirte
+          </Link>
+        )}
 
-      <TripSummary
-        people={people ?? []}
-        contributions={contributions ?? []}
-        expenses={expensesList}
-        currency={trip.currency}
-      />
+        <TripSettlement
+          people={peopleList}
+          contributions={contributionsList}
+          expenses={expensesList}
+          currency={trip.currency}
+        />
 
-      {expensesList.length > 0 && (
-        <div className="mt-4 rounded-[24px] bg-white p-5">
-          <h2 className="mb-3 text-base font-extrabold tracking-tight">En qué se ha gastado</h2>
-          <div className="flex flex-col divide-y divide-crema">
-            {expensesList.map((e, i) => (
-              <div key={i} className="flex items-center justify-between py-2.5">
-                <div className="min-w-0 flex-1 truncate text-[15px] font-medium">
-                  {e.concept ?? "Gasto"}
+        {expensesList.length > 0 && (
+          <div className="border-t border-white/10 pt-5">
+            <h2 className="mb-3 text-[25px] font-extrabold leading-none tracking-[-0.02em] text-crema">
+              En qué se ha gastado
+            </h2>
+            <div className="flex flex-col divide-y divide-white/10">
+              {expensesList.map((e, i) => (
+                <div key={i} className="flex items-center justify-between py-2.5">
+                  <div className="min-w-0 flex-1 truncate text-[15px] font-medium text-crema">
+                    {e.concept ?? "Gasto"}
+                  </div>
+                  <div className="ml-2 text-[15px] font-extrabold tabular-nums text-crema">{fmt(Number(e.amount))}</div>
                 </div>
-                <div className="ml-2 text-[15px] font-extrabold tabular-nums">{fmt(Number(e.amount))}</div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      <p className="mt-6 text-center text-xs font-medium text-muted">
-        Vista de solo lectura · hecho con Gastos
-      </p>
-    </main>
+        <p className="mt-2 text-center text-xs font-medium text-crema/50">
+          Vista de solo lectura · hecho con COCO
+        </p>
+      </main>
+    </>
   );
 }

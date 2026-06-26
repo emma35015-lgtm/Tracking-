@@ -26,7 +26,10 @@ export default async function ViajesPage() {
   return (
     <div className="screen-in px-1 pt-2">
       <ViajesIntro />
-      <div className="flex items-center gap-2">
+      <Link href="/" className="text-sm font-bold text-coral-link">
+        ← Inicio
+      </Link>
+      <div className="mt-1 flex items-center gap-2">
         <h1 className="text-[34px] font-extrabold leading-[0.95] tracking-[-0.03em]">Viajes</h1>
         <InfoButton
           title="Viajes (bote compartido)"
