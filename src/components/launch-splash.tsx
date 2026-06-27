@@ -27,7 +27,6 @@ export function LaunchSplash() {
 
   if (!show) return null;
 
-  const squares = ["#ece4d2", "#ffd84d", "#A7D9BF", "#9EC8E0", "#C9B8E8"];
   return (
     <div
       style={{ animation: "splash-out 2.1s ease forwards", background: "var(--color-crema)" }}
@@ -38,13 +37,6 @@ export function LaunchSplash() {
         className="absolute inset-x-0 bottom-0 flex flex-col items-center justify-center"
         style={{ top: "env(safe-area-inset-top)", background: "#e0532b" }}
       >
-        {/* Barrita de colores estilo póster */}
-        <div className="absolute left-7 top-16 flex gap-1.5" style={{ animation: "splash-word 1s ease both" }}>
-          {squares.map((c) => (
-            <span key={c} className="h-3.5 w-3.5 rounded-[3px]" style={{ background: c }} />
-          ))}
-        </div>
-
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/brand/coco-logo.png"

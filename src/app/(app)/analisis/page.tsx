@@ -5,6 +5,7 @@ import { MonthHeader } from "@/components/month-header";
 import { categoryColor } from "@/lib/category-style";
 import { Reveal } from "@/components/reveal";
 import { InsightList, type Insight } from "@/components/insight-list";
+import { CategoryTreemap, type MosaicItem } from "@/components/category-treemap";
 
 // Colores para el puntito de cada consejo (de la paleta de la app).
 const DOTS = ["#e0532b", "#1E8C63", "#C99700", "#9EC8E0", "#C9B8E8", "#D995AF", "#A7D9BF"];
@@ -222,18 +223,31 @@ export default async function AnalisisPage({
   const catRows = [...byCat.entries()].sort((a, b) => b[1].total - a[1].total);
   const insights = buildInsights(current, previous, currency, daysElapsed, daysInMonth);
 
-  const mosaic = catRows.map(([name, { total: catTotal, count, color }], i) => {
-    const pct = total > 0 ? Math.round((catTotal / total) * 100) : 0;
-    return {
+  // Agrupa la cola en "Otros" para que el treemap no genere tarjetas-astilla.
+  const TOP = 8;
+  const head = catRows.slice(0, TOP);
+  const tail = catRows.slice(TOP);
+  const mosaicRows: { name: string; total: number; count: number; color: string }[] = head.map(
+    ([name, { total: catTotal, count, color }]) => ({
       name,
-      color: categoryColor(name, color),
-      pct,
-      amount: formatMoneyShort(catTotal, currency),
+      total: catTotal,
       count,
-      delay: (0.05 + i * 0.05).toFixed(2),
-    };
-  });
-  const maxPct = mosaic.length ? Math.max(...mosaic.map((mm) => mm.pct), 1) : 1;
+      color: categoryColor(name, color),
+    })
+  );
+  if (tail.length > 0) {
+    const tt = tail.reduce((a, [, v]) => a + v.total, 0);
+    const tc = tail.reduce((a, [, v]) => a + v.count, 0);
+    mosaicRows.push({ name: "Otros", total: tt, count: tc, color: "#D8CFB8" });
+  }
+  const mosaic: MosaicItem[] = mosaicRows.map((r) => ({
+    name: r.name,
+    color: r.color,
+    pct: total > 0 ? Math.round((r.total / total) * 100) : 0,
+    amount: formatMoneyShort(r.total, currency),
+    count: r.count,
+    value: r.total,
+  }));
 
   const monthName = new Intl.DateTimeFormat("es-MX", { month: "long" }).format(new Date(year, month - 1, 15));
   const mood =
@@ -297,35 +311,11 @@ export default async function AnalisisPage({
             ))}
           </div>
 
-          {/* Mosaico de categorías */}
+          {/* Mosaico de categorías — treemap (rectángulo perfecto) */}
           <Reveal>
             <div>
               <div className="mb-3 px-1 text-[11px] font-bold uppercase tracking-[0.14em] text-muted">Por categoría</div>
-              <div className="-mx-[14px]" style={{ columns: 2, columnGap: "10px" }}>
-                {mosaic.map((mm) => (
-                  <div
-                    key={mm.name}
-                    className="mb-2.5 flex flex-col justify-between rounded-[24px] p-5 text-[#111]"
-                    style={{
-                      background: mm.color,
-                      minHeight: 128 + Math.round((mm.pct / maxPct) * 150),
-                      breakInside: "avoid",
-                      animation: `pop-in .5s ${mm.delay}s both`,
-                    }}
-                  >
-                    <div>
-                      <div className="text-[15px] font-extrabold leading-tight tracking-[-0.01em]">{mm.name}</div>
-                      <div className="mt-0.5 text-[12px] font-semibold text-black/55">
-                        {mm.amount} · {mm.count} {mm.count === 1 ? "gasto" : "gastos"}
-                      </div>
-                    </div>
-                    <div className="mt-6 text-[46px] font-light leading-none tracking-[-0.03em] tabular-nums">
-                      {mm.pct}
-                      <span className="text-[24px]">%</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <CategoryTreemap items={mosaic} />
             </div>
           </Reveal>
 

@@ -284,8 +284,8 @@ export function SplitFlow({
           }}
           className="flex items-center gap-4 rounded-[22px] bg-sand p-5 text-left"
         >
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[15px] bg-white">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15140F" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[15px] bg-white text-ink">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
               <path d="M4 20l4-1L20 7l-3-3L5 16l-1 4Z" />
             </svg>
           </div>

@@ -22,9 +22,9 @@ export function MonthHeader({
       <Link
         href={`${base}?mes=${prev}`}
         aria-label="Mes anterior"
-        className="flex h-[38px] w-[38px] items-center justify-center rounded-full bg-white"
+        className="flex h-[38px] w-[38px] items-center justify-center rounded-full bg-white text-ink"
       >
-        <svg width="9" height="15" viewBox="0 0 9 15" fill="none" stroke="#15140F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="9" height="15" viewBox="0 0 9 15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M7.5 1.5 1.5 7.5l6 6" />
         </svg>
       </Link>
@@ -35,9 +35,9 @@ export function MonthHeader({
       <Link
         href={`${base}?mes=${next}`}
         aria-label="Mes siguiente"
-        className="flex h-[38px] w-[38px] items-center justify-center rounded-full bg-white"
+        className="flex h-[38px] w-[38px] items-center justify-center rounded-full bg-white text-ink"
       >
-        <svg width="9" height="15" viewBox="0 0 9 15" fill="none" stroke="#15140F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="9" height="15" viewBox="0 0 9 15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M1.5 1.5 7.5 7.5l-6 6" />
         </svg>
       </Link>

@@ -38,11 +38,12 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500;600;700;800;900&display=swap"
           rel="stylesheet"
         />
-        {/* Aplica dark antes del primer render para evitar destello */}
+        {/* Aplica dark antes del primer render para evitar destello.
+            Soporta modo 'auto': oscuro tras el atardecer (aprox. por mes). */}
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "(function(){try{if(localStorage.getItem('theme')==='dark')document.documentElement.classList.add('dark');}catch(e){}})()",
+              "(function(){try{var t=localStorage.getItem('theme');var dark=t==='dark';if(t==='auto'){var d=new Date();var s=[18.5,19,19.25,19.5,19.75,20,20,19.75,19.25,18.75,18.25,18.25][d.getMonth()];var h=d.getHours()+d.getMinutes()/60;dark=h>=s||h<7;}if(dark)document.documentElement.classList.add('dark');}catch(e){}})()",
           }}
         />
       </head>

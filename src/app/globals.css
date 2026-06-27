@@ -155,7 +155,7 @@ html.dark {
 
 /* Cards "blancas" → superficie cálida suave sobre el marfil */
 .bg-white { background-color: rgba(255, 255, 255, 0.55); }
-html.dark .bg-white { background-color: rgba(255, 255, 255, 0.06); }
+html.dark .bg-white { background-color: rgba(255, 255, 255, 0.08); }
 
 /* Botones/dock oscuros */
 html.dark .bg-ink { background-color: #0b0a09; }

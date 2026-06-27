@@ -3,6 +3,7 @@ import { TabBar } from "@/components/tab-bar";
 import { LaunchSplash } from "@/components/launch-splash";
 import { Onboarding } from "@/components/onboarding";
 import { NamePrompt } from "@/components/name-prompt";
+import { ThemeWatcher } from "@/components/theme-watcher";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -18,6 +19,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <div className="mx-auto w-full max-w-lg">
       <LaunchSplash />
+      <ThemeWatcher />
       <Onboarding />
       <NamePrompt missing={missingName} />
       <main className="px-[18px] pb-32 pt-2">{children}</main>

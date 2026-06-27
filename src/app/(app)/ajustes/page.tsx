@@ -8,7 +8,7 @@ import {
   updateProfile,
 } from "@/app/(app)/actions";
 import { CategoryIcon, categoryColor } from "@/lib/category-style";
-import { DarkModeToggle } from "@/components/dark-mode-toggle";
+import { ThemeControl } from "@/components/theme-control";
 import { ColorSwatches } from "@/components/color-swatches";
 import { ReplayTutorial } from "@/components/replay-tutorial";
 
@@ -27,10 +27,15 @@ const inputClass =
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mx-1 mb-3 mt-6 text-[13px] font-bold uppercase tracking-[0.06em] text-muted">
+    <div className="mx-1 mb-2.5 mt-7 text-[12px] font-bold uppercase tracking-[0.14em] text-muted">
       {children}
     </div>
   );
+}
+
+// Tarjeta contenedora para agrupar cada bloque de ajustes.
+function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return <div className={`rounded-[24px] bg-white p-5 ${className}`}>{children}</div>;
 }
 
 export default async function AjustesPage() {
@@ -51,98 +56,122 @@ export default async function AjustesPage() {
   const monthlyBudget = budgetRow?.monthly_budget ? Number(budgetRow.monthly_budget) : null;
   const monthlyIncome = budgetRow?.monthly_income ? Number(budgetRow.monthly_income) : null;
 
+  const displayName = profile?.display_name?.trim() ?? "";
+  const initial = (displayName[0] ?? user?.email?.[0] ?? "C").toUpperCase();
+
   return (
     <div className="screen-in px-1 pt-2">
+      {/* Encabezado */}
       <div className="flex items-center gap-3.5">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/brand/coco-logo.png"
           alt="COCO"
-          className="h-[54px] w-[54px] object-contain"
+          className="h-[50px] w-[50px] object-contain"
           style={{ animation: "floaty 6s ease-in-out infinite" }}
         />
         <div>
-          <div className="text-[27px] font-extrabold leading-[0.95] tracking-[-0.045em]">Ajustes</div>
+          <div className="text-[30px] font-extrabold leading-[0.95] tracking-[-0.045em]">Ajustes</div>
           <div className="mt-0.5 text-xs font-semibold text-muted">COCO · gasta con cabeza</div>
         </div>
       </div>
 
       {/* Perfil */}
-      <form action={updateProfile} className="mt-8">
-        <div className="text-[13px] font-medium text-muted">{user?.email}</div>
-        <div className="mb-2 mt-4 text-[13px] font-bold text-muted-2">Tu nombre</div>
-        <input
-          name="display_name"
-          defaultValue={profile?.display_name ?? ""}
-          placeholder="Opcional"
-          className={inputClass}
-        />
-        <div className="mb-2 mt-4 text-[13px] font-bold text-muted-2">Moneda</div>
-        <select
-          name="default_currency"
-          defaultValue={profile?.default_currency ?? "MXN"}
-          className={inputClass}
-        >
-          {CURRENCIES.map(([code, label]) => (
-            <option key={code} value={code}>
-              {code} · {label}
-            </option>
-          ))}
-        </select>
-        <div className="mb-2 mt-4 text-[13px] font-bold text-muted-2">
-          Ingreso mensual <span className="font-medium text-muted">(opcional)</span>
-        </div>
-        <input
-          name="monthly_income"
-          inputMode="decimal"
-          defaultValue={monthlyIncome ? String(monthlyIncome) : ""}
-          placeholder="Cuánto recibes al mes — para ver cuánto te queda"
-          className={inputClass}
-        />
-        <div className="mb-2 mt-4 text-[13px] font-bold text-muted-2">
-          Presupuesto mensual <span className="font-medium text-muted">(opcional)</span>
-        </div>
-        <input
-          name="monthly_budget"
-          inputMode="decimal"
-          defaultValue={monthlyBudget ? String(monthlyBudget) : ""}
-          placeholder="Ej. 8000 — déjalo vacío para quitarlo"
-          className={inputClass}
-        />
-        <button
-          type="submit"
-          className="mt-4 h-[50px] w-full rounded-[15px] bg-coral text-base font-extrabold text-white"
-        >
-          Guardar
-        </button>
-      </form>
-
-      {/* Pagos fijos */}
-      <SectionLabel>Pagos fijos</SectionLabel>
-      <Link
-        href="/fijos"
-        className="flex items-center gap-3.5 border-y border-crema py-4"
-      >
-        <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[#C9B8E8]">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15140F" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="5" width="18" height="14" rx="2.6" />
-            <path d="M3 9.5h18" />
-          </svg>
-        </div>
-        <div className="flex-1">
-          <div className="text-[15px] font-bold tracking-tight">Suscripciones, meses y tarjeta</div>
-          <div className="text-xs font-medium text-muted">
-            Lo que se repite cada mes y cuándo se paga
+      <SectionLabel>Tu perfil</SectionLabel>
+      <Card>
+        <div className="flex items-center gap-3.5">
+          <div
+            className="flex h-[52px] w-[52px] flex-none items-center justify-center rounded-full text-[22px] font-extrabold text-white"
+            style={{ background: "linear-gradient(135deg, #e0532b, #D995AF)" }}
+          >
+            {initial}
+          </div>
+          <div className="min-w-0">
+            <div className="truncate text-[18px] font-extrabold tracking-tight">
+              {displayName || "Tú"}
+            </div>
+            <div className="truncate text-[13px] font-medium text-muted">{user?.email}</div>
           </div>
         </div>
-        <svg width="9" height="15" viewBox="0 0 9 15" fill="none" stroke="#8A8167" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M1.5 1.5 7.5 7.5l-6 6" />
-        </svg>
-      </Link>
+
+        <form action={updateProfile} className="mt-5">
+          <div className="mb-2 text-[13px] font-bold text-muted-2">Tu nombre</div>
+          <input
+            name="display_name"
+            defaultValue={profile?.display_name ?? ""}
+            placeholder="Opcional"
+            className={inputClass}
+          />
+          <div className="mb-2 mt-4 text-[13px] font-bold text-muted-2">Moneda</div>
+          <select
+            name="default_currency"
+            defaultValue={profile?.default_currency ?? "MXN"}
+            className={inputClass}
+          >
+            {CURRENCIES.map(([code, label]) => (
+              <option key={code} value={code}>
+                {code} · {label}
+              </option>
+            ))}
+          </select>
+          <div className="mb-2 mt-4 text-[13px] font-bold text-muted-2">
+            Ingreso mensual <span className="font-medium text-muted">(opcional)</span>
+          </div>
+          <input
+            name="monthly_income"
+            inputMode="decimal"
+            defaultValue={monthlyIncome ? String(monthlyIncome) : ""}
+            placeholder="Cuánto recibes al mes — para ver cuánto te queda"
+            className={inputClass}
+          />
+          <div className="mb-2 mt-4 text-[13px] font-bold text-muted-2">
+            Presupuesto mensual <span className="font-medium text-muted">(opcional)</span>
+          </div>
+          <input
+            name="monthly_budget"
+            inputMode="decimal"
+            defaultValue={monthlyBudget ? String(monthlyBudget) : ""}
+            placeholder="Ej. 8000 — déjalo vacío para quitarlo"
+            className={inputClass}
+          />
+          <button
+            type="submit"
+            className="mt-5 h-[50px] w-full rounded-[15px] bg-coral text-base font-extrabold text-white"
+          >
+            Guardar
+          </button>
+        </form>
+      </Card>
+
+      {/* Apariencia */}
+      <SectionLabel>Apariencia</SectionLabel>
+      <Card>
+        <ThemeControl />
+      </Card>
+
+      {/* Pagos fijos */}
+      <SectionLabel>Tu dinero</SectionLabel>
+      <Card className="!p-0 overflow-hidden">
+        <Link href="/fijos" className="flex items-center gap-3.5 px-5 py-4">
+          <div className="flex h-11 w-11 flex-none items-center justify-center rounded-[14px] bg-[#C9B8E8]">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15140F" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="5" width="18" height="14" rx="2.6" />
+              <path d="M3 9.5h18" />
+            </svg>
+          </div>
+          <div className="flex-1">
+            <div className="text-[15px] font-bold tracking-tight">Pagos fijos</div>
+            <div className="text-xs font-medium text-muted">Suscripciones, meses y tarjeta</div>
+          </div>
+          <svg width="9" height="15" viewBox="0 0 9 15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted-3">
+            <path d="M1.5 1.5 7.5 7.5l-6 6" />
+          </svg>
+        </Link>
+      </Card>
 
       {/* Automatización */}
       <SectionLabel>Automatización del iPhone</SectionLabel>
-      <div>
+      <Card>
         {token ? (
           <>
             <div className="flex items-center gap-[9px] text-sm font-semibold">
@@ -188,11 +217,7 @@ export default async function AjustesPage() {
             </Link>
           </>
         )}
-      </div>
-
-      {/* Apariencia */}
-      <SectionLabel>Apariencia</SectionLabel>
-      <DarkModeToggle />
+      </Card>
 
       {/* Ayuda */}
       <SectionLabel>Ayuda</SectionLabel>
@@ -200,55 +225,57 @@ export default async function AjustesPage() {
 
       {/* Categorías */}
       <SectionLabel>Categorías</SectionLabel>
-      <div className="border-t border-crema">
-        {(categories ?? []).map((c, i) => (
-          <div
-            key={c.id}
-            className="flex items-center gap-[13px] border-b border-crema py-3.5"
-            style={{ animation: `slide-r .45s ${(0.04 + i * 0.04).toFixed(2)}s both` }}
-          >
+      <Card>
+        <div className="-mt-1">
+          {(categories ?? []).map((c, i) => (
             <div
-              className="flex h-[34px] w-[34px] items-center justify-center rounded-[11px]"
-              style={{ background: categoryColor(c.name, c.color) }}
+              key={c.id}
+              className="flex items-center gap-[13px] border-b border-crema py-3 last:border-0"
+              style={{ animation: `slide-r .45s ${(0.04 + i * 0.04).toFixed(2)}s both` }}
             >
-              <CategoryIcon name={c.name} emoji={c.icon} color="#15140F" size={18} />
+              <div
+                className="flex h-[34px] w-[34px] items-center justify-center rounded-[11px]"
+                style={{ background: categoryColor(c.name, c.color) }}
+              >
+                <CategoryIcon name={c.name} emoji={c.icon} color="#15140F" size={18} />
+              </div>
+              <div className="flex-1 text-[15px] font-bold">{c.name}</div>
+              <form action={deleteCategory}>
+                <input type="hidden" name="id" value={c.id} />
+                <button type="submit" className="text-[13px] font-bold text-coral-dark">
+                  Eliminar
+                </button>
+              </form>
             </div>
-            <div className="flex-1 text-[15px] font-bold">{c.name}</div>
-            <form action={deleteCategory}>
-              <input type="hidden" name="id" value={c.id} />
-              <button type="submit" className="text-[13px] font-bold text-coral-dark">
-                Eliminar
-              </button>
-            </form>
-          </div>
-        ))}
-      </div>
-      <form action={addCategory} className="mt-5">
-        <div className="flex gap-2">
-          <input
-            name="icon"
-            placeholder="🛍️"
-            maxLength={4}
-            className="w-16 rounded-[14px] border-[1.6px] border-input-border bg-input px-2 py-[13px] text-center outline-none focus:border-coral"
-          />
-          <input
-            name="name"
-            required
-            placeholder="Nueva categoría"
-            className="flex-1 rounded-[14px] border-[1.6px] border-input-border bg-input px-[15px] py-[13px] text-[15px] font-medium outline-none focus:border-coral"
-          />
+          ))}
         </div>
-        <div className="mb-2 mt-3 text-[13px] font-bold text-muted-2">Color</div>
-        <ColorSwatches name="color" />
-        <button type="submit" className="mt-4 h-[46px] w-full rounded-[14px] bg-ink text-sm font-bold text-white">
-          Añadir categoría
-        </button>
-      </form>
+        <form action={addCategory} className="mt-4">
+          <div className="flex gap-2">
+            <input
+              name="icon"
+              placeholder="🛍️"
+              maxLength={4}
+              className="w-16 rounded-[14px] border-[1.6px] border-input-border bg-input px-2 py-[13px] text-center outline-none focus:border-coral"
+            />
+            <input
+              name="name"
+              required
+              placeholder="Nueva categoría"
+              className="flex-1 rounded-[14px] border-[1.6px] border-input-border bg-input px-[15px] py-[13px] text-[15px] font-medium text-ink outline-none focus:border-coral"
+            />
+          </div>
+          <div className="mb-2 mt-3 text-[13px] font-bold text-muted-2">Color</div>
+          <ColorSwatches name="color" />
+          <button type="submit" className="mt-4 h-[46px] w-full rounded-[14px] bg-ink text-sm font-bold text-white">
+            Añadir categoría
+          </button>
+        </form>
+      </Card>
       <p className="mx-1 mt-2 text-xs font-medium text-muted">
         Al eliminar una categoría, sus gastos quedan como &quot;Sin categoría&quot;.
       </p>
 
-      <form action={signOut} className="mt-6">
+      <form action={signOut} className="mt-7">
         <button
           type="submit"
           className="h-[50px] w-full rounded-[15px] border-[1.6px] border-input-border font-bold text-muted-2"
