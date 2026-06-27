@@ -80,10 +80,7 @@ export default async function AjustesPage() {
       <SectionLabel>Tu perfil</SectionLabel>
       <Card>
         <div className="flex items-center gap-3.5">
-          <div
-            className="flex h-[52px] w-[52px] flex-none items-center justify-center rounded-full text-[22px] font-extrabold text-white"
-            style={{ background: "linear-gradient(135deg, #e0532b, #D995AF)" }}
-          >
+          <div className="flex h-[52px] w-[52px] flex-none items-center justify-center rounded-full bg-coral text-[22px] font-extrabold text-white">
             {initial}
           </div>
           <div className="min-w-0">

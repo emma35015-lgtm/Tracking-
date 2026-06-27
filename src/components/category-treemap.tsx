@@ -9,9 +9,10 @@ export type MosaicItem = {
   value: number; // monto real, para el área proporcional
 };
 
-// Proporción del contenedor (un poco más alto que ancho).
+// Proporción del contenedor: vertical (retrato) para aprovechar la pantalla
+// del teléfono. El treemap orienta cada tarjeta para que no se amontonen.
 const AW = 10;
-const AH = 12;
+const AH = 14;
 
 // Mosaico de categorías como treemap: las tarjetas llenan un rectángulo
 // perfecto y su tamaño es proporcional al gasto.
